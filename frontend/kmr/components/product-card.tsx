@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useQuoteCart } from "@/lib/store/quote-cart";
 import { getValidImages } from "@/lib/image";
 import { formatPrice } from "@/lib/price";
+import { RevealImage } from "@/components/reveal-image";
 import type { Product } from "@/lib/api/types";
 
 export function ProductCard({
@@ -24,8 +24,9 @@ export function ProductCard({
         className="relative block aspect-[4/5] w-full overflow-hidden bg-secondary"
       >
         {coverImage ? (
-          <Image
+          <RevealImage
             src={coverImage}
+            width={640}
             alt={product.name}
             fill
             className="object-cover transition-transform duration-300 group-hover:scale-105"

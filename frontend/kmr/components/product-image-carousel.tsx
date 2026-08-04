@@ -4,6 +4,8 @@ import { useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { RevealImage } from "@/components/reveal-image";
+import { cloudinaryUrl } from "@/lib/cloudinary";
 
 export function ProductImageCarousel({
   images,
@@ -29,9 +31,10 @@ export function ProductImageCarousel({
   return (
     <div className="flex flex-col gap-3">
       <div className="group relative aspect-square w-full overflow-hidden bg-secondary">
-        <Image
+        <RevealImage
           key={images[index]}
           src={images[index]}
+          width={1000}
           alt={alt}
           fill
           className="object-cover"
@@ -78,7 +81,13 @@ export function ProductImageCarousel({
               aria-label={`View image ${i + 1}`}
               aria-current={i === index}
             >
-              <Image src={src} alt="" fill className="object-cover" sizes="64px" />
+              <Image
+                src={cloudinaryUrl(src, 150)}
+                alt=""
+                fill
+                className="object-cover"
+                sizes="64px"
+              />
             </button>
           ))}
         </div>

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { getValidImages } from "@/lib/image";
 import { ScrollReveal } from "@/components/scroll-reveal";
+import { cloudinaryUrl } from "@/lib/cloudinary";
 import type { Brand } from "@/lib/api/types";
 
 export function BrandStrip({ brands }: { brands: Brand[] }) {
@@ -27,7 +28,7 @@ export function BrandStrip({ brands }: { brands: Brand[] }) {
           const logo = getValidImages(brand.logo)[0];
           const image = (
             <Image
-              src={logo}
+              src={cloudinaryUrl(logo, 400)}
               alt={brand.name}
               width={220}
               height={88}
