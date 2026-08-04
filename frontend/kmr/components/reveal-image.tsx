@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image, { type ImageProps } from "next/image";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "@/lib/gsap";
@@ -19,6 +19,13 @@ export function RevealImage({
 }: Omit<ImageProps, "src" | "onLoad"> & { src: string; width: number }) {
   const [loaded, setLoaded] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
+
+  // Cached images can finish loading before this effect attaches its
+  // onLoad listener, so the "load" event never fires — check the
+  // already-loaded state directly as a fallback.
+  useEffect(() => {
+    if (imgRef.current?.complete) setLoaded(true);
+  }, [src]);
 
   useGSAP(
     () => {
