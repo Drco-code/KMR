@@ -15,6 +15,7 @@ export default async function CatalogPage({
 
   return (
     <CatalogView
+      key={JSON.stringify(resolvedSearchParams)}
       heading="Expanded Hardware & Paint Collection"
       intro="Our complete professional ecosystem. From artisanal pigments to precision hardware for the architectural visionary."
       products={products}

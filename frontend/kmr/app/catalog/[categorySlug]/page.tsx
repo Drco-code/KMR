@@ -24,16 +24,19 @@ export default async function CategoryPage({
     getCategories(),
   ]);
 
+  const catalogSearchParams = {
+    ...resolvedSearchParams,
+    category: resolvedSearchParams.category ?? category.slug,
+  };
+
   return (
     <CatalogView
+      key={JSON.stringify(catalogSearchParams)}
       heading={category.name}
       intro={`Browse the ${category.name} collection from our complete professional ecosystem.`}
       products={products}
       categories={categories}
-      searchParams={{
-        ...resolvedSearchParams,
-        category: resolvedSearchParams.category ?? category.slug,
-      }}
+      searchParams={catalogSearchParams}
     />
   );
 }

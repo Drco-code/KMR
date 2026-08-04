@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import type { Category } from "@/lib/api/types";
@@ -11,30 +10,15 @@ export function CategorySidebarFilter({
   categories,
   categoryCounts,
   selectedSlugs,
+  onToggle,
 }: {
   categories: Category[];
   categoryCounts: Map<string, number>;
   selectedSlugs: string[];
+  onToggle: (slug: string) => void;
 }) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
   const [expanded, setExpanded] = useState(true);
   const [showAll, setShowAll] = useState(false);
-
-  function toggle(slug: string) {
-    const next = selectedSlugs.includes(slug)
-      ? selectedSlugs.filter((s) => s !== slug)
-      : [...selectedSlugs, slug];
-
-    const params = new URLSearchParams(searchParams.toString());
-    if (next.length > 0) {
-      params.set("category", next.join(","));
-    } else {
-      params.delete("category");
-    }
-    params.delete("page");
-    router.push(`/catalog?${params.toString()}`);
-  }
 
   const visibleCategories = showAll
     ? categories
@@ -66,7 +50,7 @@ export function CategorySidebarFilter({
                 <input
                   type="checkbox"
                   checked={selectedSlugs.includes(category.slug)}
-                  onChange={() => toggle(category.slug)}
+                  onChange={() => onToggle(category.slug)}
                   className="size-4 accent-ink"
                 />
                 {category.name}

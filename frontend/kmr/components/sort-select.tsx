@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
 import {
   Select,
   SelectContent,
@@ -16,20 +15,17 @@ const SORT_LABELS: Record<CatalogSort, string> = {
   "name-desc": "Name (Z–A)",
 };
 
-export function SortSelect({ sort }: { sort: CatalogSort }) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
+export function SortSelect({
+  sort,
+  onChange,
+}: {
+  sort: CatalogSort;
+  onChange: (sort: CatalogSort) => void;
+}) {
   function handleChange(value: string | null) {
-    if (!value) return;
-    const params = new URLSearchParams(searchParams.toString());
-    if (value === "featured") {
-      params.delete("sort");
-    } else {
-      params.set("sort", value);
+    if (value === "name-asc" || value === "name-desc" || value === "featured") {
+      onChange(value);
     }
-    params.delete("page");
-    router.push(`/catalog?${params.toString()}`);
   }
 
   return (

@@ -1,17 +1,7 @@
-import Link from "next/link";
+"use client";
+
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-function pageHref(searchParams: URLSearchParams, page: number) {
-  const params = new URLSearchParams(searchParams.toString());
-  if (page <= 1) {
-    params.delete("page");
-  } else {
-    params.set("page", String(page));
-  }
-  const qs = params.toString();
-  return qs ? `/catalog?${qs}` : "/catalog";
-}
 
 function getPageNumbers(current: number, total: number): (number | "…")[] {
   if (total <= 7) {
@@ -33,11 +23,11 @@ function getPageNumbers(current: number, total: number): (number | "…")[] {
 export function PaginationNav({
   currentPage,
   totalPages,
-  searchParams,
+  onPageChange,
 }: {
   currentPage: number;
   totalPages: number;
-  searchParams: URLSearchParams;
+  onPageChange: (page: number) => void;
 }) {
   if (totalPages <= 1) return null;
 
@@ -45,8 +35,10 @@ export function PaginationNav({
 
   return (
     <nav className="flex items-center justify-center gap-2" aria-label="Pagination">
-      <Link
-        href={pageHref(searchParams, Math.max(1, currentPage - 1))}
+      <button
+        type="button"
+        onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+        disabled={currentPage === 1}
         aria-disabled={currentPage === 1}
         className={cn(
           "flex size-9 items-center justify-center border border-border text-ink",
@@ -54,7 +46,7 @@ export function PaginationNav({
         )}
       >
         <ChevronLeft className="size-4" />
-      </Link>
+      </button>
 
       {pages.map((page, i) =>
         page === "…" ? (
@@ -62,9 +54,10 @@ export function PaginationNav({
             …
           </span>
         ) : (
-          <Link
+          <button
+            type="button"
             key={page}
-            href={pageHref(searchParams, page)}
+            onClick={() => onPageChange(page)}
             className={cn(
               "flex size-9 items-center justify-center text-sm",
               page === currentPage
@@ -73,12 +66,14 @@ export function PaginationNav({
             )}
           >
             {page}
-          </Link>
+          </button>
         )
       )}
 
-      <Link
-        href={pageHref(searchParams, Math.min(totalPages, currentPage + 1))}
+      <button
+        type="button"
+        onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+        disabled={currentPage === totalPages}
         aria-disabled={currentPage === totalPages}
         className={cn(
           "flex size-9 items-center justify-center border border-border text-ink",
@@ -86,7 +81,7 @@ export function PaginationNav({
         )}
       >
         <ChevronRight className="size-4" />
-      </Link>
+      </button>
     </nav>
   );
 }
