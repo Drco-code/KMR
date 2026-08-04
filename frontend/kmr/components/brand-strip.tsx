@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { getValidImages } from "@/lib/image";
+import { ScrollReveal } from "@/components/scroll-reveal";
 import type { Brand } from "@/lib/api/types";
 
 export function BrandStrip({ brands }: { brands: Brand[] }) {
@@ -16,7 +17,12 @@ export function BrandStrip({ brands }: { brands: Brand[] }) {
           Our Brands
         </h2>
       </div>
-      <div className="flex flex-wrap items-center justify-center gap-x-20 gap-y-12">
+      <ScrollReveal
+        className="flex flex-wrap items-center justify-center gap-x-20 gap-y-12"
+        stagger={0.06}
+        y={16}
+        duration={0.6}
+      >
         {withLogos.map((brand) => {
           const logo = getValidImages(brand.logo)[0];
           const image = (
@@ -45,7 +51,7 @@ export function BrandStrip({ brands }: { brands: Brand[] }) {
             </span>
           );
         })}
-      </div>
+      </ScrollReveal>
     </section>
   );
 }

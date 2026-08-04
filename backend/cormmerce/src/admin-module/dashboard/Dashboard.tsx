@@ -3,7 +3,6 @@ import { ApiClient } from 'adminjs';
 import { Box, H2, Loader, MessageBox, Text } from '@adminjs/design-system';
 import StatTiles from './StatTiles.js';
 import TopProductsChart from './TopProductsChart.js';
-import CategoryBreakdownChart from './CategoryBreakdownChart.js';
 import DemandTrendChart from './DemandTrendChart.js';
 import { PALETTE } from './theme.js';
 import type { DashboardData } from './types.js';
@@ -65,12 +64,8 @@ const Dashboard: React.FC = () => {
         />
       </Box>
 
-      <Box mb="lg">
-        <DemandTrendChart trend={data.trend} />
-      </Box>
-
       <Box>
-        <CategoryBreakdownChart data={data.categoryBreakdown} />
+        <DemandTrendChart trend={data.trend} />
       </Box>
 
       {data.stats.totalProducts > 0 && data.topByQuantity.length === 0 && (

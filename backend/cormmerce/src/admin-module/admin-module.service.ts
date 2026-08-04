@@ -25,7 +25,6 @@ interface DashboardData {
     outOfStockProducts: number;
     featuredProducts: number;
   };
-  categoryBreakdown: { category: string; count: number }[];
   topByQuantity: { productName: string; quantity: number }[];
   topByRequests: { productName: string; requests: number }[];
   trend: {
@@ -116,16 +115,12 @@ export class AdminModuleService {
   // pre-rename quotes; accepted as the best available signal since there's
   // no order/sales table, only quote requests.
   private async getDashboardData(): Promise<DashboardData> {
-    const [totalProducts, activeProducts, outOfStockProducts, featuredProducts, categories] =
+    const [totalProducts, activeProducts, outOfStockProducts, featuredProducts] =
       await Promise.all([
         this.prisma.product.count(),
         this.prisma.product.count({ where: { isActive: true } }),
         this.prisma.product.count({ where: { stock: 0 } }),
         this.prisma.product.count({ where: { isFeatured: true } }),
-        this.prisma.category.findMany({
-          select: { name: true, _count: { select: { products: true } } },
-          orderBy: { name: 'asc' },
-        }),
       ]);
 
     const [quantityByProduct, requestsByProduct] = await Promise.all([
@@ -193,10 +188,6 @@ export class AdminModuleService {
         outOfStockProducts,
         featuredProducts,
       },
-      categoryBreakdown: categories.map((c) => ({
-        category: c.name,
-        count: c._count.products,
-      })),
       topByQuantity: quantityByProduct.map((p) => ({
         productName: p.productName,
         quantity: p._sum.quantity ?? 0,

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getBrands, getCategories, getProducts } from "@/lib/api/client";
 import { ProductGrid } from "@/components/product-grid";
 import { BrandStrip } from "@/components/brand-strip";
+import { ScrollReveal } from "@/components/scroll-reveal";
 
 export default async function Home() {
   const [products, categories, brands] = await Promise.all([
@@ -20,7 +21,12 @@ export default async function Home() {
       <section className="relative flex h-[560px] items-center justify-center overflow-hidden bg-ink">
         <div className="absolute inset-0 bg-gradient-to-br from-ink via-ink/90 to-black" />
         <div className="absolute inset-0 bg-black/30" />
-        <div className="relative flex max-w-3xl flex-col items-center gap-8 px-6 text-center">
+        <ScrollReveal
+          className="relative flex max-w-3xl flex-col items-center gap-8 px-6 text-center"
+          stagger={0.15}
+          y={20}
+          duration={0.8}
+        >
           <h1 className="font-display text-5xl leading-tight font-bold text-white md:text-6xl">
             The Art of Living in Color
           </h1>
@@ -43,23 +49,23 @@ export default async function Home() {
               Order Swatches
             </Link>
           </div>
-        </div>
+        </ScrollReveal>
       </section>
 
       <section className="flex flex-col gap-16 px-6 py-24 md:px-20 md:py-30">
-        <div className="flex flex-col items-start gap-4">
+        <ScrollReveal className="flex flex-col items-start gap-4">
           <span className="text-xs font-medium tracking-[0.2em] text-gold uppercase">
             The Collection
           </span>
           <h2 className="font-display text-4xl text-ink md:text-5xl">
             Signature Collections
           </h2>
-        </div>
+        </ScrollReveal>
         <ProductGrid products={featured} categories={categories} />
       </section>
 
       <section className="bg-black px-6 py-24 md:px-20 md:py-30">
-        <div className="mx-auto flex max-w-[1440px] flex-col items-start gap-6">
+        <ScrollReveal className="mx-auto flex max-w-[1440px] flex-col items-start gap-6">
           <span className="text-xs font-medium tracking-[0.2em] text-gold-light uppercase">
             Pigment Science
           </span>
@@ -78,14 +84,14 @@ export default async function Home() {
           >
             Learn More
           </Link>
-        </div>
+        </ScrollReveal>
       </section>
 
       <section className="flex flex-col gap-16 px-6 py-24 md:px-20 md:py-30">
         <h2 className="text-center font-display text-4xl text-ink md:text-5xl">
           Consultancy Services
         </h2>
-        <div className="flex flex-col gap-6 md:flex-row">
+        <ScrollReveal className="flex flex-col gap-6 md:flex-row" stagger={0.15} y={24}>
           <ConsultancyTeaser
             title="Color Matching"
             description="Our experts use spectro-analysis to match any sample, from a scrap of silk to a sunset photograph."
@@ -96,7 +102,7 @@ export default async function Home() {
             description="Access our network of KMR certified master painters for a flawless, architectural finish."
             cta="Book Application"
           />
-        </div>
+        </ScrollReveal>
       </section>
 
       <BrandStrip brands={brands} />

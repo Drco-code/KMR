@@ -11,7 +11,6 @@ export interface DashboardData {
     outOfStockProducts: number;
     featuredProducts: number;
   };
-  categoryBreakdown: { category: string; count: number }[];
   topByQuantity: { productName: string; quantity: number }[];
   topByRequests: { productName: string; requests: number }[];
   trend: {
