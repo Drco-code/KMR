@@ -1,0 +1,4 @@
+-- This migration documents schema state that was already applied to the
+-- database directly (via `prisma db push`) before migration history existed
+-- for it: Category.parentId, the self-referential CategoryHierarchy
+-- relation, and its supporting index. No DDL needed here.

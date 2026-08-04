@@ -1,0 +1,57 @@
+# dependencies
+node_modules/
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# env files
+.env
+.env.*
+!.env.*.example
+
+# build output
+dist/
+build/
+.next/
+out/
+generated/
+
+# logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# OS
+.DS_Store
+
+# tests / coverage
+coverage/
+.nyc_output/
+
+# IDEs
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# misc
+.temp
+.tmp
+*.pid
+*.seed
+*.pid.lock
+*.tsbuildinfo
+.vercel
+
+# claude / agent local settings
+.claude/settings.local.json

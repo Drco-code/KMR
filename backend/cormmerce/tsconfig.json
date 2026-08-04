@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "module": "node20",
+    "moduleResolution": "nodenext",
+    // "resolvePackageJsonExports": true,
+    "esModuleInterop": true,
+    // "isolatedModules": true,
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2023",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "types": ["node", "multer"],
+    "strictNullChecks": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "noFallthroughCasesInSwitch": false,
+    "ignoreDeprecations": "5.0"
+  },
+  // Dashboard components are .tsx compiled by AdminJS's own webpack bundler
+  // (see admin-module.service.ts), not by Nest's backend tsc build — this
+  // project has no "jsx" compiler option, so tsc would fail on JSX syntax
+  // if it tried to include them.
+  "exclude": ["src/admin-module/dashboard/**/*"]
+}
