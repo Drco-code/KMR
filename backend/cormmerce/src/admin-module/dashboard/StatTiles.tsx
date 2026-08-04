@@ -1,49 +1,52 @@
 import React from 'react';
-import { Box, H2, Text } from '@adminjs/design-system';
+import { Box, Icon, Text } from '@adminjs/design-system';
+import { CARD_STYLE, PALETTE, PALETTE_TINT, type PaletteKey } from './theme.js';
 import type { DashboardData } from './types.js';
 
 const TILES: Array<{
   label: string;
   key: keyof DashboardData['stats'];
-  variant: 'primary' | 'success' | 'danger' | 'info';
+  icon: string;
+  variant: PaletteKey;
 }> = [
-  { label: 'Total products', key: 'totalProducts', variant: 'primary' },
-  { label: 'Active', key: 'activeProducts', variant: 'success' },
-  { label: 'Inactive', key: 'inactiveProducts', variant: 'info' },
-  { label: 'Out of stock', key: 'outOfStockProducts', variant: 'danger' },
-  { label: 'Featured', key: 'featuredProducts', variant: 'info' },
+  { label: 'Total products', key: 'totalProducts', icon: 'Package', variant: 'primary' },
+  { label: 'Active', key: 'activeProducts', icon: 'CheckCircle', variant: 'success' },
+  { label: 'Inactive', key: 'inactiveProducts', icon: 'PauseCircle', variant: 'info' },
+  { label: 'Out of stock', key: 'outOfStockProducts', icon: 'AlertTriangle', variant: 'danger' },
+  { label: 'Featured', key: 'featuredProducts', icon: 'Star', variant: 'warning' },
 ];
 
-const COLORS: Record<string, string> = {
-  primary: '#2d69f0',
-  success: '#22a06b',
-  danger: '#e0483e',
-  info: '#6e6e6e',
-};
-
 const StatTiles: React.FC<{ stats: DashboardData['stats'] }> = ({ stats }) => (
-  <Box
-    flex
-    flexWrap="wrap"
-    style={{ gap: '16px' }}
-    mb="xl"
-  >
+  <Box flex flexWrap="wrap" style={{ gap: '16px' }} mb="xl">
     {TILES.map((tile) => (
       <Box
         key={tile.key}
         flexGrow={1}
-        minWidth="160px"
+        minWidth="180px"
         bg="white"
-        p="lg"
-        style={{ borderRadius: 8, borderTop: `3px solid ${COLORS[tile.variant]}` }}
-        boxShadow="card"
+        p="xl"
+        style={CARD_STYLE}
       >
-        <Text fontSize="sm" color="grey60">
+        <Box
+          flex
+          alignItems="center"
+          justifyContent="center"
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: 10,
+            background: PALETTE_TINT[tile.variant],
+          }}
+          mb="lg"
+        >
+          <Icon icon={tile.icon} size={20} color={PALETTE[tile.variant]} />
+        </Box>
+        <Text fontSize="28px" fontWeight="bold" color="grey100" style={{ lineHeight: 1.1 }}>
+          {stats[tile.key]}
+        </Text>
+        <Text fontSize="sm" color="grey60" mt="xs">
           {tile.label}
         </Text>
-        <H2 mt="sm" mb={0}>
-          {stats[tile.key]}
-        </H2>
       </Box>
     ))}
   </Box>

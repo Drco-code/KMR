@@ -9,6 +9,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { CARD_STYLE } from './theme.js';
 
 type Props = {
   title: string;
@@ -18,23 +19,25 @@ type Props = {
 };
 
 const TopProductsChart: React.FC<Props> = ({ title, data, barColor, valueLabel }) => (
-  <Box bg="white" p="lg" style={{ borderRadius: 8 }} boxShadow="card" flexGrow={1} minWidth="360px">
-    <H4>{title}</H4>
+  <Box bg="white" p="xl" style={CARD_STYLE} flexGrow={1} minWidth="360px">
+    <H4 mb="lg" fontWeight="bold">
+      {title}
+    </H4>
     {data.length === 0 ? (
       <Text color="grey60">No quote requests yet.</Text>
     ) : (
       <ResponsiveContainer width="100%" height={280}>
         <BarChart data={data} layout="vertical" margin={{ left: 24 }}>
-          <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-          <XAxis type="number" allowDecimals={false} />
+          <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="rgba(15, 23, 42, 0.08)" />
+          <XAxis type="number" allowDecimals={false} tick={{ fontSize: 12 }} />
           <YAxis
             type="category"
             dataKey="productName"
             width={140}
             tick={{ fontSize: 12 }}
           />
-          <Tooltip formatter={(value: number) => [value, valueLabel]} />
-          <Bar dataKey="value" fill={barColor} radius={[0, 4, 4, 0]} />
+          <Tooltip formatter={(value: number) => [value, valueLabel]} cursor={{ fill: 'rgba(15, 23, 42, 0.04)' }} />
+          <Bar dataKey="value" fill={barColor} radius={[0, 6, 6, 0]} />
         </BarChart>
       </ResponsiveContainer>
     )}

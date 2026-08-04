@@ -5,6 +5,7 @@ import StatTiles from './StatTiles.js';
 import TopProductsChart from './TopProductsChart.js';
 import CategoryBreakdownChart from './CategoryBreakdownChart.js';
 import DemandTrendChart from './DemandTrendChart.js';
+import { PALETTE } from './theme.js';
 import type { DashboardData } from './types.js';
 
 const api = new ApiClient();
@@ -37,26 +38,34 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <Box p="xl">
-      <H2 mb="lg">Product overview</H2>
+    <Box bg="grey20" style={{ minHeight: '100%' }} p="xl">
+      <Box mb="xl">
+        <H2 fontWeight="bold" mb="xs">
+          Product overview
+        </H2>
+        <Text color="grey60">
+          A snapshot of your catalog and what customers are asking for most.
+        </Text>
+      </Box>
+
       <StatTiles stats={data.stats} />
 
-      <Box flex flexWrap="wrap" style={{ gap: '16px' }} mb="xl">
+      <Box flex flexWrap="wrap" style={{ gap: '16px' }} mb="lg">
         <TopProductsChart
           title="Most demanded — by quantity requested"
           data={data.topByQuantity.map((p) => ({ productName: p.productName, value: p.quantity }))}
-          barColor="#2d69f0"
+          barColor={PALETTE.primary}
           valueLabel="Quantity requested"
         />
         <TopProductsChart
           title="Most demanded — by number of requests"
           data={data.topByRequests.map((p) => ({ productName: p.productName, value: p.requests }))}
-          barColor="#22a06b"
+          barColor={PALETTE.success}
           valueLabel="Requests"
         />
       </Box>
 
-      <Box mb="xl">
+      <Box mb="lg">
         <DemandTrendChart trend={data.trend} />
       </Box>
 
