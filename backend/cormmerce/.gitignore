@@ -57,10 +57,15 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 /generated/prisma
 
-# AdminJS's pre-built frontend bundle (see package.json "bundle:admin" and
-# src/admin-module/bundle-admin.ts) — a build artifact, regenerated on
-# every deploy, never committed.
-/.adminjs
+# NOTE: .adminjs (AdminJS's pre-built frontend bundle, see package.json
+# "bundle:admin" and src/admin-module/bundle-admin.ts) is deliberately NOT
+# gitignored, even though it's a build artifact rebuilt on every deploy.
+# Render's build-to-deploy artifact packaging appears to strip out
+# gitignored paths, which silently dropped this folder between a
+# successful build step and the running instance — the running app then
+# 404'd on every AdminJS asset request (custom dashboard, image upload
+# widgets, etc). If you run `npm run bundle:admin` locally, don't commit
+# the resulting .adminjs/ changes — they're deploy-time-only output.
 
 
 .claude
