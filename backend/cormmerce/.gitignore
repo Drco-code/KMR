@@ -57,6 +57,11 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 /generated/prisma
 
+# AdminJS's pre-built frontend bundle (see package.json "bundle:admin" and
+# src/admin-module/bundle-admin.ts) — a build artifact, regenerated on
+# every deploy, never committed.
+/.adminjs
+
 
 .claude
 .agents

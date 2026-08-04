@@ -209,7 +209,12 @@ export class AdminModuleService {
     };
   }
 
-  async buildMiddleware(): Promise<RequestHandler> {
+  // Builds the AdminJS instance itself, shared by both buildMiddleware()
+  // (the running app, at request time) and prebundle() (a one-off script
+  // run during deploy — see bundle-admin.ts). Keeping construction in one
+  // place means the resources/dashboard/upload config below can't drift
+  // between what the build-time bundler sees and what the running app serves.
+  private async buildAdminInstance() {
     const [
       { default: AdminJS, ComponentLoader },
       { default: AdminJSExpress },
@@ -425,14 +430,31 @@ export class AdminModuleService {
       })),
     });
 
-    // In dev, admin.watch() bundles once and keeps rebuilding on file
-    // changes. In production, AdminJS never bundles on its own — we have to
-    // call admin.initialize() ourselves once at startup, or /admin serves
-    // no frontend assets at all.
+    return { admin, AdminJSExpress };
+  }
+
+  // Pre-builds the AdminJS frontend bundle (recharts + design-system +
+  // dashboard components) to `.adminjs/bundle.js` on disk. Must run during
+  // the Render BUILD step (see package.json's "bundle:admin" script and
+  // bundle-admin.ts) — calling admin.initialize() at RUNTIME instead (i.e.
+  // inside buildMiddleware, at app startup) ran webpack inside the live
+  // app's 512MB instance and reliably OOM-killed it before the server could
+  // even bind a port. @adminjs/express serves the bundle as a static file
+  // by path, so it doesn't matter that this runs in a separate, throwaway
+  // process from the one that later serves requests.
+  async prebundle(): Promise<void> {
+    const { admin } = await this.buildAdminInstance();
+    await admin.initialize();
+  }
+
+  async buildMiddleware(): Promise<RequestHandler> {
+    const { admin, AdminJSExpress } = await this.buildAdminInstance();
+
+    // Dev only: watch() bundles once and keeps rebuilding on file changes.
+    // In production the bundle already exists on disk from prebundle() —
+    // see the comment above.
     if (process.env.NODE_ENV !== 'production') {
       await admin.watch();
-    } else {
-      await admin.initialize();
     }
 
     const adminRouter = AdminJSExpress.buildRouter(admin);
