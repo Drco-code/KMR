@@ -277,6 +277,11 @@ export class AdminModuleService {
       componentLoader,
       branding: {
         companyName: 'KMR Admin',
+        // Placeholder until there's a real KMR logo — `false` hides
+        // AdminJS's default icon rather than showing generic branding.
+        logo: false,
+        // Hides the "Made with ♥ by AdminJS Team" footer credit.
+        withMadeWithLove: false,
       },
       dashboard: {
         component: dashboardComponent,
