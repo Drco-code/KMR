@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useQuoteCart } from "@/lib/store/quote-cart";
 import { submitQuoteRequest } from "@/lib/api/client";
+import { formatPrice } from "@/lib/price";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,10 +23,10 @@ function buildWhatsAppMessage(
     ...(company ? [`Company: ${company}`] : []),
     ``,
     `Items:`,
-    ...items.map(
-      (item) =>
-        `- ${item.name} x${item.quantity}${item.priceDescription ? ` (${item.priceDescription})` : ""}`
-    ),
+    ...items.map((item) => {
+      const price = formatPrice(item.priceDescription);
+      return `- ${item.name} x${item.quantity}${price ? ` (${price})` : ""}`;
+    }),
   ];
   return lines.join("\n");
 }
@@ -141,8 +142,8 @@ export default function QuoteReviewPage() {
               <span className="text-ink">
                 {item.name} × {item.quantity}
               </span>
-              {item.priceDescription && (
-                <span className="text-ink-muted">{item.priceDescription}</span>
+              {formatPrice(item.priceDescription) && (
+                <span className="text-ink-muted">{formatPrice(item.priceDescription)}</span>
               )}
             </div>
           ))}

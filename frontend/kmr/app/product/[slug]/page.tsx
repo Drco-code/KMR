@@ -4,6 +4,7 @@ import { getCategories, getProductBySlug } from "@/lib/api/client";
 import { AddToQuoteButton } from "@/components/add-to-quote-button";
 import { ProductImageCarousel } from "@/components/product-image-carousel";
 import { getValidImages } from "@/lib/image";
+import { formatPrice } from "@/lib/price";
 
 export default async function ProductPage({
   params,
@@ -38,8 +39,8 @@ export default async function ProductPage({
           <h1 className="font-display text-4xl text-ink md:text-5xl">
             {product.name}
           </h1>
-          {product.priceDescription && (
-            <p className="text-xl text-ink-muted">{product.priceDescription}</p>
+          {formatPrice(product.priceDescription) && (
+            <p className="text-xl text-ink-muted">{formatPrice(product.priceDescription)}</p>
           )}
           {product.description && (
             <p className="max-w-md text-base leading-relaxed text-ink-muted">

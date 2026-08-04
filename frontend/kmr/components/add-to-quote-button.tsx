@@ -44,7 +44,7 @@ export function AddToQuoteButton({ product }: { product: Product }) {
       onClick={handleAdd}
       className="rounded-sm bg-black px-10 py-6 text-sm font-semibold tracking-[0.1em] text-white uppercase hover:bg-black/90"
     >
-      Add to Inquiry
+      Add to Cart
     </Button>
   );
 }

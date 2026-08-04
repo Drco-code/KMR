@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useQuoteCart } from "@/lib/store/quote-cart";
 import { getValidImages } from "@/lib/image";
+import { formatPrice } from "@/lib/price";
 import type { Product } from "@/lib/api/types";
 
 export function ProductCard({
@@ -40,12 +41,12 @@ export function ProductCard({
         </h3>
         {categoryName && (
           <p className="text-xs tracking-[0.08em] text-ink-muted uppercase">
-            KMR | {categoryName}
+            {categoryName}
           </p>
         )}
         <div className="flex items-end justify-between pt-2">
-          {product.priceDescription ? (
-            <span className="text-sm text-ink">{product.priceDescription}</span>
+          {formatPrice(product.priceDescription) ? (
+            <span className="text-sm text-ink">{formatPrice(product.priceDescription)}</span>
           ) : (
             <span />
           )}
@@ -62,7 +63,7 @@ export function ProductCard({
             }
             className="text-xs font-semibold tracking-[0.08em] text-ink uppercase underline decoration-from-font underline-offset-2 hover:text-gold"
           >
-            Add to Inquiry
+            Add to Cart
           </button>
         </div>
       </div>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Minus, Plus, X } from "lucide-react";
 import { useQuoteCart, type QuoteCartItem } from "@/lib/store/quote-cart";
 import { isValidImageSrc } from "@/lib/image";
+import { formatPrice } from "@/lib/price";
 
 export function QuoteCartLine({ item }: { item: QuoteCartItem }) {
   const setQuantity = useQuoteCart((state) => state.setQuantity);
@@ -27,8 +28,8 @@ export function QuoteCartLine({ item }: { item: QuoteCartItem }) {
         >
           {item.name}
         </Link>
-        {item.priceDescription && (
-          <p className="text-sm text-ink-muted">{item.priceDescription}</p>
+        {formatPrice(item.priceDescription) && (
+          <p className="text-sm text-ink-muted">{formatPrice(item.priceDescription)}</p>
         )}
       </div>
 

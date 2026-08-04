@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ShoppingBag } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import { CartBadge } from "@/components/cart-badge";
 import { MobileNav } from "@/components/mobile-nav";
 import { NavSearch } from "@/components/nav-search";
@@ -49,7 +49,7 @@ export async function SiteHeader() {
             href="/quote"
             className="relative flex size-9 items-center justify-center text-ink transition-colors hover:text-gold"
           >
-            <ShoppingBag className="size-[18px]" />
+            <ShoppingCart className="size-[18px]" />
             <CartBadge />
             <span className="sr-only">View quote cart</span>
           </Link>
