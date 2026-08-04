@@ -54,4 +54,5 @@ coverage/
 .vercel
 
 # claude / agent local settings
-.claude/settings.local.json
+**/.claude/settings.local.json
+**/.claude/scheduled_tasks.lock
