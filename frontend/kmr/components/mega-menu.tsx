@@ -47,7 +47,7 @@ export function MegaMenu({
       <Link
         href="/catalog"
         className={cn(
-          "border-b-2 pb-1 text-sm font-semibold tracking-[0.05em] uppercase transition-colors",
+          "border-b-2 pb-1 text-sm font-semibold tracking-[0.02em] uppercase transition-colors",
           isActive ? "border-gold text-gold" : "border-transparent text-ink hover:text-gold"
         )}
       >
@@ -65,7 +65,7 @@ export function MegaMenu({
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
         className={cn(
-          "flex items-center gap-1 border-b-2 pb-1 text-sm font-semibold tracking-[0.05em] uppercase outline-none transition-colors",
+          "flex items-center gap-1 border-b-2 pb-1 text-sm font-semibold tracking-[0.02em] uppercase outline-none transition-colors",
           isActive || open ? "border-gold text-gold" : "border-transparent text-ink hover:text-gold"
         )}
       >

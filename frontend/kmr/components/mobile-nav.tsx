@@ -32,7 +32,7 @@ export function MobileNav({ categories }: { categories: Category[] }) {
     <Sheet>
       <SheetTrigger
         render={
-          <Button variant="ghost" size="icon-sm" className="lg:hidden">
+          <Button variant="ghost" size="icon-sm" className="2xl:hidden">
             <Menu />
             <span className="sr-only">Open menu</span>
           </Button>

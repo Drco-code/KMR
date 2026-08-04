@@ -34,7 +34,7 @@ export async function SiteHeader() {
           KMR
         </Link>
 
-        <nav className="hidden items-center gap-8 lg:flex">
+        <nav className="hidden items-center gap-3 2xl:flex">
           {MEGA_MENU_ITEMS.map((item) => (
             <MegaMenu key={item.slug} label={item.label} slug={item.slug} categories={categories} />
           ))}
