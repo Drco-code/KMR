@@ -425,8 +425,14 @@ export class AdminModuleService {
       })),
     });
 
+    // In dev, admin.watch() bundles once and keeps rebuilding on file
+    // changes. In production, AdminJS never bundles on its own — we have to
+    // call admin.initialize() ourselves once at startup, or /admin serves
+    // no frontend assets at all.
     if (process.env.NODE_ENV !== 'production') {
       await admin.watch();
+    } else {
+      await admin.initialize();
     }
 
     const adminRouter = AdminJSExpress.buildRouter(admin);

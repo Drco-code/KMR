@@ -30,9 +30,11 @@ export const auth = betterAuth({
   // actually listens on (see main.ts), not the frontend's port.
   baseURL: process.env.BETTER_AUTH_URL,
 
-  // The frontend runs on a different port, so its origin must be
-  // explicitly trusted or Better Auth rejects its requests.
-  trustedOrigins: ['http://localhost:3000'],
+  // The frontend runs on a different origin, so it must be explicitly
+  // trusted or Better Auth rejects its requests. FRONTEND_URL is the same
+  // env var main.ts uses for CORS — set it to the real deployed frontend
+  // URL in production, defaults to the local dev frontend otherwise.
+  trustedOrigins: [process.env.FRONTEND_URL ?? 'http://localhost:3000'],
 
   // Tell Better Auth to store users/sessions/accounts in Postgres via Prisma.
   database: prismaAdapter(prisma, {
