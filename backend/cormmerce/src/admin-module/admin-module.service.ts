@@ -275,6 +275,9 @@ export class AdminModuleService {
     const admin = new AdminJS({
       rootPath: ADMIN_ROOT_PATH,
       componentLoader,
+      branding: {
+        companyName: 'KMR Admin',
+      },
       dashboard: {
         component: dashboardComponent,
         handler: async () => this.getDashboardData(),
