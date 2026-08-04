@@ -16,6 +16,15 @@ import { AdminModuleService } from './admin-module.service';
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
+// AdminJS defaults this to the dot-directory `.adminjs`. Render's
+// build-to-runtime artifact packaging silently drops dot-directories, so
+// the bundle this script produces during the BUILD step never survived
+// into the running instance — every AdminJS asset request (custom
+// dashboard, image upload widgets) 404'd at runtime even though the build
+// logs showed bundling succeed. main.ts must set this identically, since
+// both processes need to agree on where the bundle lives.
+process.env.ADMIN_JS_TMP_DIR = process.env.ADMIN_JS_TMP_DIR || 'adminjs-bundle';
+
 async function main() {
   const prisma = new PrismaModuleService();
   const adminModuleService = new AdminModuleService(prisma);

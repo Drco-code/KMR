@@ -36,10 +36,14 @@ async function bootstrap() {
   // app's process, which is what was OOM-killing it a couple minutes after
   // boot even after moving our OWN admin.initialize() call to the build
   // step (see AdminModuleService.prebundle / bundle-admin.ts). AdminJS
-  // checks this exact env var and no-ops instead — the pre-built
-  // `.adminjs/bundle.js` from the build step is still served fine as a
-  // static file either way.
+  // checks this exact env var and no-ops instead — the pre-built bundle
+  // from the build step is still served fine as a static file either way.
   process.env.ADMIN_JS_SKIP_BUNDLE = 'true';
+
+  // Must match bundle-admin.ts's ADMIN_JS_TMP_DIR exactly — see the
+  // comment there for why it's not the `.adminjs` default (Render's
+  // build-to-runtime packaging drops dot-directories).
+  process.env.ADMIN_JS_TMP_DIR = process.env.ADMIN_JS_TMP_DIR || 'adminjs-bundle';
 
   // Mounted directly on the underlying Express app (not as a Nest
   // controller) because AdminJS's router needs to own everything under
