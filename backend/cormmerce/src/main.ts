@@ -28,6 +28,19 @@ async function bootstrap() {
     }),
   );
 
+  // @adminjs/express's buildRouter() unconditionally calls admin.initialize()
+  // internally on its own (fire-and-forget, not awaited by buildRouter) —
+  // it does this EVERY time a router is built, regardless of whether we
+  // already pre-built the bundle ourselves. In production that reruns the
+  // full webpack build (recharts + design-system) inside this running
+  // app's process, which is what was OOM-killing it a couple minutes after
+  // boot even after moving our OWN admin.initialize() call to the build
+  // step (see AdminModuleService.prebundle / bundle-admin.ts). AdminJS
+  // checks this exact env var and no-ops instead — the pre-built
+  // `.adminjs/bundle.js` from the build step is still served fine as a
+  // static file either way.
+  process.env.ADMIN_JS_SKIP_BUNDLE = 'true';
+
   // Mounted directly on the underlying Express app (not as a Nest
   // controller) because AdminJS's router needs to own everything under
   // /admin itself. See admin-module.service.ts for the session check.
