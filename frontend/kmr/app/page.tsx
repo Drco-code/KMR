@@ -3,6 +3,7 @@ import { getBrands, getCategories, getProducts } from "@/lib/api/client";
 import { ProductGrid } from "@/components/product-grid";
 import { BrandStrip } from "@/components/brand-strip";
 import { ScrollReveal } from "@/components/scroll-reveal";
+import { TextReveal } from "@/components/text-reveal";
 
 export default async function Home() {
   const [products, categories, brands] = await Promise.all([
@@ -27,9 +28,12 @@ export default async function Home() {
           y={20}
           duration={0.8}
         >
-          <h1 className="font-display text-5xl leading-tight font-bold text-white md:text-6xl">
+          <TextReveal
+            as="h1"
+            className="font-display text-5xl leading-tight font-bold text-white md:text-6xl"
+          >
             The Art of Living in Color
-          </h1>
+          </TextReveal>
           <p className="max-w-xl text-lg text-white/90">
             Premium architectural coatings and artisanal pigments for the
             modern home. Discover a collection designed for those who value

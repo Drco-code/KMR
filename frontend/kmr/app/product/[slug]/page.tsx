@@ -5,6 +5,7 @@ import { AddToQuoteButton } from "@/components/add-to-quote-button";
 import { ProductImageCarousel } from "@/components/product-image-carousel";
 import { getValidImages } from "@/lib/image";
 import { formatPrice } from "@/lib/price";
+import { TextReveal } from "@/components/text-reveal";
 
 export default async function ProductPage({
   params,
@@ -36,9 +37,9 @@ export default async function ProductPage({
         />
 
         <div className="flex flex-col gap-6">
-          <h1 className="font-display text-4xl text-ink md:text-5xl">
+          <TextReveal as="h1" className="font-display text-4xl text-ink md:text-5xl">
             {product.name}
-          </h1>
+          </TextReveal>
           {formatPrice(product.priceDescription) && (
             <p className="text-xl text-ink-muted">{formatPrice(product.priceDescription)}</p>
           )}

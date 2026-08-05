@@ -7,6 +7,7 @@ import { SortSelect } from "@/components/sort-select";
 import { ProductGrid } from "@/components/product-grid";
 import { PaginationNav } from "@/components/pagination-nav";
 import { ConsultancyBanner } from "@/components/consultancy-banner";
+import { TextReveal } from "@/components/text-reveal";
 import type { Category, Product } from "@/lib/api/types";
 
 // Filters/sort/pagination are all derived from data already sitting in
@@ -87,9 +88,9 @@ export function CatalogView({
           <span className="text-xs font-medium tracking-[0.2em] text-gold uppercase">
             {resolved.query ? "Search Results" : "Full Range"}
           </span>
-          <h1 className="font-display text-4xl text-ink md:text-5xl">
+          <TextReveal as="h1" className="font-display text-4xl text-ink md:text-5xl">
             {resolved.query ? `"${q}"` : heading}
-          </h1>
+          </TextReveal>
           <p className="max-w-2xl text-ink-muted">{intro}</p>
         </div>
         <SortSelect sort={resolved.sort} onChange={handleSortChange} />
