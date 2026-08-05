@@ -200,6 +200,29 @@ export class AdminModuleService {
     };
   }
 
+  // Reads the categoryIds/primaryCategoryId virtual fields submitted by
+  // ProductCategoriesSelect.tsx and replaces this product's ProductCategory
+  // rows to match. Runs after AdminJS's own new/edit action has already
+  // created/updated the Product row itself.
+  private async syncProductCategories(productId: string | undefined, payload: any) {
+    if (!productId || !payload || typeof payload.categoryIds !== 'string') return;
+
+    const categoryIds = payload.categoryIds.split(',').filter(Boolean);
+    const primaryCategoryId = payload.primaryCategoryId || categoryIds[0];
+    if (categoryIds.length === 0) return;
+
+    await this.prisma.$transaction([
+      this.prisma.productCategory.deleteMany({ where: { productId } }),
+      this.prisma.productCategory.createMany({
+        data: categoryIds.map((categoryId: string) => ({
+          productId,
+          categoryId,
+          isPrimary: categoryId === primaryCategoryId,
+        })),
+      }),
+    ]);
+  }
+
   // Backs the "Category Tree" custom admin page — returns every category
   // flat (id/name/parentId/showInNav/navOrder), which the page itself
   // arranges into an indented tree client-side.
@@ -253,6 +276,15 @@ export class AdminModuleService {
     const categoryTreeComponent = componentLoader.add(
       'CategoryTree',
       path.join(__dirname, 'dashboard', 'CategoryTree'),
+    );
+
+    const productCategoriesSelectComponent = componentLoader.add(
+      'ProductCategoriesSelect',
+      path.join(__dirname, 'dashboard', 'ProductCategoriesSelect'),
+    );
+    const productCategoriesListComponent = componentLoader.add(
+      'ProductCategoriesList',
+      path.join(__dirname, 'dashboard', 'ProductCategoriesList'),
     );
 
     // @adminjs/prisma only ever reads `clientModule.Prisma.dmmf.datamodel`
@@ -324,6 +356,19 @@ export class AdminModuleService {
                   imagesMimeType: { isVisible: false },
                   imagesFilename: { isVisible: false },
                   imagesSize: { isVisible: false },
+                  categories: {
+                    isVisible: { list: false, show: true, edit: false, filter: false },
+                    components: { show: productCategoriesListComponent },
+                  },
+                  categoryIds: {
+                    type: 'string',
+                    isVisible: { list: false, show: false, edit: true, filter: false },
+                    components: { edit: productCategoriesSelectComponent },
+                  },
+                  primaryCategoryId: {
+                    type: 'string',
+                    isVisible: false,
+                  },
                 },
                 // @adminjs/prisma misdetects Product.imagesSize (an Int[]
                 // column) as a plain scalar number property, so the base
@@ -344,6 +389,10 @@ export class AdminModuleService {
                       }
                       return request;
                     },
+                    after: async (response: any, request: any) => {
+                      await this.syncProductCategories(response.record?.params?.id, request.payload);
+                      return response;
+                    },
                   },
                   edit: {
                     before: (request: any) => {
@@ -353,6 +402,10 @@ export class AdminModuleService {
                         delete request.payload.imagesSize;
                       }
                       return request;
+                    },
+                    after: async (response: any, request: any) => {
+                      await this.syncProductCategories(response.record?.params?.id, request.payload);
+                      return response;
                     },
                   },
                 },
