@@ -235,15 +235,6 @@ export class AdminModuleService {
       path.join(__dirname, 'dashboard', 'Dashboard'),
     );
 
-    // Replaces the default Category reference dropdown on Product's edit/new
-    // forms with one that shows each option's full ancestor chain (e.g.
-    // "Tools > Power Tool (A-M)") instead of a flat, context-free list of
-    // category names — see CategorySelect.tsx for why.
-    const categorySelectComponent = componentLoader.add(
-      'CategorySelect',
-      path.join(__dirname, 'dashboard', 'CategorySelect'),
-    );
-
     // @adminjs/prisma only ever reads `clientModule.Prisma.dmmf.datamodel`
     // (see getModelByName/getEnums in its source) — it never touches the
     // rest of the generated client. We deliberately don't hand it the real
@@ -303,7 +294,6 @@ export class AdminModuleService {
           name === 'Product'
             ? {
                 properties: {
-                  category: { components: { edit: categorySelectComponent } },
                   images: { isVisible: { list: true, show: true, edit: false, filter: false } },
                   imagesMimeType: { isVisible: false },
                   imagesFilename: { isVisible: false },

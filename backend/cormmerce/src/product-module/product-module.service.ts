@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Cloudinary } from '../cloudinary/cloudinary';
 import { PrismaModuleService } from '../prisma-module/prisma-module.service';
 import { CreateProductModuleDto } from './dto/create-product-module.dto';
@@ -39,14 +39,20 @@ export class ProductModuleService {
     createProductModuleDto: CreateProductModuleDto,
     files?: Express.Multer.File[],
   ) {
-    const category = await this.prisma.category.findUnique({
-      where: { id: createProductModuleDto.categoryId },
-    });
+    const { categoryIds, primaryCategoryId } = createProductModuleDto;
 
-    if (!category) {
-      throw new NotFoundException(
-        `Category with id ${createProductModuleDto.categoryId} not found`,
+    if (!categoryIds.includes(primaryCategoryId)) {
+      throw new BadRequestException(
+        'primaryCategoryId must be one of categoryIds',
       );
+    }
+
+    const foundCategories = await this.prisma.category.findMany({
+      where: { id: { in: categoryIds } },
+      select: { id: true },
+    });
+    if (foundCategories.length !== categoryIds.length) {
+      throw new NotFoundException('One or more categoryIds do not exist');
     }
 
     const providedImages = createProductModuleDto.images ?? [];
@@ -82,24 +88,35 @@ export class ProductModuleService {
       createProductModuleDto.slug ?? createProductModuleDto.name,
     );
 
-    return this.prisma.product.create({
-      data: {
-        name: createProductModuleDto.name,
-        slug,
-        description: createProductModuleDto.description,
-        priceDescription: createProductModuleDto.priceDescription,
-        images,
-        imagesMimeType,
-        imagesFilename,
-        imagesSize,
-        isActive: createProductModuleDto.isActive ?? true,
-        isFeatured: createProductModuleDto.isFeatured ?? false,
-        stock: createProductModuleDto.stock ?? 0,
-        categoryId: createProductModuleDto.categoryId,
-      },
-      include: {
-        category: true,
-      },
+    return this.prisma.$transaction(async (tx) => {
+      const product = await tx.product.create({
+        data: {
+          name: createProductModuleDto.name,
+          slug,
+          description: createProductModuleDto.description,
+          priceDescription: createProductModuleDto.priceDescription,
+          images,
+          imagesMimeType,
+          imagesFilename,
+          imagesSize,
+          isActive: createProductModuleDto.isActive ?? true,
+          isFeatured: createProductModuleDto.isFeatured ?? false,
+          stock: createProductModuleDto.stock ?? 0,
+        },
+      });
+
+      await tx.productCategory.createMany({
+        data: categoryIds.map((categoryId) => ({
+          productId: product.id,
+          categoryId,
+          isPrimary: categoryId === primaryCategoryId,
+        })),
+      });
+
+      return tx.product.findUniqueOrThrow({
+        where: { id: product.id },
+        include: { categories: { include: { category: true } } },
+      });
     });
   }
 
@@ -111,7 +128,7 @@ export class ProductModuleService {
     const [products, quantities] = await Promise.all([
       this.prisma.product.findMany({
         orderBy: { createdAt: 'desc' },
-        include: { category: true },
+        include: { categories: { include: { category: true } } },
         omit: { stock: true },
       }),
       // "Best Selling" sort proxy — matched by name, same tradeoff as the
@@ -127,8 +144,14 @@ export class ProductModuleService {
       quantities.map((q) => [q.productName, q._sum.quantity ?? 0]),
     );
 
-    return products.map((product) => ({
+    return products.map(({ categories, ...product }) => ({
       ...product,
+      categories: categories.map((pc) => ({
+        id: pc.category.id,
+        slug: pc.category.slug,
+        name: pc.category.name,
+        isPrimary: pc.isPrimary,
+      })),
       totalQuantityRequested: quantityByName.get(product.name) ?? 0,
     }));
   }
@@ -136,7 +159,7 @@ export class ProductModuleService {
   async findOne(id: string) {
     const product = await this.prisma.product.findUnique({
       where: { id },
-      include: { category: true },
+      include: { categories: { include: { category: true } } },
       omit: { stock: true },
     });
 
@@ -144,7 +167,16 @@ export class ProductModuleService {
       throw new NotFoundException(`Product with id ${id} not found`);
     }
 
-    return product;
+    const { categories, ...rest } = product;
+    return {
+      ...rest,
+      categories: categories.map((pc) => ({
+        id: pc.category.id,
+        slug: pc.category.slug,
+        name: pc.category.name,
+        isPrimary: pc.isPrimary,
+      })),
+    };
   }
 
   update(id: number, updateProductModuleDto: UpdateProductModuleDto) {

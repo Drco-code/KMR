@@ -1,4 +1,6 @@
 import {
+  ArrayMinSize,
+  ArrayUnique,
   IsArray,
   IsBoolean,
   IsInt,
@@ -50,6 +52,17 @@ export class CreateProductModuleDto {
   @Min(0)
   stock?: number;
 
+  // Every category this product should be filed under. Must contain at
+  // least one id, and must include primaryCategoryId.
+  @IsArray()
+  @ArrayMinSize(1)
+  @ArrayUnique()
+  @IsUUID(undefined, { each: true })
+  categoryIds: string[];
+
+  // Which of categoryIds drives the canonical URL/breadcrumb on the
+  // storefront product page. Validated (in ProductModuleService) to be a
+  // member of categoryIds.
   @IsUUID()
-  categoryId: string;
+  primaryCategoryId: string;
 }

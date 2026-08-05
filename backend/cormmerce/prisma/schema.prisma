@@ -72,7 +72,7 @@ model Category {
   // LINK: One Category has many Products.
   // If you delete a Category, Prisma blocks it (see onDelete: Restrict
   // on the Product side) so you can't accidentally orphan products.
-  products Product[]
+  products ProductCategory[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -136,19 +136,33 @@ model Product {
   // visible/editable through the AdminJS staff dashboard.
   stock Int @default(0)
 
-  // LINK: Every Product belongs to exactly one Category.
-  // onDelete: Restrict means Postgres will refuse to delete a
-  // Category while Products still reference it — protects against
-  // accidentally wiping out a whole section of the catalog.
-  categoryId String
-  category   Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  // LINK: A Product can belong to multiple Categories (see ProductCategory
+  // below), with exactly one marked isPrimary — that one drives the
+  // canonical URL/breadcrumb on the storefront product page.
+  categories ProductCategory[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
 
-  // Speeds up "show me all products in category X" queries —
-  // this is the most common query pattern on the storefront.
+// Join table for the Product<->Category many-to-many relationship. One row
+// per (product, category) assignment. Exactly one row per product must have
+// isPrimary: true — that's the category the storefront uses for the
+// canonical URL/breadcrumb (see ProductModuleService for the enforcement,
+// and the partial unique index in this model's migration for the DB-level
+// backstop).
+model ProductCategory {
+  id         String  @id @default(uuid())
+  productId  String
+  categoryId String
+  isPrimary  Boolean @default(false)
+
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  @@unique([productId, categoryId])
   @@index([categoryId])
+  @@index([productId])
 }
 
 // A brand KMR carries (e.g. a paint manufacturer). Powers the "Brands We
