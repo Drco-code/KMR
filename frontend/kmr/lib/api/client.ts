@@ -32,7 +32,7 @@ export async function getProducts(): Promise<Product[]> {
 export async function getProductsByCategorySlug(categorySlug: string): Promise<Product[]> {
   const [products, category] = await Promise.all([getProducts(), getCategoryBySlug(categorySlug)]);
   if (!category) return [];
-  return products.filter((product) => product.categoryId === category.id);
+  return products.filter((product) => product.categories.some((c) => c.id === category.id));
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {

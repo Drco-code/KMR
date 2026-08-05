@@ -41,14 +41,14 @@ export interface ResolvedCatalog {
 }
 
 // Category is a self-referential tree (see backend schema.prisma), and a
-// product is filed under exactly one category via Product.categoryId — a
-// leaf category most of the time, but nothing stops staff from assigning
-// it to a parent "group header" category either. Browsing a parent
-// category should show everything filed under it OR any of its
-// descendants, not just products filed on that exact row — otherwise a
-// product assigned one level off from where a visitor expects it to be
-// filed just silently disappears from both listings. This builds, for
-// every category, the set of its own id plus every descendant's id.
+// product can now be filed under multiple categories (Product.categories) —
+// a leaf category most of the time, but nothing stops staff from assigning
+// it to a parent "group header" category too. Browsing a parent category
+// should show everything filed under it OR any of its descendants, not just
+// products filed on that exact row — otherwise a product assigned one level
+// off from where a visitor expects it to be filed just silently disappears
+// from both listings. This builds, for every category, the set of its own
+// id plus every descendant's id.
 function buildDescendantIdSets(categories: Category[]): Map<string, Set<string>> {
   const childrenByParent = new Map<string, Category[]>();
   for (const category of categories) {
@@ -129,7 +129,7 @@ export function resolveCatalog(
     const treeIds = descendantIdsByCategoryId.get(category.id)!;
     categoryCounts.set(
       category.slug,
-      bySearch.filter((p) => treeIds.has(p.categoryId)).length
+      bySearch.filter((p) => p.categories.some((c) => treeIds.has(c.id))).length
     );
   }
 
@@ -140,7 +140,7 @@ export function resolveCatalog(
     })
   );
   const byCategory = selectedCategoryIds.size
-    ? bySearch.filter((p) => selectedCategoryIds.has(p.categoryId))
+    ? bySearch.filter((p) => p.categories.some((c) => selectedCategoryIds.has(c.id)))
     : bySearch;
 
   const sort: CatalogSort = VALID_SORTS.includes(params.sort as CatalogSort)
