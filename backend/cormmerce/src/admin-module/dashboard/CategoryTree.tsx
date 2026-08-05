@@ -40,14 +40,15 @@ function flattenTree(categories: CategoryRow[]): TreeNode[] {
 
 const CategoryTree: React.FC = () => {
   const [categories, setCategories] = useState<CategoryRow[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
 
   function load() {
     api
       .getPage<CategoryRow[]>({ pageName: 'categoryTree' })
       .then((response) => setCategories(response.data))
-      .catch(() => setError('Could not load categories.'));
+      .catch(() => setLoadError('Could not load categories.'));
   }
 
   useEffect(load, []);
@@ -65,21 +66,25 @@ const CategoryTree: React.FC = () => {
       setCategories((current) =>
         (current ?? []).map((c) => (c.id === id ? { ...c, ...data } : c)),
       );
+      // Clear any previous save error on success
+      setSaveError(null);
     } catch {
-      setError('Failed to save a change — please retry.');
+      setSaveError('Failed to save a change — please retry.');
     } finally {
       setSavingId(null);
     }
   }
 
-  if (error) {
+  // Initial load failure: show full-page error (no tree to display)
+  if (loadError) {
     return (
       <Box p="xl">
-        <MessageBox message={error} variant="danger" />
+        <MessageBox message={loadError} variant="danger" />
       </Box>
     );
   }
 
+  // Still loading: show spinner
   if (!categories) {
     return (
       <Box p="xxl" flex justifyContent="center">
@@ -92,6 +97,15 @@ const CategoryTree: React.FC = () => {
 
   return (
     <Box p="xl">
+      {/* Save error banner: dismissible, does not unmount the tree */}
+      {saveError && (
+        <Box mb="lg">
+          <MessageBox message={saveError} variant="danger">
+            <Button onClick={() => setSaveError(null)}>Dismiss</Button>
+          </MessageBox>
+        </Box>
+      )}
+
       <Box mb="lg">
         <H2 fontWeight="bold" mb="xs">
           Category Tree
