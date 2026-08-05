@@ -14,10 +14,15 @@ const CategoryParentSelect: React.FC<EditPropertyProps> = (props) => {
     api
       .resourceAction({ resourceId: 'Category', actionName: 'list', params: { perPage: 1000 } })
       .then((response) => {
+        // AdminJS's "list" action exposes this self-relation under the
+        // Prisma field name `parent` (a reference-typed property), not the
+        // raw `parentId` scalar column — the scalar is only surfaced as its
+        // own editable property on the edit/new forms (see admin-module.
+        // service.ts's `parentId` property override), never in list results.
         const categories: CategoryLike[] = (response.data.records ?? []).map((r: any) => ({
           id: r.params.id,
           name: r.params.name,
-          parentId: r.params.parentId ?? null,
+          parentId: r.params.parent ?? null,
         }));
         // record.id is empty on the "new" form — nothing to exclude yet.
         const excludeIds = record.id ? selfAndDescendantIds(categories, record.id) : undefined;
