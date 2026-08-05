@@ -1,14 +1,12 @@
 import { ProductCard } from "@/components/product-card";
 import { ScrollReveal } from "@/components/scroll-reveal";
-import type { Category, Product } from "@/lib/api/types";
+import type { Product } from "@/lib/api/types";
 
 export function ProductGrid({
   products,
-  categories,
   emptyMessage,
 }: {
   products: Product[];
-  categories?: Category[];
   emptyMessage?: string;
 }) {
   if (products.length === 0) {
@@ -21,10 +19,6 @@ export function ProductGrid({
     );
   }
 
-  const categoryNameById = new Map(
-    (categories ?? []).map((c) => [c.id, c.name])
-  );
-
   return (
     <ScrollReveal
       className="grid w-full grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
@@ -36,7 +30,7 @@ export function ProductGrid({
         <ProductCard
           key={product.id}
           product={product}
-          categoryName={categoryNameById.get(product.categoryId)}
+          categoryName={product.categories.find((c) => c.isPrimary)?.name}
         />
       ))}
     </ScrollReveal>

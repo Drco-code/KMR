@@ -109,7 +109,6 @@ export function CatalogView({
         <div className="flex flex-col gap-10">
           <ProductGrid
             products={resolved.pageProducts}
-            categories={categories}
             emptyMessage={emptyMessage}
           />
           <PaginationNav

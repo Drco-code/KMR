@@ -1,14 +1,13 @@
 import Link from "next/link";
-import { getBrands, getCategories, getProducts } from "@/lib/api/client";
+import { getBrands, getProducts } from "@/lib/api/client";
 import { ProductGrid } from "@/components/product-grid";
 import { BrandStrip } from "@/components/brand-strip";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { TextReveal } from "@/components/text-reveal";
 
 export default async function Home() {
-  const [products, categories, brands] = await Promise.all([
+  const [products, brands] = await Promise.all([
     getProducts(),
-    getCategories(),
     getBrands(),
   ]);
   // "Signature Collections" is staff-curated via the isFeatured flag in
@@ -65,7 +64,7 @@ export default async function Home() {
             Signature Collections
           </h2>
         </ScrollReveal>
-        <ProductGrid products={featured} categories={categories} />
+        <ProductGrid products={featured} />
       </section>
 
       <section className="bg-black px-6 py-24 md:px-20 md:py-30">

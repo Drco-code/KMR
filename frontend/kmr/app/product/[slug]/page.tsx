@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getCategories, getProductBySlug } from "@/lib/api/client";
+import { getProductBySlug } from "@/lib/api/client";
 import { AddToQuoteButton } from "@/components/add-to-quote-button";
 import { ProductImageCarousel } from "@/components/product-image-carousel";
 import { getValidImages } from "@/lib/image";
@@ -16,17 +16,16 @@ export default async function ProductPage({
   const product = await getProductBySlug(slug);
   if (!product) notFound();
 
-  const categories = await getCategories();
-  const category = categories.find((c) => c.id === product.categoryId);
+  const primaryCategory = product.categories.find((c) => c.isPrimary);
 
   return (
     <div className="flex flex-col gap-4 px-6 py-16 md:px-20 md:py-24">
-      {category && (
+      {primaryCategory && (
         <Link
-          href={`/catalog/${category.slug}`}
+          href={`/catalog/${primaryCategory.slug}`}
           className="text-xs font-medium tracking-[0.15em] text-gold uppercase"
         >
-          ← {category.name}
+          ← {primaryCategory.name}
         </Link>
       )}
 
