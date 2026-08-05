@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Category" ADD COLUMN     "navOrder" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "showInNav" BOOLEAN NOT NULL DEFAULT true;

@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsBoolean, IsInt, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class CreateCategoryModuleDto {
   @IsString()
@@ -16,4 +16,15 @@ export class CreateCategoryModuleDto {
   @IsOptional()
   @IsUUID()
   parentId?: string;
+
+  // Whether this category is eligible to appear in the storefront's
+  // dropdown/mega-menu nav. Defaults to true if omitted.
+  @IsOptional()
+  @IsBoolean()
+  showInNav?: boolean;
+
+  // Sibling order within its nav tier, ascending. Defaults to 0 if omitted.
+  @IsOptional()
+  @IsInt()
+  navOrder?: number;
 }

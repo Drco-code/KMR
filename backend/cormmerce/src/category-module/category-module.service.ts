@@ -41,6 +41,8 @@ export class CategoryModuleService {
         name: createCategoryModuleDto.name,
         slug,
         parentId: createCategoryModuleDto.parentId,
+        showInNav: createCategoryModuleDto.showInNav ?? true,
+        navOrder: createCategoryModuleDto.navOrder ?? 0,
       },
     });
   }
