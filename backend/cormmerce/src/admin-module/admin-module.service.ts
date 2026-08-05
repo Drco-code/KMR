@@ -223,6 +223,52 @@ export class AdminModuleService {
     ]);
   }
 
+  // The read-path counterpart to syncProductCategories above. @adminjs/prisma
+  // never includes reverse relations (ProductCategory has no scalar FK on
+  // Product) and AdminJS's own populator only resolves to-one `reference`
+  // properties, so nothing in the base show/list/edit handlers ever loads a
+  // product's assigned categories — without this, the Show page always says
+  // "No categories assigned" and the Edit form always starts with zero
+  // categories checked, which is actively dangerous given syncProductCategories
+  // does a full delete+recreate: an admin editing a product they can't see the
+  // existing categories for would silently wipe them on save. Queried in bulk
+  // (IN productIds) so the list action stays a single extra query, not N+1.
+  private async getProductCategoriesMap(
+    productIds: string[],
+  ): Promise<Map<string, { id: string; name: string; isPrimary: boolean }[]>> {
+    const map = new Map<string, { id: string; name: string; isPrimary: boolean }[]>();
+    if (productIds.length === 0) return map;
+
+    const rows = await this.prisma.productCategory.findMany({
+      where: { productId: { in: productIds } },
+      include: { category: true },
+      orderBy: [{ isPrimary: 'desc' }],
+    });
+
+    for (const row of rows) {
+      const list = map.get(row.productId) ?? [];
+      list.push({ id: row.category.id, name: row.category.name, isPrimary: row.isPrimary });
+      map.set(row.productId, list);
+    }
+    return map;
+  }
+
+  // Stamps the categories/categoryIds/primaryCategoryId params AdminJS's
+  // response `RecordJSON` needs onto an already-serialized record (i.e. after
+  // `.toJSON()` has run — see show/list/edit action sources in
+  // node_modules/adminjs, which build the response's `record`/`records` this
+  // way before any `after` hook sees it). Plain object mutation is sufficient;
+  // there's no live BaseRecord left to re-serialize at this point.
+  private applyProductCategoryParams(
+    params: Record<string, any>,
+    categories: { id: string; name: string; isPrimary: boolean }[],
+  ) {
+    params.categories = categories;
+    const categoryIds = categories.map((c) => c.id);
+    params.categoryIds = categoryIds.join(',');
+    params.primaryCategoryId = categories.find((c) => c.isPrimary)?.id ?? categoryIds[0] ?? '';
+  }
+
   // Backs the "Category Tree" custom admin page — returns every category
   // flat (id/name/parentId/showInNav/navOrder), which the page itself
   // arranges into an indented tree client-side.
@@ -394,6 +440,15 @@ export class AdminModuleService {
                       return response;
                     },
                   },
+                  // GET (render) and POST (save) both flow through this same
+                  // `after` hook. On GET, request.payload is empty so
+                  // syncProductCategories's own guard no-ops the write side —
+                  // we only need the read side below. On POST, sync runs first
+                  // (write), then the read side re-fetches, so the response
+                  // reflects the just-saved state rather than stale pre-save
+                  // params. Doing it this way (always re-fetch after an
+                  // unconditional sync attempt) avoids needing to branch on
+                  // request.method here at all.
                   edit: {
                     before: (request: any) => {
                       if (request.payload) {
@@ -404,7 +459,35 @@ export class AdminModuleService {
                       return request;
                     },
                     after: async (response: any, request: any) => {
-                      await this.syncProductCategories(response.record?.params?.id, request.payload);
+                      const productId = response.record?.params?.id;
+                      await this.syncProductCategories(productId, request.payload);
+                      if (productId) {
+                        const map = await this.getProductCategoriesMap([productId]);
+                        this.applyProductCategoryParams(response.record.params, map.get(productId) ?? []);
+                      }
+                      return response;
+                    },
+                  },
+                  show: {
+                    after: async (response: any) => {
+                      const productId = response.record?.params?.id;
+                      if (productId) {
+                        const map = await this.getProductCategoriesMap([productId]);
+                        this.applyProductCategoryParams(response.record.params, map.get(productId) ?? []);
+                      }
+                      return response;
+                    },
+                  },
+                  list: {
+                    after: async (response: any) => {
+                      const records = response.records ?? [];
+                      const productIds = records
+                        .map((record: any) => record.params?.id)
+                        .filter((id: unknown): id is string => typeof id === 'string');
+                      const map = await this.getProductCategoriesMap(productIds);
+                      for (const record of records) {
+                        this.applyProductCategoryParams(record.params, map.get(record.params?.id) ?? []);
+                      }
                       return response;
                     },
                   },
