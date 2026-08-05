@@ -8,6 +8,7 @@
 // API (see auth-module/auth.ts) — one login, everywhere.
 import { Injectable } from '@nestjs/common';
 import * as path from 'path';
+import { readFile } from 'fs/promises';
 import type { RequestHandler } from 'express';
 import { fromNodeHeaders } from 'better-auth/node';
 import { PrismaModuleService } from '../prisma-module/prisma-module.service';
@@ -628,9 +629,41 @@ export class AdminModuleService {
 
     const adminRouter = AdminJSExpress.buildRouter(admin);
 
+    // @adminjs/express's own static-asset route (buildAssets in that
+    // package) serves AdminJS's pre-built scripts — global.bundle.js,
+    // design-system.bundle.js, app.bundle.js (everything AdminJS ships in
+    // its own package rather than bundling itself here) — via Express's
+    // res.sendFile(). On this project's current Node version, sendFile
+    // throws a false "Not Found" for those exact files even though they
+    // demonstrably exist on disk (reproduced in total isolation with a
+    // bare Express server, no AdminJS/Nest/app code involved at all) —
+    // apparently a `send`-package/Node-version incompatibility. Reading
+    // and serving the same files ourselves, ahead of adminRouter, sidesteps
+    // the broken sendFile call entirely. Built from AdminJS's own
+    // `Router.assets` list (path -> src) rather than hardcoded paths, so
+    // this stays correct if that list ever changes. Does NOT cover
+    // components.bundle.js — in dev that one is served by a live
+    // "bundleComponents" action route, not this static list, and it
+    // already works fine.
+    const { Router: adminAssetRouter } = await import('adminjs');
+    const staticAssetsByPath = new Map(
+      adminAssetRouter.assets.map((asset) => [asset.path, path.resolve(asset.src)]),
+    );
+
     return async (req, res, next) => {
       if (req.method === 'GET' && req.path === '/login') {
         res.type('html').send(LOGIN_PAGE_HTML);
+        return;
+      }
+
+      const staticAssetPath = staticAssetsByPath.get(req.path);
+      if (req.method === 'GET' && staticAssetPath) {
+        try {
+          const content = await readFile(staticAssetPath);
+          res.type(path.extname(staticAssetPath)).send(content);
+        } catch {
+          res.status(404).end();
+        }
         return;
       }
 

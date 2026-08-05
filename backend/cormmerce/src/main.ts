@@ -38,7 +38,19 @@ async function bootstrap() {
   // step (see AdminModuleService.prebundle / bundle-admin.ts). AdminJS
   // checks this exact env var and no-ops instead — the pre-built bundle
   // from the build step is still served fine as a static file either way.
-  process.env.ADMIN_JS_SKIP_BUNDLE = 'true';
+  //
+  // Only set this in production. In local dev there's no separate build
+  // step (no one runs `npm run bundle:admin` before `npm run start:dev`),
+  // so skipping the bundle here means the bundle.js/global.bundle.js/etc
+  // assets never get written — AdminJS's own screens 404 on every asset
+  // and the dashboard renders blank after login, even though the custom
+  // /admin/login page (served directly by our own middleware, not AdminJS's
+  // router) still returns 200. Leaving this unset in dev lets
+  // AdminModuleService.buildMiddleware()'s `admin.watch()` call (see that
+  // file) actually perform the bundle, and rebuild it on file changes.
+  if (process.env.NODE_ENV === 'production') {
+    process.env.ADMIN_JS_SKIP_BUNDLE = 'true';
+  }
 
   // Must match bundle-admin.ts's ADMIN_JS_TMP_DIR exactly — see the
   // comment there for why it's not the `.adminjs` default (Render's
