@@ -405,6 +405,14 @@ export class AdminModuleService {
                   imagesMimeType: { isVisible: false },
                   imagesFilename: { isVisible: false },
                   imagesSize: { isVisible: false },
+                  // AdminJS's built-in rich text editor (TipTap-based —
+                  // bold/italic/headings/lists/links/blockquotes) stores its
+                  // output as an HTML string straight into this same
+                  // Product.description column. The storefront sanitizes it
+                  // with sanitize-html before rendering (see
+                  // app/product/[slug]/page.tsx) — this column now holds
+                  // staff-authored markup, not plain text.
+                  description: { type: 'richtext' },
                   categories: {
                     isVisible: { list: false, show: true, edit: false, filter: false },
                     components: { show: productCategoriesListComponent },

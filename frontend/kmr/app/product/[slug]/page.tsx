@@ -1,11 +1,30 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import sanitizeHtml from "sanitize-html";
 import { getProductBySlug } from "@/lib/api/client";
 import { AddToQuoteButton } from "@/components/add-to-quote-button";
 import { ProductImageCarousel } from "@/components/product-image-carousel";
 import { getValidImages } from "@/lib/image";
 import { formatPrice } from "@/lib/price";
 import { TextReveal } from "@/components/text-reveal";
+
+// Product.description is written by staff through AdminJS's rich text
+// editor (see backend admin-module.service.ts) and stored as raw HTML.
+// It's still sanitized before rendering here — an allowlist limited to
+// the formatting that editor actually produces, nothing that could
+// execute script or load an external resource.
+function sanitizeDescription(html: string): string {
+  return sanitizeHtml(html, {
+    allowedTags: [
+      "p", "br", "strong", "em", "u", "s", "a",
+      "ul", "ol", "li", "blockquote", "h1", "h2", "h3", "code", "pre",
+    ],
+    allowedAttributes: {
+      a: ["href", "target", "rel"],
+    },
+    allowedSchemes: ["http", "https", "mailto"],
+  });
+}
 
 export default async function ProductPage({
   params,
@@ -43,9 +62,10 @@ export default async function ProductPage({
             <p className="text-xl text-ink-muted">{formatPrice(product.priceDescription)}</p>
           )}
           {product.description && (
-            <p className="max-w-md text-base leading-relaxed text-ink-muted">
-              {product.description}
-            </p>
+            <div
+              className="prose prose-sm max-w-md text-ink-muted prose-headings:text-ink prose-strong:text-ink"
+              dangerouslySetInnerHTML={{ __html: sanitizeDescription(product.description) }}
+            />
           )}
           <div className="pt-4">
             <AddToQuoteButton product={product} />
