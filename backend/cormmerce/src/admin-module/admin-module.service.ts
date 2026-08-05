@@ -235,6 +235,11 @@ export class AdminModuleService {
       path.join(__dirname, 'dashboard', 'Dashboard'),
     );
 
+    const categoryParentSelectComponent = componentLoader.add(
+      'CategoryParentSelect',
+      path.join(__dirname, 'dashboard', 'CategoryParentSelect'),
+    );
+
     // @adminjs/prisma only ever reads `clientModule.Prisma.dmmf.datamodel`
     // (see getModelByName/getEnums in its source) — it never touches the
     // rest of the generated client. We deliberately don't hand it the real
@@ -366,7 +371,13 @@ export class AdminModuleService {
                     },
                   },
                 }
-              : {},
+              : name === 'Category'
+                ? {
+                    properties: {
+                      parentId: { components: { edit: categoryParentSelectComponent } },
+                    },
+                  }
+                : {},
         // Lets staff pick one or more images straight from their PC/device
         // instead of pasting Cloudinary URLs by hand. See
         // CloudinaryAdminUploadProvider for how each uploaded file is mapped
