@@ -107,12 +107,30 @@ export class ProductModuleService {
   // (visible/editable through the AdminJS dashboard, which reads straight
   // from Prisma and isn't affected by this omit). Never let it leak into
   // what anonymous customers can fetch.
-  findAll() {
-    return this.prisma.product.findMany({
-      orderBy: { createdAt: 'desc' },
-      include: { category: true },
-      omit: { stock: true },
-    });
+  async findAll() {
+    const [products, quantities] = await Promise.all([
+      this.prisma.product.findMany({
+        orderBy: { createdAt: 'desc' },
+        include: { category: true },
+        omit: { stock: true },
+      }),
+      // "Best Selling" sort proxy — matched by name, same tradeoff as the
+      // AdminJS dashboard's demand tracking (see QuoteRequestItem.productName
+      // comment): we don't have real sales data, only what's been requested.
+      this.prisma.quoteRequestItem.groupBy({
+        by: ['productName'],
+        _sum: { quantity: true },
+      }),
+    ]);
+
+    const quantityByName = new Map(
+      quantities.map((q) => [q.productName, q._sum.quantity ?? 0]),
+    );
+
+    return products.map((product) => ({
+      ...product,
+      totalQuantityRequested: quantityByName.get(product.name) ?? 0,
+    }));
   }
 
   async findOne(id: string) {

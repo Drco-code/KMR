@@ -11,6 +11,10 @@ import type { CatalogSort } from "@/lib/catalog";
 
 const SORT_LABELS: Record<CatalogSort, string> = {
   featured: "Featured",
+  "best-selling": "Best Selling",
+  "price-asc": "Price: Low to High",
+  "price-desc": "Price: High to Low",
+  newest: "Newest",
   "name-asc": "Name (A–Z)",
   "name-desc": "Name (Z–A)",
 };
@@ -23,8 +27,8 @@ export function SortSelect({
   onChange: (sort: CatalogSort) => void;
 }) {
   function handleChange(value: string | null) {
-    if (value === "name-asc" || value === "name-desc" || value === "featured") {
-      onChange(value);
+    if (value !== null && value in SORT_LABELS) {
+      onChange(value as CatalogSort);
     }
   }
 

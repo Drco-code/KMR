@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { resolveCatalog, type CatalogSearchParams, type CatalogSort } from "@/lib/catalog";
+import { resolveCatalog, VALID_SORTS, type CatalogSearchParams, type CatalogSort } from "@/lib/catalog";
 import { CategorySidebarFilter } from "@/components/category-sidebar-filter";
 import { SortSelect } from "@/components/sort-select";
 import { ProductGrid } from "@/components/product-grid";
@@ -30,8 +30,8 @@ export function CatalogView({
 }) {
   const [category, setCategory] = useState(searchParams.category ?? "");
   const [sort, setSort] = useState<CatalogSort>(
-    searchParams.sort === "name-asc" || searchParams.sort === "name-desc"
-      ? searchParams.sort
+    VALID_SORTS.includes(searchParams.sort as CatalogSort)
+      ? (searchParams.sort as CatalogSort)
       : "featured"
   );
   const [page, setPage] = useState(Number(searchParams.page ?? "1") || 1);
