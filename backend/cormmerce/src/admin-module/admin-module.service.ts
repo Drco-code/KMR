@@ -208,7 +208,9 @@ export class AdminModuleService {
     if (!productId || !payload || typeof payload.categoryIds !== 'string') return;
 
     const categoryIds = payload.categoryIds.split(',').filter(Boolean);
-    const primaryCategoryId = payload.primaryCategoryId || categoryIds[0];
+    const primaryCategoryId = categoryIds.includes(payload.primaryCategoryId)
+      ? payload.primaryCategoryId
+      : categoryIds[0];
     if (categoryIds.length === 0) return;
 
     await this.prisma.$transaction([
