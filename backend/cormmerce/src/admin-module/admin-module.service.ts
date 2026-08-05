@@ -200,6 +200,16 @@ export class AdminModuleService {
     };
   }
 
+  // Backs the "Category Tree" custom admin page — returns every category
+  // flat (id/name/parentId/showInNav/navOrder), which the page itself
+  // arranges into an indented tree client-side.
+  private async getCategoryTreeData() {
+    return this.prisma.category.findMany({
+      select: { id: true, name: true, parentId: true, showInNav: true, navOrder: true },
+      orderBy: [{ navOrder: 'asc' }, { createdAt: 'asc' }],
+    });
+  }
+
   // Builds the AdminJS instance itself, shared by both buildMiddleware()
   // (the running app, at request time) and prebundle() (a one-off script
   // run during deploy — see bundle-admin.ts). Keeping construction in one
@@ -238,6 +248,11 @@ export class AdminModuleService {
     const categoryParentSelectComponent = componentLoader.add(
       'CategoryParentSelect',
       path.join(__dirname, 'dashboard', 'CategoryParentSelect'),
+    );
+
+    const categoryTreeComponent = componentLoader.add(
+      'CategoryTree',
+      path.join(__dirname, 'dashboard', 'CategoryTree'),
     );
 
     // @adminjs/prisma only ever reads `clientModule.Prisma.dmmf.datamodel`
@@ -282,6 +297,12 @@ export class AdminModuleService {
       dashboard: {
         component: dashboardComponent,
         handler: async () => this.getDashboardData(),
+      },
+      pages: {
+        categoryTree: {
+          component: categoryTreeComponent,
+          handler: async () => this.getCategoryTreeData(),
+        },
       },
       resources: modelNames.map((name) => ({
         resource: {
