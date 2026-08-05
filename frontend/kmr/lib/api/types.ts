@@ -3,6 +3,15 @@ export interface Category {
   name: string;
   slug: string;
   parentId: string | null;
+  showInNav: boolean;
+  navOrder: number;
+}
+
+export interface ProductCategoryRef {
+  id: string;
+  slug: string;
+  name: string;
+  isPrimary: boolean;
 }
 
 export interface Product {
@@ -14,7 +23,7 @@ export interface Product {
   images: string[];
   isActive: boolean;
   isFeatured: boolean;
-  categoryId: string;
+  categories: ProductCategoryRef[];
   createdAt: string;
   // Aggregated from quote-request history — see resolveCatalog's
   // "best-selling" sort. A proxy for popularity, not confirmed sales.
