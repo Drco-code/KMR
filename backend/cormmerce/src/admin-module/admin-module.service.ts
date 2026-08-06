@@ -336,6 +336,16 @@ export class AdminModuleService {
       path.join(__dirname, 'dashboard', 'ProductCategoriesList'),
     );
 
+    // AdminJS's built-in logout button only renders when it manages its own
+    // session (buildAuthenticatedRouter); this app shares Better Auth's
+    // session cookie instead (see buildMiddleware() below), so the default
+    // sidebar never shows one. Override it with a working "Sign out" button
+    // — see SidebarFooter.tsx for the full explanation.
+    componentLoader.override(
+      'SidebarFooter',
+      path.join(__dirname, 'dashboard', 'SidebarFooter'),
+    );
+
     // @adminjs/prisma only ever reads `clientModule.Prisma.dmmf.datamodel`
     // (see getModelByName/getEnums in its source) — it never touches the
     // rest of the generated client. We deliberately don't hand it the real
