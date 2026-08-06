@@ -1,12 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
 // Collapsed by default so a long staff-authored description can't push
 // AddToQuoteButton down the page — it only grows when the shopper opts in.
 export function ProductDescription({ html }: { html: string }) {
   const [open, setOpen] = useState(false);
+  const [overflowing, setOverflowing] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Only show the "more below" fade when the description actually exceeds
+  // the capped panel height — short descriptions render with no fade line.
+  useEffect(() => {
+    if (!open) return;
+    const el = scrollRef.current;
+    if (!el) return;
+    setOverflowing(el.scrollHeight > el.clientHeight + 1);
+  }, [open, html]);
 
   return (
     <div className="border-t border-ink/10 pt-4">
@@ -29,10 +40,20 @@ export function ProductDescription({ html }: { html: string }) {
         }`}
       >
         <div className="overflow-hidden">
-          <div
-            className="prose prose-sm max-w-md pt-4 text-ink-muted prose-headings:text-ink prose-strong:text-ink"
-            dangerouslySetInnerHTML={{ __html: html }}
-          />
+          {/* Capped + independently scrollable so a long staff-authored
+              description can't drag the whole page into a long scroll —
+              only this panel scrolls, with a fade to hint there's more. */}
+          <div className="relative mt-4">
+            <div ref={scrollRef} className="max-h-80 overflow-y-auto pr-2">
+              <div
+                className="prose prose-sm max-w-md text-ink-muted prose-headings:text-ink prose-strong:text-ink"
+                dangerouslySetInnerHTML={{ __html: html }}
+              />
+            </div>
+            {overflowing && (
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-background to-transparent" />
+            )}
+          </div>
         </div>
       </div>
     </div>
