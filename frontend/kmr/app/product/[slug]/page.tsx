@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import sanitizeHtml from "sanitize-html";
 import { getProductBySlug } from "@/lib/api/client";
 import { AddToQuoteButton } from "@/components/add-to-quote-button";
+import { ProductDescription } from "@/components/product-description";
 import { ProductImageCarousel } from "@/components/product-image-carousel";
 import { getValidImages } from "@/lib/image";
 import { formatPrice } from "@/lib/price";
@@ -61,15 +62,12 @@ export default async function ProductPage({
           {formatPrice(product.priceDescription) && (
             <p className="text-xl text-ink-muted">{formatPrice(product.priceDescription)}</p>
           )}
-          {product.description && (
-            <div
-              className="prose prose-sm max-w-md text-ink-muted prose-headings:text-ink prose-strong:text-ink"
-              dangerouslySetInnerHTML={{ __html: sanitizeDescription(product.description) }}
-            />
-          )}
-          <div className="pt-4">
+          <div className="pt-2">
             <AddToQuoteButton product={product} />
           </div>
+          {product.description && (
+            <ProductDescription html={sanitizeDescription(product.description)} />
+          )}
         </div>
       </div>
     </div>
