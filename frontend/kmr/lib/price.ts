@@ -1,13 +1,21 @@
 // priceDescription is free text staff type in (see schema comment on
 // Product.priceDescription) — usually a plain number ("10.99") but
-// sometimes a note like "Inquire for wholesale rate". Only prefix the
-// cedi sign when it actually looks like a price.
+// sometimes a note like "Inquire for wholesale rate". Only format it as
+// currency (₵, thousands separators, 2 decimals) when it actually looks
+// like a plain number — free-text notes pass through untouched.
 export function formatPrice(priceDescription: string | null | undefined): string | null {
   if (!priceDescription) return null;
   const trimmed = priceDescription.trim();
   if (!trimmed) return null;
-  if (trimmed.startsWith("₵")) return trimmed;
-  return /^\d/.test(trimmed) ? `₵${trimmed}` : trimmed;
+
+  const withoutSign = trimmed.startsWith("₵") ? trimmed.slice(1).trim() : trimmed;
+  if (!/^\d[\d,]*(\.\d+)?$/.test(withoutSign)) return trimmed;
+
+  const amount = Number(withoutSign.replace(/,/g, ""));
+  return `₵${amount.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
 }
 
 // Numeric value for sorting by price. Free-text notes like "Inquire for
