@@ -32,7 +32,7 @@ export function BrandStrip({ brands }: { brands: Brand[] }) {
               alt={brand.name}
               width={220}
               height={88}
-              className="h-16 w-auto max-w-[180px] object-contain grayscale transition-all duration-300 hover:grayscale-0 md:h-20"
+              className="h-16 w-auto max-w-[180px] object-contain md:h-20"
             />
           );
 
