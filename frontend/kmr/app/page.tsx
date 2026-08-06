@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { getBrands, getProducts } from "@/lib/api/client";
 import { ProductGrid } from "@/components/product-grid";
@@ -19,6 +20,14 @@ export default async function Home() {
   return (
     <div className="flex flex-col">
       <section className="relative flex h-[560px] items-center justify-center overflow-hidden bg-ink">
+        <Image
+          src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1600&q=80&fit=crop&auto=format"
+          alt=""
+          fill
+          priority
+          className="object-cover"
+          sizes="100vw"
+        />
         <div className="absolute inset-0 bg-gradient-to-br from-ink via-ink/90 to-black" />
         <div className="absolute inset-0 bg-black/30" />
         <ScrollReveal
@@ -31,25 +40,24 @@ export default async function Home() {
             as="h1"
             className="font-display text-5xl leading-tight font-bold text-white md:text-6xl"
           >
-            The Art of Living in Color
+            Everything for the Build, Beautifully Made
           </TextReveal>
           <p className="max-w-xl text-lg text-white/90">
-            Premium architectural coatings and artisanal pigments for the
-            modern home. Discover a collection designed for those who value
-            heritage and innovation.
+            Premium paints, tools, and hardware for those who care how
+            it&apos;s built — and how it looks when it&apos;s done.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-6">
             <Link
               href="/catalog"
               className="rounded-sm bg-black px-10 py-4 text-sm font-semibold tracking-[0.1em] text-white uppercase shadow-lg transition-opacity hover:opacity-90"
             >
-              Explore Palette
+              Explore Catalog
             </Link>
             <Link
               href="/quote"
               className="rounded-sm border border-white px-10 py-4 text-sm font-semibold tracking-[0.1em] text-white uppercase transition-colors hover:bg-white hover:text-ink"
             >
-              Order Swatches
+              Get a Quote
             </Link>
           </div>
         </ScrollReveal>
