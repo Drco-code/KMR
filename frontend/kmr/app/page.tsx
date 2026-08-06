@@ -76,25 +76,35 @@ export default async function Home() {
       </section>
 
       <section className="bg-black px-6 py-24 md:px-20 md:py-30">
-        <ScrollReveal className="mx-auto flex max-w-[1440px] flex-col items-start gap-6">
-          <span className="text-xs font-medium tracking-[0.2em] text-gold-light uppercase">
-            Pigment Science
-          </span>
-          <h2 className="font-display text-4xl text-white md:text-5xl">
-            Architectural Grade Performance.
-          </h2>
-          <p className="max-w-xl text-lg text-white/60">
-            We don&apos;t just sell paint; we engineer light. Our patented
-            pigments offer unparalleled depth and color stability, ensuring
-            your home remains vibrant for decades. Zero-VOC, eco-certified,
-            and artist-curated.
-          </p>
-          <Link
-            href="/catalog"
-            className="mt-2 rounded-sm bg-gold px-8 py-3 text-sm font-semibold tracking-[0.05em] text-white uppercase hover:opacity-90"
-          >
-            Learn More
-          </Link>
+        <ScrollReveal className="mx-auto grid max-w-[1440px] grid-cols-1 items-center gap-12 md:grid-cols-2">
+          <div className="relative aspect-[4/3] w-full overflow-hidden">
+            <Image
+              src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=1200&q=80&fit=crop&auto=format"
+              alt="Welder at work, sparks flying"
+              fill
+              className="object-cover"
+              sizes="(min-width: 768px) 50vw, 100vw"
+            />
+          </div>
+          <div className="flex flex-col items-start gap-6">
+            <span className="text-xs font-medium tracking-[0.2em] text-gold-light uppercase">
+              Craftsmanship &amp; Performance
+            </span>
+            <h2 className="font-display text-4xl text-white md:text-5xl">
+              Built for the Job, Made to Last.
+            </h2>
+            <p className="max-w-xl text-lg text-white/60">
+              From premium coatings to professional-grade tools, every
+              product is chosen for durability and performance — vetted by
+              people who use this stuff, not just sell it.
+            </p>
+            <Link
+              href="/catalog"
+              className="mt-2 rounded-sm bg-gold px-8 py-3 text-sm font-semibold tracking-[0.05em] text-white uppercase hover:opacity-90"
+            >
+              Learn More
+            </Link>
+          </div>
         </ScrollReveal>
       </section>
 
