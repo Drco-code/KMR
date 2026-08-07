@@ -56,8 +56,8 @@ export default async function Home() {
         </ScrollReveal>
       </section>
 
-      <section className="flex flex-col gap-16 px-6 py-24 md:px-20 md:py-30">
-        <ScrollReveal className="flex flex-col items-start gap-4">
+      <section className="flex flex-col items-center gap-16 px-6 py-24 md:px-20 md:py-30">
+        <ScrollReveal className="flex flex-col items-center gap-4 text-center">
           <span className="text-xs font-medium tracking-[0.2em] text-gold uppercase">
             The Collection
           </span>
@@ -65,7 +65,9 @@ export default async function Home() {
             Signature Collections
           </h2>
         </ScrollReveal>
-        <ProductGrid products={featured} />
+        <div className="w-full max-w-[1200px]">
+          <ProductGrid products={featured} />
+        </div>
       </section>
 
       <section className="bg-black px-6 py-24 md:px-20 md:py-30">
