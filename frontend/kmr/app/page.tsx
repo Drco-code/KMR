@@ -20,7 +20,7 @@ export default async function Home() {
 
   return (
     <div className="flex flex-col">
-      <section className="relative flex min-h-[560px] items-center justify-center overflow-hidden bg-ink">
+      <section className="relative flex min-h-[calc(100vh-120px)] items-center justify-center overflow-hidden bg-ink">
         <HeroBackground />
         <div className="absolute inset-0 bg-black/40" />
         <ScrollReveal
