@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -9,6 +9,7 @@ import { cloudinaryUrl } from "@/lib/cloudinary";
 import { gsap } from "@/lib/gsap";
 
 const AUTOPLAY_DELAY_MS = 4000;
+const SWIPE_THRESHOLD = 50;
 
 export function ProductImageCarousel({
   images,
@@ -20,10 +21,12 @@ export function ProductImageCarousel({
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
 
-  function goTo(next: number) {
+  const goTo = useCallback((next: number) => {
     setIndex((next + images.length) % images.length);
-  }
+  }, [images.length]);
 
   // Auto-advances one slide at a time; pausing on hover/focus so a visitor
   // who's actually looking at the gallery isn't fighting the timer, and
@@ -50,6 +53,33 @@ export function ProductImageCarousel({
     });
   }, [index]);
 
+  // Touch/swipe handlers for mobile
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    // Don't track touch if starting on a button
+    if ((e.target as HTMLElement).closest('button')) return;
+    touchStartX.current = e.touches[0].clientX;
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    touchEndX.current = e.touches[0].clientX;
+  }, []);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    // Don't process swipe if touch started on a button
+    if ((e.target as HTMLElement).closest('button')) return;
+    
+    const diff = touchStartX.current - touchEndX.current;
+    if (Math.abs(diff) > SWIPE_THRESHOLD) {
+      if (diff > 0) {
+        // Swiped left - go to next
+        goTo(index + 1);
+      } else {
+        // Swiped right - go to previous
+        goTo(index - 1);
+      }
+    }
+  }, [index, goTo]);
+
   if (images.length === 0) {
     return (
       <div className="relative mx-auto aspect-square w-full max-w-md overflow-hidden bg-secondary md:max-w-lg">
@@ -64,6 +94,9 @@ export function ProductImageCarousel({
         className="group relative mx-auto aspect-square w-full max-w-md overflow-hidden bg-secondary md:max-w-lg"
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
       >
         {images.map((src, i) => (
           <div

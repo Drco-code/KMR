@@ -5,6 +5,7 @@ import { ProductGrid } from "@/components/product-grid";
 import { BrandStrip } from "@/components/brand-strip";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { TextReveal } from "@/components/text-reveal";
+import { HeroBackground } from "@/components/hero-background";
 
 export default async function Home() {
   const [products, brands] = await Promise.all([
@@ -20,14 +21,7 @@ export default async function Home() {
   return (
     <div className="flex flex-col">
       <section className="relative flex h-[560px] items-center justify-center overflow-hidden bg-ink">
-        <Image
-          src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1600&q=80&fit=crop&auto=format"
-          alt=""
-          fill
-          priority
-          className="object-cover"
-          sizes="100vw"
-        />
+        <HeroBackground />
         <div className="absolute inset-0 bg-gradient-to-br from-ink via-ink/90 to-black" />
         <div className="absolute inset-0 bg-black/30" />
         <ScrollReveal
