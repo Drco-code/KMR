@@ -287,6 +287,11 @@ model Session {
   ipAddress String?
   userAgent String?
 
+  // Tracks the last time this session was active. Used for inactivity-based
+  // logout — if lastActivityAt is older than the configured timeout (e.g. 1 hour),
+  // the session is considered expired and the user is logged out.
+  lastActivityAt DateTime? @updatedAt
+
   // LINK: Every Session belongs to exactly one User.
   // onDelete: Cascade — if a User is deleted, all their sessions
   // (i.e. all their logged-in devices) are wiped out with them.

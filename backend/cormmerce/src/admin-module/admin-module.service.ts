@@ -706,6 +706,36 @@ export class AdminModuleService {
         return;
       }
 
+      // Check for inactivity timeout (1 hour)
+      // If the session has been inactive for more than 1 hour, the user is logged out.
+      // This ensures that abandoned admin sessions are automatically invalidated.
+      const INACTIVITY_TIMEOUT_MS = 60 * 60 * 1000; // 1 hour in milliseconds
+      const sessionRecord = await this.prisma.session.findUnique({
+        where: { id: session.session.id },
+        select: { lastActivityAt: true },
+      });
+
+      if (sessionRecord?.lastActivityAt) {
+        const lastActivity = new Date(sessionRecord.lastActivityAt);
+        const now = new Date();
+        const timeSinceLastActivity = now.getTime() - lastActivity.getTime();
+
+        if (timeSinceLastActivity > INACTIVITY_TIMEOUT_MS) {
+          // Session has been inactive for more than 1 hour, invalidate it
+          await this.prisma.session.delete({
+            where: { id: session.session.id },
+          });
+          res.redirect(`${ADMIN_ROOT_PATH}/login`);
+          return;
+        }
+      }
+
+      // Update lastActivityAt to current time
+      await this.prisma.session.update({
+        where: { id: session.session.id },
+        data: { lastActivityAt: new Date() },
+      });
+
       // Generates the product-label QR on demand from FRONTEND_URL + slug —
       // deliberately not stored anywhere (no DB column, no Cloudinary
       // upload) so it can never go stale if the slug changes, and costs
