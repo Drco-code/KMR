@@ -5,6 +5,7 @@ import { useQuoteCart } from "@/lib/store/quote-cart";
 import { getValidImages } from "@/lib/image";
 import { formatPrice } from "@/lib/price";
 import { RevealImage } from "@/components/reveal-image";
+import { Button } from "@/components/ui/button";
 import type { Product } from "@/lib/api/types";
 
 export function ProductCard({
@@ -51,7 +52,9 @@ export function ProductCard({
           ) : (
             <span />
           )}
-          <button
+          <Button
+            variant="outline"
+            size="xs"
             type="button"
             onClick={() =>
               addItem({
@@ -62,10 +65,10 @@ export function ProductCard({
                 coverImage,
               })
             }
-            className="text-xs font-semibold tracking-[0.08em] text-ink uppercase underline decoration-from-font underline-offset-2 hover:text-gold"
+            className="tracking-[0.08em] uppercase"
           >
             Add to Cart
-          </button>
+          </Button>
         </div>
       </div>
     </div>
