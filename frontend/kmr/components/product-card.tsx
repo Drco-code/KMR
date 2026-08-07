@@ -19,11 +19,11 @@ export function ProductCard({
   const coverImage = getValidImages(product.images)[0] ?? null;
 
   return (
-    <div className="group flex w-full max-w-[320px] flex-col overflow-hidden rounded-lg border border-border bg-card transition-shadow duration-300 hover:shadow-lg">
+    <div className="group flex w-full max-w-[300px] flex-col overflow-hidden rounded-md border border-gray-200 bg-white transition-all duration-300 hover:shadow-xl">
       {/* Image Section - White background with padding */}
       <Link
         href={`/product/${product.slug}`}
-        className="relative block aspect-square w-full bg-white p-6"
+        className="relative block aspect-square w-full bg-gray-50 p-8"
       >
         {coverImage ? (
           <RevealImage
@@ -40,7 +40,7 @@ export function ProductCard({
       </Link>
 
       {/* Content Section */}
-      <div className="flex flex-col gap-3 p-4">
+      <div className="flex flex-col gap-2 p-4 pt-3">
         {/* Category Badge */}
         {categoryName && (
           <span className="text-[10px] font-medium tracking-[0.1em] text-ink-muted uppercase">
@@ -49,7 +49,7 @@ export function ProductCard({
         )}
 
         {/* Product Name - Full, not truncated */}
-        <h3 className="font-display text-base font-semibold leading-tight text-ink">
+        <h3 className="font-sans text-sm font-medium leading-snug text-ink">
           <Link href={`/product/${product.slug}`} className="hover:text-gold transition-colors">
             {product.name}
           </Link>
@@ -57,7 +57,7 @@ export function ProductCard({
 
         {/* Price */}
         {formatPrice(product.priceDescription) && (
-          <p className="text-sm font-semibold text-ink">
+          <p className="text-sm font-semibold text-ink mt-1">
             {formatPrice(product.priceDescription)}
           </p>
         )}
@@ -79,7 +79,7 @@ export function ProductCard({
               coverImage,
             })
           }
-          className="w-full rounded-md bg-ink py-5 text-sm font-semibold tracking-[0.05em] text-white uppercase transition-all duration-300 hover:bg-gold hover:shadow-md"
+          className="w-full rounded-md bg-[#1a2744] py-4 text-sm font-semibold tracking-[0.02em] text-white transition-all duration-300 hover:bg-[#1a2744]/90 hover:shadow-md"
         >
           Add to cart
         </Button>
