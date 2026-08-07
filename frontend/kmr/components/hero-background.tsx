@@ -62,7 +62,7 @@ export function HeroBackground() {
           alt="KMR Architectural Paint & Hardware"
           fill
           priority
-          className="object-cover"
+          className="object-cover object-top"
           sizes="100vw"
         />
       </picture>
