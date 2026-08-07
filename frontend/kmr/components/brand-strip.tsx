@@ -12,10 +12,10 @@ export function BrandStrip({ brands }: { brands: Brand[] }) {
     <section className="flex flex-col items-center gap-12 border-t border-border bg-secondary px-6 py-24 text-center md:px-20 md:py-30">
       <div className="flex flex-col items-center gap-4">
         <span className="text-xs font-medium tracking-[0.2em] text-gold uppercase">
-          Trusted Partners
+          Our Partners
         </span>
         <h2 className="font-display text-4xl text-ink md:text-5xl">
-          Our Brands
+          Brands We Work With
         </h2>
       </div>
       <ScrollReveal

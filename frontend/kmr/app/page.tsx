@@ -84,60 +84,7 @@ export default async function Home() {
         </ScrollReveal>
       </section>
 
-      <section className="flex flex-col gap-16 px-6 py-24 md:px-20 md:py-30">
-        <h2 className="text-center font-display text-4xl text-ink md:text-5xl">
-          Consultancy Services
-        </h2>
-        <ScrollReveal className="flex flex-col gap-6 md:flex-row" stagger={0.15} y={24}>
-          <ConsultancyTeaser
-            title="Color Matching"
-            description="Our experts use spectro-analysis to match any sample, from a scrap of silk to a sunset photograph."
-            cta="Start Matching"
-            image="https://images.unsplash.com/photo-1567016432779-094069958ea5?w=800&q=80&fit=crop&auto=format"
-          />
-          <ConsultancyTeaser
-            title="Professional Application"
-            description="Access our network of KMR certified master painters for a flawless, architectural finish."
-            cta="Book Application"
-            image="https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&q=80&fit=crop&auto=format"
-          />
-        </ScrollReveal>
-      </section>
-
       <BrandStrip brands={brands} />
-    </div>
-  );
-}
-
-function ConsultancyTeaser({
-  title,
-  description,
-  cta,
-  image,
-}: {
-  title: string;
-  description: string;
-  cta: string;
-  image: string;
-}) {
-  return (
-    <div className="relative flex flex-1 flex-col justify-end gap-4 overflow-hidden bg-ink p-10 min-h-[360px]">
-      <Image
-        src={image}
-        alt=""
-        fill
-        className="object-cover"
-        sizes="(min-width: 768px) 50vw, 100vw"
-      />
-      <div className="absolute inset-0 bg-black/50" />
-      <h3 className="relative font-display text-3xl text-white">{title}</h3>
-      <p className="relative text-white/80">{description}</p>
-      <Link
-        href="/consultancy"
-        className="relative text-sm font-semibold tracking-[0.05em] text-gold-light uppercase transition-all duration-300 hover:tracking-[0.1em] hover:text-gold"
-      >
-        {cta} →
-      </Link>
     </div>
   );
 }
