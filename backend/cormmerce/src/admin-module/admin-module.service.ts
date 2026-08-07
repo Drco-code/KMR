@@ -11,6 +11,7 @@ import * as path from 'path';
 import { readFile } from 'fs/promises';
 import type { RequestHandler } from 'express';
 import { fromNodeHeaders } from 'better-auth/node';
+import * as QRCode from 'qrcode';
 import { PrismaModuleService } from '../prisma-module/prisma-module.service';
 import { auth } from '../auth-module/auth';
 import { CloudinaryAdminUploadProvider } from '../cloudinary/cloudinary-admin-upload.provider';
@@ -335,6 +336,10 @@ export class AdminModuleService {
       'ProductCategoriesList',
       path.join(__dirname, 'dashboard', 'ProductCategoriesList'),
     );
+    const productQrCodeComponent = componentLoader.add(
+      'ProductQrCode',
+      path.join(__dirname, 'dashboard', 'ProductQrCode'),
+    );
 
     // AdminJS's built-in logout button only renders when it manages its own
     // session (buildAuthenticatedRouter); this app shares Better Auth's
@@ -435,6 +440,14 @@ export class AdminModuleService {
                   primaryCategoryId: {
                     type: 'string',
                     isVisible: false,
+                  },
+                  // Virtual property — not a real DB column. The QR is
+                  // generated on-demand by buildMiddleware()'s
+                  // /api/products/:id/qr-code route from FRONTEND_URL +
+                  // slug, so there's nothing to store or edit here.
+                  qrCode: {
+                    isVisible: { list: false, show: true, edit: false, filter: false },
+                    components: { show: productQrCodeComponent },
                   },
                 },
                 // @adminjs/prisma misdetects Product.imagesSize (an Int[]
@@ -690,6 +703,28 @@ export class AdminModuleService {
       });
       if (!session) {
         res.redirect(`${ADMIN_ROOT_PATH}/login`);
+        return;
+      }
+
+      // Generates the product-label QR on demand from FRONTEND_URL + slug —
+      // deliberately not stored anywhere (no DB column, no Cloudinary
+      // upload) so it can never go stale if the slug changes, and costs
+      // nothing beyond this one request. Handled here, ahead of adminRouter,
+      // since it's a plain PNG response rather than an AdminJS JSON action.
+      const qrCodeMatch = req.path.match(/^\/api\/products\/([^/]+)\/qr-code$/);
+      if (req.method === 'GET' && qrCodeMatch) {
+        const product = await this.prisma.product.findUnique({
+          where: { id: qrCodeMatch[1] },
+          select: { slug: true },
+        });
+        if (!product) {
+          res.status(404).end();
+          return;
+        }
+        const productUrl = `${process.env.FRONTEND_URL ?? 'http://localhost:3000'}/product/${product.slug}`;
+        const png = await QRCode.toBuffer(productUrl, { type: 'png', width: 360 });
+        res.set('Content-Disposition', `attachment; filename="${product.slug}-qr.png"`);
+        res.type('png').send(png);
         return;
       }
 
