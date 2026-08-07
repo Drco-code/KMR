@@ -21,7 +21,7 @@ export function ProductGrid({
 
   return (
     <ScrollReveal
-      className="grid w-full grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+      className="grid w-full grid-cols-1 gap-x-6 gap-y-10 justify-items-center sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
       stagger={0.08}
       y={24}
       duration={0.6}
