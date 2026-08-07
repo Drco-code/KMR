@@ -188,6 +188,25 @@ model Brand {
   updatedAt DateTime @updatedAt
 }
 
+// The single promo/announcement bar shown at the very top of the storefront
+// header (e.g. "Complimentary color consultation with any purchase over
+// GH₵300"). Staff edit this one row from the AdminJS dashboard; the
+// storefront hides the bar entirely while the row is missing, isActive is
+// false, or the message is blank. There is exactly one row (seeded by the
+// migration; the admin dashboard hides new/delete for this resource).
+model PromoBanner {
+  id        String  @id @default(uuid())
+  // The promo text, e.g. "Free delivery on orders over GH₵300".
+  message   String?
+  // Master switch — set false to pause the promo without deleting the text.
+  isActive  Boolean @default(true)
+  // Optional URL the bar links to (e.g. "/catalog" or "/quote").
+  link      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 // ==========================================
 // 📋 2. BACKUP AUDIT TRAIL / QUOTE LOGS
 // ==========================================

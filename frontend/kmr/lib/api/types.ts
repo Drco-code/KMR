@@ -38,6 +38,13 @@ export interface Brand {
   logo: string[];
 }
 
+// The active promo banner for the header bar, as served by GET /promo-module.
+// `null` (or an absent message) means no promo is running — the bar hides.
+export interface PromoBanner {
+  message: string;
+  link: string | null;
+}
+
 export interface QuoteRequestItem {
   productName: string;
   quantity: number;

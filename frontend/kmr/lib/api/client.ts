@@ -1,4 +1,4 @@
-import type { Brand, Category, Product, QuoteRequestPayload } from "./types";
+import type { Brand, Category, Product, PromoBanner, QuoteRequestPayload } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -43,6 +43,10 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
 export async function getBrands(): Promise<Brand[]> {
   const brands = await apiFetch<Brand[]>("/brand-module", { cache: "no-store" });
   return brands.filter((brand) => brand.isActive);
+}
+
+export async function getPromoBanner(): Promise<PromoBanner | null> {
+  return apiFetch<PromoBanner | null>("/promo-module", { cache: "no-store" });
 }
 
 export async function submitQuoteRequest(payload: QuoteRequestPayload): Promise<void> {

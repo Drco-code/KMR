@@ -6,7 +6,7 @@ import { NavSearch } from "@/components/nav-search";
 import { MegaMenu } from "@/components/mega-menu";
 import { ContactUsButton } from "@/components/contact-us-button";
 import { NavLink } from "@/components/nav-link";
-import { getCategories } from "@/lib/api/client";
+import { getCategories, getPromoBanner } from "@/lib/api/client";
 
 const MEGA_MENU_ITEMS = [
   { label: "Tools", slug: "tools" },
@@ -17,15 +17,31 @@ const MEGA_MENU_ITEMS = [
 ];
 
 export async function SiteHeader() {
-  const categories = await getCategories();
+  // The promo bar is admin-managed (PromoBanner resource in the dashboard):
+  // it only renders while a message is set and the banner is active.
+  const [categories, promo] = await Promise.all([
+    getCategories(),
+    getPromoBanner(),
+  ]);
 
   return (
     <header className="sticky top-0 z-40">
-      <div className="flex h-10 items-center justify-center bg-black px-6 text-center md:px-20">
-        <p className="text-xs font-medium tracking-[0.15em] text-white uppercase">
-          Complimentary color consultation with any purchase over GH₵300
-        </p>
-      </div>
+      {promo?.message ? (
+        <div className="flex min-h-10 items-center justify-center bg-black px-6 py-2 text-center md:px-20">
+          {promo.link ? (
+            <Link
+              href={promo.link}
+              className="text-xs font-medium tracking-[0.15em] text-white uppercase transition-colors hover:text-gold"
+            >
+              {promo.message}
+            </Link>
+          ) : (
+            <p className="text-xs font-medium tracking-[0.15em] text-white uppercase">
+              {promo.message}
+            </p>
+          )}
+        </div>
+      ) : null}
       <div className="flex h-20 items-center justify-between border-b border-border bg-background px-6 md:px-20">
         <Link
           href="/"

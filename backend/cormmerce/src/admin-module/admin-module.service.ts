@@ -375,6 +375,7 @@ export class AdminModuleService {
       'Category',
       'Product',
       'Brand',
+      'PromoBanner',
       'QuoteRequest',
       'QuoteRequestItem',
     ];
@@ -568,7 +569,21 @@ export class AdminModuleService {
                       parentId: { components: { edit: categoryParentSelectComponent } },
                     },
                   }
-                : {},
+                : name === 'PromoBanner'
+                  ? {
+                      properties: {
+                        // Promo copy can be long — textarea beats a single-line input.
+                        message: { type: 'textarea' },
+                      },
+                      actions: {
+                        // Exactly one promo banner row exists (seeded by the
+                        // migration) — staff edit it, they don't create or
+                        // delete it. Hiding new/delete keeps it a singleton.
+                        new: { isVisible: false },
+                        delete: { isVisible: false },
+                      },
+                    }
+                  : {},
         // Lets staff pick one or more images straight from their PC/device
         // instead of pasting Cloudinary URLs by hand. See
         // CloudinaryAdminUploadProvider for how each uploaded file is mapped
