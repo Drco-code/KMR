@@ -39,7 +39,7 @@ export function HeroBackground() {
   }, []);
 
   return (
-    <div ref={imageRef} className="absolute inset-0 will-change-transform">
+    <div ref={imageRef} className="absolute inset-0 will-change-transform z-0">
       {/* Responsive hero banner using locally optimized images */}
       <picture>
         {/* Mobile: 750px wide */}
