@@ -27,7 +27,7 @@ function buildWhatsAppMessage(
     `Items:`,
     ...items.map((item) => {
       const price = formatPrice(item.priceDescription);
-      return `- ${item.name} x${item.quantity}${price ? ` (${price})` : ""}`;
+      return `- ${item.name} (Qty: ${item.quantity})${price ? ` — ${price}` : ""}`;
     }),
   ];
   return lines.join("\n");
@@ -150,15 +150,20 @@ export default function QuoteReviewPage() {
           <h2 className="font-display text-2xl text-ink">Itemized Summary</h2>
           <Separator />
           {items.map((item) => (
-            <div key={item.productId} className="flex items-center justify-between text-sm">
-              <span className="text-ink">
-                {item.name} × {item.quantity}
-              </span>
+            <div key={item.productId} className="flex items-center justify-between gap-6 text-sm">
+              <div className="flex min-w-0 flex-col">
+                <span className="text-ink">{item.name}</span>
+                <span className="text-xs text-ink-muted">Qty: {item.quantity}</span>
+              </div>
               {formatPrice(item.priceDescription) && (
                 <span className="text-ink-muted">{formatPrice(item.priceDescription)}</span>
               )}
             </div>
           ))}
+          <Separator />
+          <p className="text-sm text-ink-muted">
+            {items.reduce((sum, i) => sum + i.quantity, 0)} item(s)
+          </p>
         </div>
       </div>
     </div>
