@@ -215,13 +215,25 @@ export class AdminModuleService {
       : categoryIds[0];
     if (categoryIds.length === 0) return;
 
+    // Only persist category ids that actually exist — a stale id in the
+    // submitted form (e.g. a category deleted after the form loaded) would
+    // otherwise make the createMany below fail the whole save with a
+    // foreign-key error and show a generic "error" on every product edit.
+    const existing = await this.prisma.category.findMany({
+      where: { id: { in: categoryIds } },
+      select: { id: true },
+    });
+    const existingIds = new Set(existing.map((c) => c.id));
+    const validIds = categoryIds.filter((categoryId: string) => existingIds.has(categoryId));
+    if (validIds.length === 0) return;
+
     await this.prisma.$transaction([
       this.prisma.productCategory.deleteMany({ where: { productId } }),
       this.prisma.productCategory.createMany({
-        data: categoryIds.map((categoryId: string) => ({
+        data: validIds.map((categoryId: string) => ({
           productId,
           categoryId,
-          isPrimary: categoryId === primaryCategoryId,
+          isPrimary: categoryId === primaryCategoryId && validIds.includes(primaryCategoryId),
         })),
       }),
     ]);
@@ -250,6 +262,11 @@ export class AdminModuleService {
     });
 
     for (const row of rows) {
+      // Guard against orphaned rows (a productCategory whose category was
+      // deleted before the FK Restrict constraint existed). The join would
+      // otherwise throw on row.category.id and 500 every product edit on
+      // databases with legacy data.
+      if (!row.category) continue;
       const list = map.get(row.productId) ?? [];
       list.push({ id: row.category.id, name: row.category.name, isPrimary: row.isPrimary });
       map.set(row.productId, list);
@@ -281,6 +298,101 @@ export class AdminModuleService {
       select: { id: true, name: true, parentId: true, showInNav: true, navOrder: true },
       orderBy: [{ navOrder: 'asc' }, { createdAt: 'asc' }],
     });
+  }
+
+  // Backs the "Global Search" custom admin page (dashboard/GlobalSearch.tsx).
+  // With 150+ categories and growing catalogs, finding a record by scrolling
+  // list pages gets slow — this searches the meaningful text fields of every
+  // catalog/quote model at once (case-insensitive contains) and returns up to
+  // 8 matches per model so the page can link straight to each record.
+  // AdminJS 7.x has no built-in global search (only per-resource filters and
+  // the hidden autocomplete `search` action), so this custom page fills that
+  // gap using the same `pages` mechanism as the Category Tree page.
+  private async searchData(request: any) {
+    const query = (request?.query?.q ?? '').toString().trim();
+    if (!query) {
+      return { query: '', results: {}, total: 0 };
+    }
+
+    const contains = { contains: query, mode: 'insensitive' as const };
+    const take = 8;
+
+    const [products, categories, brands, promos, quoteRequests, items] =
+      await Promise.all([
+        this.prisma.product.findMany({
+          where: {
+            OR: [
+              { name: contains },
+              { slug: contains },
+              { description: contains },
+              { priceDescription: contains },
+            ],
+          },
+          take,
+          orderBy: { createdAt: 'desc' },
+          select: { id: true, name: true, slug: true, isActive: true, isFeatured: true },
+        }),
+        this.prisma.category.findMany({
+          where: { OR: [{ name: contains }, { slug: contains }] },
+          take,
+          orderBy: { createdAt: 'desc' },
+          select: { id: true, name: true, slug: true, showInNav: true },
+        }),
+        this.prisma.brand.findMany({
+          where: { OR: [{ name: contains }, { websiteUrl: contains }] },
+          take,
+          orderBy: { createdAt: 'desc' },
+          select: { id: true, name: true, websiteUrl: true, isActive: true },
+        }),
+        this.prisma.promoBanner.findMany({
+          where: { OR: [{ message: contains }, { link: contains }] },
+          take,
+          orderBy: { updatedAt: 'desc' },
+          select: { id: true, message: true, link: true, isActive: true },
+        }),
+        this.prisma.quoteRequest.findMany({
+          where: {
+            OR: [
+              { customerName: contains },
+              { customerCompany: contains },
+              { customerPhone: contains },
+              { customerLocation: contains },
+            ],
+          },
+          take,
+          orderBy: { createdAt: 'desc' },
+          select: {
+            id: true,
+            customerName: true,
+            customerCompany: true,
+            customerPhone: true,
+            customerLocation: true,
+            status: true,
+            createdAt: true,
+          },
+        }),
+        this.prisma.quoteRequestItem.findMany({
+          where: { OR: [{ productName: contains }] },
+          take,
+          orderBy: { quantity: 'desc' },
+          select: { id: true, productName: true, quantity: true, quoteRequestId: true },
+        }),
+      ]);
+
+    const results = {
+      Product: products,
+      Category: categories,
+      Brand: brands,
+      PromoBanner: promos,
+      QuoteRequest: quoteRequests,
+      QuoteRequestItem: items,
+    };
+
+    return {
+      query,
+      results,
+      total: Object.values(results).reduce((sum, rows) => sum + rows.length, 0),
+    };
   }
 
   // Builds the AdminJS instance itself, shared by both buildMiddleware()
@@ -326,6 +438,11 @@ export class AdminModuleService {
     const categoryTreeComponent = componentLoader.add(
       'CategoryTree',
       path.join(__dirname, 'dashboard', 'CategoryTree'),
+    );
+
+    const globalSearchComponent = componentLoader.add(
+      'GlobalSearch',
+      path.join(__dirname, 'dashboard', 'GlobalSearch'),
     );
 
     const productCategoriesSelectComponent = componentLoader.add(
@@ -399,6 +516,10 @@ export class AdminModuleService {
         categoryTree: {
           component: categoryTreeComponent,
           handler: async () => this.getCategoryTreeData(),
+        },
+        globalSearch: {
+          component: globalSearchComponent,
+          handler: (request: any) => this.searchData(request),
         },
       },
       resources: modelNames.map((name) => ({
