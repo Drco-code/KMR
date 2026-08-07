@@ -19,10 +19,11 @@ export function ProductCard({
   const coverImage = getValidImages(product.images)[0] ?? null;
 
   return (
-    <div className="group flex w-full max-w-[380px] flex-col gap-4">
+    <div className="group flex w-full max-w-[320px] flex-col overflow-hidden rounded-lg border border-border bg-card transition-shadow duration-300 hover:shadow-lg">
+      {/* Image Section - White background with padding */}
       <Link
         href={`/product/${product.slug}`}
-        className="relative block aspect-[4/5] w-full overflow-hidden bg-secondary rounded-sm"
+        className="relative block aspect-square w-full bg-white p-6"
       >
         {coverImage ? (
           <RevealImage
@@ -30,46 +31,58 @@ export function ProductCard({
             width={640}
             alt={product.name}
             fill
-            className="object-cover object-center transition-transform duration-300 group-hover:scale-105"
-            sizes="380px"
+            className="object-contain object-center transition-transform duration-300 group-hover:scale-105"
+            sizes="320px"
           />
         ) : (
           <div className="size-full bg-muted" />
         )}
       </Link>
-      <div className="flex flex-col gap-1">
-        <h3 className="truncate font-display text-lg text-ink">
-          <Link href={`/product/${product.slug}`}>{product.name}</Link>
-        </h3>
+
+      {/* Content Section */}
+      <div className="flex flex-col gap-3 p-4">
+        {/* Category Badge */}
         {categoryName && (
-          <p className="text-xs tracking-[0.08em] text-ink-muted uppercase">
+          <span className="text-[10px] font-medium tracking-[0.1em] text-ink-muted uppercase">
             {categoryName}
+          </span>
+        )}
+
+        {/* Product Name - Full, not truncated */}
+        <h3 className="font-display text-base font-semibold leading-tight text-ink">
+          <Link href={`/product/${product.slug}`} className="hover:text-gold transition-colors">
+            {product.name}
+          </Link>
+        </h3>
+
+        {/* Price */}
+        {formatPrice(product.priceDescription) && (
+          <p className="text-sm font-semibold text-ink">
+            {formatPrice(product.priceDescription)}
           </p>
         )}
-        <div className="flex items-end justify-between pt-2">
-          {formatPrice(product.priceDescription) ? (
-            <span className="text-sm text-ink">{formatPrice(product.priceDescription)}</span>
-          ) : (
-            <span />
-          )}
-          <Button
-            variant="default"
-            size="xs"
-            type="button"
-            onClick={() =>
-              addItem({
-                productId: product.id,
-                name: product.name,
-                slug: product.slug,
-                priceDescription: product.priceDescription,
-                coverImage,
-              })
-            }
-            className="tracking-[0.08em] uppercase bg-ink text-white transition-all duration-300 hover:bg-gold hover:scale-105 hover:shadow-md"
-          >
-            Add to Cart
-          </Button>
-        </div>
+
+        {/* Divider */}
+        <div className="border-t border-border" />
+
+        {/* Add to Cart Button - Full width */}
+        <Button
+          variant="default"
+          size="default"
+          type="button"
+          onClick={() =>
+            addItem({
+              productId: product.id,
+              name: product.name,
+              slug: product.slug,
+              priceDescription: product.priceDescription,
+              coverImage,
+            })
+          }
+          className="w-full rounded-md bg-ink py-5 text-sm font-semibold tracking-[0.05em] text-white uppercase transition-all duration-300 hover:bg-gold hover:shadow-md"
+        >
+          Add to cart
+        </Button>
       </div>
     </div>
   );
