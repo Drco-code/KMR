@@ -15,6 +15,7 @@ export class QuoteRequestModuleService {
         customerName: createQuoteRequestModuleDto.customerName,
         customerCompany: createQuoteRequestModuleDto.customerCompany,
         customerPhone: createQuoteRequestModuleDto.customerPhone,
+        customerLocation: createQuoteRequestModuleDto.customerLocation,
         status,
         items: {
           create: createQuoteRequestModuleDto.items.map((item) => ({

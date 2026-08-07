@@ -222,6 +222,8 @@ model QuoteRequest {
   customerName    String
   customerCompany String?
   customerPhone   String?
+  // Delivery/pickup location so the sales team knows where the order goes.
+  customerLocation String?
 
   // Lets the admin dashboard track follow-up state on each lead.
   status String @default("PENDING") // PENDING, RESPONDED, ARCHIVED

@@ -55,5 +55,6 @@ export interface QuoteRequestPayload {
   customerName: string;
   customerCompany?: string;
   customerPhone?: string;
+  customerLocation?: string;
   items: QuoteRequestItem[];
 }

@@ -14,6 +14,7 @@ import { Separator } from "@/components/ui/separator";
 function buildWhatsAppMessage(
   name: string,
   company: string,
+  location: string,
   items: { name: string; quantity: number; priceDescription: string | null }[]
 ) {
   const lines = [
@@ -21,6 +22,7 @@ function buildWhatsAppMessage(
     ``,
     `Name: ${name}`,
     ...(company ? [`Company: ${company}`] : []),
+    ...(location ? [`Location: ${location}`] : []),
     ``,
     `Items:`,
     ...items.map((item) => {
@@ -39,6 +41,7 @@ export default function QuoteReviewPage() {
   const [name, setName] = useState("");
   const [company, setCompany] = useState("");
   const [phone, setPhone] = useState("");
+  const [location, setLocation] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
@@ -63,6 +66,7 @@ export default function QuoteReviewPage() {
         customerName: name,
         customerCompany: company || undefined,
         customerPhone: phone || undefined,
+        customerLocation: location || undefined,
         items: items.map((item) => ({
           productName: item.name,
           quantity: item.quantity,
@@ -72,7 +76,7 @@ export default function QuoteReviewPage() {
       // best-effort audit trail — the WhatsApp message is the real order channel
     }
 
-    const message = buildWhatsAppMessage(name, company, items);
+    const message = buildWhatsAppMessage(name, company, location, items);
     const url = whatsappNumber
       ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`
       : null;
@@ -123,6 +127,14 @@ export default function QuoteReviewPage() {
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="location">Delivery Location (optional)</Label>
+            <Input
+              id="location"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
             />
           </div>
           <Button

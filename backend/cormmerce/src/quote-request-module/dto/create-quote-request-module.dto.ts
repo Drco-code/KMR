@@ -35,6 +35,10 @@ export class CreateQuoteRequestModuleDto {
 
   @IsOptional()
   @IsString()
+  customerLocation?: string;
+
+  @IsOptional()
+  @IsString()
   status?: string;
 
   @IsArray()

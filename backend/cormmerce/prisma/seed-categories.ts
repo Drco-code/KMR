@@ -336,10 +336,27 @@ async function seedNode(node: TreeNode, parentId: string | null) {
   }
 }
 
+// The storefront's promo bar is a singleton row — seed it so a fresh DB has
+// one to edit (the AdminJS dashboard hides new/delete for this resource).
+// Upsert by fixed id so re-running this script never duplicates it.
+async function seedPromoBanner() {
+  await prisma.promoBanner.upsert({
+    where: { id: '00000000-0000-4000-8000-000000000001' },
+    update: {},
+    create: {
+      id: '00000000-0000-4000-8000-000000000001',
+      message: 'Complimentary color consultation with any purchase over GH₵300',
+      isActive: true,
+    },
+  });
+  console.log('PromoBanner');
+}
+
 async function main() {
   for (const root of TREE) {
     await seedNode(root, null);
   }
+  await seedPromoBanner();
 }
 
 main()
