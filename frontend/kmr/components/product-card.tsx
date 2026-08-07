@@ -53,7 +53,7 @@ export function ProductCard({
             <span />
           )}
           <Button
-            variant="outline"
+            variant="default"
             size="xs"
             type="button"
             onClick={() =>
@@ -65,7 +65,7 @@ export function ProductCard({
                 coverImage,
               })
             }
-            className="tracking-[0.08em] uppercase"
+            className="tracking-[0.08em] uppercase bg-ink text-white hover:bg-ink/90"
           >
             Add to Cart
           </Button>
