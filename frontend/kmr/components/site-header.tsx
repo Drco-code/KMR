@@ -23,7 +23,7 @@ export async function SiteHeader() {
     <header className="sticky top-0 z-40">
       <div className="flex h-10 items-center justify-center bg-black px-6 text-center md:px-20">
         <p className="text-xs font-medium tracking-[0.15em] text-white uppercase">
-          Complimentary color consultation with any purchase over ₵300
+          Complimentary color consultation with any purchase over GH₵300
         </p>
       </div>
       <div className="flex h-20 items-center justify-between border-b border-border bg-background px-6 md:px-20">
