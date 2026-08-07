@@ -22,8 +22,7 @@ export default async function Home() {
     <div className="flex flex-col">
       <section className="relative flex h-[560px] items-center justify-center overflow-hidden bg-ink">
         <HeroBackground />
-        <div className="absolute inset-0 bg-gradient-to-br from-ink via-ink/90 to-black" />
-        <div className="absolute inset-0 bg-black/30" />
+        <div className="absolute inset-0 bg-black/40" />
         <ScrollReveal
           className="relative flex max-w-3xl flex-col items-center gap-8 px-6 text-center"
           stagger={0.15}

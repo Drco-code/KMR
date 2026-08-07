@@ -19,15 +19,15 @@ export function HeroBackground() {
       gsap.fromTo(
         el,
         {
-          scale: 0.98,
+          scale: 1,
           x: 0,
           y: 0,
         },
         {
-          scale: 1.08,
-          x: -20,
-          y: -15,
-          duration: 25,
+          scale: 1.05,
+          x: -10,
+          y: -8,
+          duration: 30,
           ease: "none",
           repeat: -1,
           yoyo: true,
@@ -45,20 +45,20 @@ export function HeroBackground() {
         {/* Mobile: 750px wide */}
         <source
           media="(max-width: 767px)"
-          srcSet="/images/optimized/hero-banner-1-mobile.webp"
+          srcSet="/images/optimized/hero-banner-2-mobile.webp"
         />
         {/* Tablet: 1024px wide */}
         <source
           media="(max-width: 1023px)"
-          srcSet="/images/optimized/hero-banner-1-tablet.webp"
+          srcSet="/images/optimized/hero-banner-2-tablet.webp"
         />
         {/* Desktop: 1920px wide */}
         <source
           media="(min-width: 1024px)"
-          srcSet="/images/optimized/hero-banner-1-desktop.webp"
+          srcSet="/images/optimized/hero-banner-2-desktop.webp"
         />
         <Image
-          src="/images/optimized/hero-banner-1-desktop.webp"
+          src="/images/optimized/hero-banner-2-desktop.webp"
           alt="KMR Architectural Paint & Hardware"
           fill
           priority
