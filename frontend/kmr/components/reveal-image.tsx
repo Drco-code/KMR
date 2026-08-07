@@ -32,7 +32,7 @@ export function RevealImage({
     setLoaded(true);
     gsap.fromTo(
       img,
-      { opacity: 0, scale: 1.06 },
+      { opacity: 0, scale: 1.02 },
       {
         opacity: 1,
         scale: 1,
