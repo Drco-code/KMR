@@ -20,11 +20,12 @@ export default async function Home() {
 
   return (
     <div className="flex flex-col">
-      <section className="relative flex min-h-[50vh] items-center justify-center overflow-hidden bg-ink md:min-h-[calc(100vh-120px)]">
+      <section className="relative flex min-h-[50vh] items-end overflow-hidden bg-ink md:min-h-[calc(100vh-120px)]">
         <HeroBackground />
-        <div className="absolute inset-0 bg-black/40" />
+        {/* Bottom scrim only — image stays visible up top, text stays legible below */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
         <ScrollReveal
-          className="relative flex max-w-3xl flex-col items-center gap-8 px-6 text-center"
+          className="relative flex w-full max-w-4xl flex-col items-start gap-6 px-6 pb-14 text-left md:gap-7 md:px-20 md:pb-20"
           stagger={0.15}
           y={20}
           duration={0.8}
@@ -33,13 +34,13 @@ export default async function Home() {
             as="h1"
             className="font-display text-5xl leading-tight font-bold text-white md:text-6xl"
           >
-            Everything for the Build, Beautifully Made
+            Built Right. Made Beautiful.
           </TextReveal>
           <p className="max-w-xl text-lg text-white/90">
-            Premium paints, tools, and hardware for those who care how
-            it&apos;s built — and how it looks when it&apos;s done.
+            Paints, tools, and hardware for people who care how it&apos;s
+            made — and how it looks when it&apos;s done.
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-6">
+          <div className="flex flex-wrap items-center gap-6">
             <Link
               href="/catalog"
               className="rounded-sm bg-black px-10 py-4 text-sm font-semibold tracking-[0.1em] text-white uppercase shadow-lg transition-all duration-300 hover:scale-105 hover:bg-gold hover:shadow-xl"
