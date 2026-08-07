@@ -4,7 +4,6 @@ import { getBrands, getProducts } from "@/lib/api/client";
 import { ProductGrid } from "@/components/product-grid";
 import { BrandStrip } from "@/components/brand-strip";
 import { ScrollReveal } from "@/components/scroll-reveal";
-import { TextReveal } from "@/components/text-reveal";
 import { HeroBackground } from "@/components/hero-background";
 
 export default async function Home() {
@@ -20,41 +19,9 @@ export default async function Home() {
 
   return (
     <div className="flex flex-col">
-      <section className="relative flex min-h-[50vh] items-end overflow-hidden bg-ink md:min-h-[calc(100vh-120px)]">
+      {/* Image-only hero — copy and CTAs will be added back once the direction is confirmed */}
+      <section className="relative min-h-[50vh] overflow-hidden bg-ink md:min-h-[calc(100vh-120px)]">
         <HeroBackground />
-        {/* Bottom scrim only — image stays visible up top, text stays legible below */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
-        <ScrollReveal
-          className="relative flex w-full max-w-4xl flex-col items-start gap-6 px-6 pb-14 text-left md:gap-7 md:px-20 md:pb-20"
-          stagger={0.15}
-          y={20}
-          duration={0.8}
-        >
-          <TextReveal
-            as="h1"
-            className="font-display text-5xl leading-tight font-bold text-white md:text-6xl"
-          >
-            Built Right. Made Beautiful.
-          </TextReveal>
-          <p className="max-w-xl text-lg text-white/90">
-            Paints, tools, and hardware for people who care how it&apos;s
-            made — and how it looks when it&apos;s done.
-          </p>
-          <div className="flex flex-wrap items-center gap-6">
-            <Link
-              href="/catalog"
-              className="rounded-sm bg-black px-10 py-4 text-sm font-semibold tracking-[0.1em] text-white uppercase shadow-lg transition-all duration-300 hover:scale-105 hover:bg-gold hover:shadow-xl"
-            >
-              Explore Catalog
-            </Link>
-            <Link
-              href="/quote"
-              className="rounded-sm border border-white px-10 py-4 text-sm font-semibold tracking-[0.1em] text-white uppercase transition-all duration-300 hover:scale-105 hover:bg-white hover:text-ink hover:shadow-xl"
-            >
-              Get a Quote
-            </Link>
-          </div>
-        </ScrollReveal>
       </section>
 
       <section className="flex flex-col items-center gap-16 px-6 py-24 md:px-20 md:py-30">
