@@ -42,13 +42,13 @@ export default async function Home() {
           <div className="flex flex-wrap items-center justify-center gap-6">
             <Link
               href="/catalog"
-              className="rounded-sm bg-black px-10 py-4 text-sm font-semibold tracking-[0.1em] text-white uppercase shadow-lg transition-opacity hover:opacity-90"
+              className="rounded-sm bg-black px-10 py-4 text-sm font-semibold tracking-[0.1em] text-white uppercase shadow-lg transition-all duration-300 hover:scale-105 hover:bg-gold hover:shadow-xl"
             >
               Explore Catalog
             </Link>
             <Link
               href="/quote"
-              className="rounded-sm border border-white px-10 py-4 text-sm font-semibold tracking-[0.1em] text-white uppercase transition-colors hover:bg-white hover:text-ink"
+              className="rounded-sm border border-white px-10 py-4 text-sm font-semibold tracking-[0.1em] text-white uppercase transition-all duration-300 hover:scale-105 hover:bg-white hover:text-ink hover:shadow-xl"
             >
               Get a Quote
             </Link>
@@ -95,7 +95,7 @@ export default async function Home() {
             </p>
             <Link
               href="/catalog"
-              className="mt-2 rounded-sm bg-gold px-8 py-3 text-sm font-semibold tracking-[0.05em] text-white uppercase hover:opacity-90"
+              className="mt-2 rounded-sm bg-gold px-8 py-3 text-sm font-semibold tracking-[0.05em] text-white uppercase transition-all duration-300 hover:scale-105 hover:bg-gold/90 hover:shadow-lg"
             >
               Learn More
             </Link>
@@ -153,7 +153,7 @@ function ConsultancyTeaser({
       <p className="relative text-white/80">{description}</p>
       <Link
         href="/consultancy"
-        className="relative text-sm font-semibold tracking-[0.05em] text-gold-light uppercase"
+        className="relative text-sm font-semibold tracking-[0.05em] text-gold-light uppercase transition-all duration-300 hover:tracking-[0.1em] hover:text-gold"
       >
         {cta} →
       </Link>
