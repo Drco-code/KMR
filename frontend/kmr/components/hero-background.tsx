@@ -40,14 +40,32 @@ export function HeroBackground() {
 
   return (
     <div ref={imageRef} className="absolute inset-0 will-change-transform">
-      <Image
-        src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1600&q=80&fit=crop&auto=format"
-        alt=""
-        fill
-        priority
-        className="object-cover"
-        sizes="100vw"
-      />
+      {/* Responsive hero banner using locally optimized images */}
+      <picture>
+        {/* Mobile: 750px wide */}
+        <source
+          media="(max-width: 767px)"
+          srcSet="/images/optimized/hero-banner-1-mobile.webp"
+        />
+        {/* Tablet: 1024px wide */}
+        <source
+          media="(max-width: 1023px)"
+          srcSet="/images/optimized/hero-banner-1-tablet.webp"
+        />
+        {/* Desktop: 1920px wide */}
+        <source
+          media="(min-width: 1024px)"
+          srcSet="/images/optimized/hero-banner-1-desktop.webp"
+        />
+        <Image
+          src="/images/optimized/hero-banner-1-desktop.webp"
+          alt="KMR Architectural Paint & Hardware"
+          fill
+          priority
+          className="object-cover"
+          sizes="100vw"
+        />
+      </picture>
     </div>
   );
 }
