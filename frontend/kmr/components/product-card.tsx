@@ -18,7 +18,7 @@ export function ProductCard({
   const coverImage = getValidImages(product.images)[0] ?? null;
 
   return (
-    <div className="group flex flex-col gap-4">
+    <div className="group flex w-full max-w-[380px] flex-col gap-4">
       <Link
         href={`/product/${product.slug}`}
         className="relative block aspect-[4/5] w-full overflow-hidden bg-secondary rounded-sm"
@@ -29,8 +29,8 @@ export function ProductCard({
             width={640}
             alt={product.name}
             fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-            sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+            className="object-cover object-center transition-transform duration-300 group-hover:scale-105"
+            sizes="380px"
           />
         ) : (
           <div className="size-full bg-muted" />
