@@ -39,9 +39,10 @@ export interface Brand {
 }
 
 // The active promo banner for the header bar, as served by GET /promo-module.
-// `null` (or an absent message) means no promo is running — the bar hides.
+// The backend always returns an object — a null message means no promo is
+// running and the bar hides (a bare null would serialize to an empty body).
 export interface PromoBanner {
-  message: string;
+  message: string | null;
   link: string | null;
 }
 

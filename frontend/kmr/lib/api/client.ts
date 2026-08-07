@@ -45,8 +45,8 @@ export async function getBrands(): Promise<Brand[]> {
   return brands.filter((brand) => brand.isActive);
 }
 
-export async function getPromoBanner(): Promise<PromoBanner | null> {
-  return apiFetch<PromoBanner | null>("/promo-module", { cache: "no-store" });
+export async function getPromoBanner(): Promise<PromoBanner> {
+  return apiFetch<PromoBanner>("/promo-module", { cache: "no-store" });
 }
 
 export async function submitQuoteRequest(payload: QuoteRequestPayload): Promise<void> {
