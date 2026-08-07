@@ -65,6 +65,15 @@ export default async function Home() {
               people who use them, backed by consultants who match,
               specify, and apply.
             </p>
+            <div className="flex w-full max-w-xl items-center gap-5 border-t border-white/15 pt-6">
+              <span className="font-display text-5xl text-gold-light">20+</span>
+              <div className="flex flex-col">
+                <span className="text-xs font-medium tracking-[0.2em] text-white/70 uppercase">
+                  Years of
+                </span>
+                <span className="font-display text-2xl text-white">Experience</span>
+              </div>
+            </div>
             <Link
               href="/catalog"
               className="mt-2 rounded-sm bg-gold px-8 py-3 text-sm font-semibold tracking-[0.05em] text-white uppercase transition-all duration-300 hover:scale-105 hover:bg-gold/90 hover:shadow-lg"
