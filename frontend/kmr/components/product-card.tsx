@@ -65,7 +65,7 @@ export function ProductCard({
                 coverImage,
               })
             }
-            className="tracking-[0.08em] uppercase bg-ink text-white hover:bg-ink/90"
+            className="tracking-[0.08em] uppercase bg-ink text-white transition-all duration-300 hover:bg-gold hover:scale-105 hover:shadow-md"
           >
             Add to Cart
           </Button>
