@@ -8,11 +8,11 @@ import { gsap } from "@/lib/gsap";
 const SLIDES = [
   {
     desktop: "/images/optimized/hero-slide-1-desktop.webp",
-    mobile: "/images/optimized/hero-slide-1-mobile.webp",
+    mobile: "/images/optimized/hero-mobile-1-mobile.webp",
   },
   {
     desktop: "/images/optimized/hero-slide-2-desktop.webp",
-    mobile: "/images/optimized/hero-slide-2-mobile.webp",
+    mobile: "/images/optimized/hero-mobile-2-mobile.webp",
   },
 ];
 
