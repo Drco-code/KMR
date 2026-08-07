@@ -51,15 +51,19 @@ export default async function Home() {
           </div>
           <div className="flex flex-col items-start gap-6">
             <span className="text-xs font-medium tracking-[0.2em] text-gold-light uppercase">
-              Craftsmanship &amp; Performance
+              Who We Are
             </span>
             <h2 className="font-display text-4xl text-white md:text-5xl">
-              Built for the Job, Made to Last.
+              Where Colour Meets Craft.
             </h2>
             <p className="max-w-xl text-lg text-white/60">
-              From premium coatings to professional-grade tools, every
-              product is chosen for durability and performance — vetted by
-              people who use this stuff, not just sell it.
+              KMR City Ventures is a Ghanaian building-materials house
+              built on one belief — the right finish changes everything.
+              From premium coatings and artisanal pigments to timber and
+              professional-grade tools, we supply what architects,
+              painters, and builders actually trust: products vetted by
+              people who use them, backed by consultants who match,
+              specify, and apply.
             </p>
             <Link
               href="/catalog"
