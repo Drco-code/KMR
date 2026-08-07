@@ -65,7 +65,7 @@ export default async function Home() {
             Signature Collections
           </h2>
         </ScrollReveal>
-        <div className="w-full max-w-[1200px]">
+        <div className="mx-auto w-full max-w-[1200px]">
           <ProductGrid products={featured} />
         </div>
       </section>

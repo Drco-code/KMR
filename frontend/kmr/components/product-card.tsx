@@ -21,7 +21,7 @@ export function ProductCard({
     <div className="group flex flex-col gap-4">
       <Link
         href={`/product/${product.slug}`}
-        className="relative block aspect-[4/5] w-full overflow-hidden bg-secondary"
+        className="relative block aspect-[4/5] w-full overflow-hidden bg-secondary rounded-sm"
       >
         {coverImage ? (
           <RevealImage
