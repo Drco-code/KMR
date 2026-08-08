@@ -52,7 +52,11 @@ export async function SiteFooter() {
   return (
     <footer className="bg-[#e2e2e2] px-6 py-16 md:px-20 md:py-24">
       <div className="mx-auto flex max-w-[1440px] flex-col gap-16">
-        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 md:grid-cols-4">
+        <div
+          className={`grid grid-cols-1 gap-10 sm:grid-cols-2 md:grid-cols-4 ${
+            showLocation ? "lg:grid-cols-5" : "lg:grid-cols-4"
+          }`}
+        >
           <div className="flex flex-col gap-6">
             <span className="font-display text-2xl font-semibold text-ink">
               KMR
@@ -92,39 +96,33 @@ export async function SiteFooter() {
               ))}
             </div>
           ))}
-        </div>
 
-        {showLocation ? (
-          <div className="flex flex-col gap-8 border-t border-ink/10 pt-8 md:flex-row md:items-center md:justify-between">
-            {contactInfo.address ? (
-              <div className="flex items-start gap-4">
-                <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-white text-gold ring-1 ring-ink/10">
-                  <MapPin className="size-5" />
-                </span>
-                <div className="flex flex-col gap-1">
-                  <h5 className="text-xs font-semibold tracking-[0.15em] text-ink uppercase">
-                    Visit Us
-                  </h5>
-                  <p className="text-sm leading-relaxed text-ink/70">
-                    {contactInfo.address}
-                  </p>
-                </div>
-              </div>
-            ) : null}
-            {contactInfo.mapEmbedUrl ? (
-              // Admin-supplied iframe src (Google Maps embed or OpenStreetMap
-              // embed). Muted grayscale by default; color on hover.
-              <iframe
-                src={contactInfo.mapEmbedUrl}
-                title="KMR location map"
-                loading="lazy"
-                allowFullScreen
-                referrerPolicy="no-referrer-when-downgrade"
-                className="h-48 w-full max-w-md rounded-sm border border-ink/10 grayscale transition-all duration-500 hover:grayscale-0 md:w-[420px]"
-              />
-            ) : null}
-          </div>
-        ) : null}
+          {showLocation ? (
+            <div className="flex flex-col gap-4">
+              <h5 className="flex items-center gap-2 text-xs font-semibold tracking-[0.15em] text-ink uppercase">
+                <MapPin className="size-3.5 text-gold" />
+                Visit Us
+              </h5>
+              {contactInfo.address ? (
+                <p className="text-sm leading-relaxed text-ink/70">
+                  {contactInfo.address}
+                </p>
+              ) : null}
+              {contactInfo.mapEmbedUrl ? (
+                // Admin-supplied iframe src (Google Maps embed or OpenStreetMap
+                // embed). Muted grayscale by default; color on hover.
+                <iframe
+                  src={contactInfo.mapEmbedUrl}
+                  title="KMR location map"
+                  loading="lazy"
+                  allowFullScreen
+                  referrerPolicy="no-referrer-when-downgrade"
+                  className="h-40 w-full rounded-sm border border-ink/10 grayscale transition-all duration-500 hover:grayscale-0"
+                />
+              ) : null}
+            </div>
+          ) : null}
+        </div>
 
         <div className="border-t border-ink/10 pt-8 text-center">
           <p className="text-xs tracking-[0.1em] text-ink/60 uppercase">
