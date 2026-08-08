@@ -178,6 +178,12 @@ model Brand {
   name       String  @unique
   websiteUrl String? // Optional link-out when a visitor clicks the logo.
 
+  // One-line tagline shown under the brand name in the homepage "Our
+  // Brands" section (e.g. "Shield, provides you with the highest quality
+  // premium paint..."). Optional — cards render without a caption while
+  // the field is empty.
+  description String?
+
   // Lets admins hide a brand from the homepage without deleting it.
   isActive Boolean @default(true)
 

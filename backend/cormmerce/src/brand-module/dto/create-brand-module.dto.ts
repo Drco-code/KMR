@@ -9,6 +9,12 @@ export class CreateBrandModuleDto {
   @IsUrl()
   websiteUrl?: string;
 
+  // One-line tagline shown under the brand name in the homepage "Our
+  // Brands" section.
+  @IsOptional()
+  @IsString()
+  description?: string;
+
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;

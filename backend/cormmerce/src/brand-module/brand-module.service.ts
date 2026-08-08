@@ -12,6 +12,7 @@ export class BrandModuleService {
       data: {
         name: createBrandModuleDto.name,
         websiteUrl: createBrandModuleDto.websiteUrl,
+        description: createBrandModuleDto.description,
         isActive: createBrandModuleDto.isActive ?? true,
         logo: createBrandModuleDto.logo ?? [],
       },

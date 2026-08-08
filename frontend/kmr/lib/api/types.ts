@@ -35,6 +35,9 @@ export interface Brand {
   id: string;
   name: string;
   websiteUrl: string | null;
+  // One-line tagline shown under the brand name in the homepage "Our
+  // Brands" section.
+  description: string | null;
   isActive: boolean;
   logo: string[];
 }

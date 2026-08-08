@@ -796,6 +796,9 @@ export class AdminModuleService {
                     logoMimeType: { isVisible: false },
                     logoFilename: { isVisible: false },
                     logoSize: { isVisible: false },
+                    // One-line tagline shown under the brand name on the
+                    // homepage — textarea beats a single-line input.
+                    description: { type: 'textarea' },
                   },
                   actions: {
                     new: {
