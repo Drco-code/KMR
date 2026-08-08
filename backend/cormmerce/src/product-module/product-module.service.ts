@@ -3,6 +3,7 @@ import { Cloudinary } from '../cloudinary/cloudinary';
 import { PrismaModuleService } from '../prisma-module/prisma-module.service';
 import { CreateProductModuleDto } from './dto/create-product-module.dto';
 import { UpdateProductModuleDto } from './dto/update-product-module.dto';
+import { slugify } from './slug';
 
 @Injectable()
 export class ProductModuleService {
@@ -11,16 +12,8 @@ export class ProductModuleService {
     private readonly cloudinary: Cloudinary,
   ) {}
 
-  private slugify(value: string) {
-    return value
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
-  }
-
   private async buildUniqueSlug(baseSlug: string) {
-    let slug = this.slugify(baseSlug);
+    let slug = slugify(baseSlug);
     let counter = 1;
 
     while (true) {
@@ -31,7 +24,7 @@ export class ProductModuleService {
         return slug;
       }
 
-      slug = `${this.slugify(baseSlug)}-${counter++}`;
+      slug = `${slugify(baseSlug)}-${counter++}`;
     }
   }
 

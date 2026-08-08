@@ -37,7 +37,8 @@ export async function getProductsByCategorySlug(categorySlug: string): Promise<P
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {
   const products = await getProducts();
-  return products.find((product) => product.slug === slug) ?? null;
+  const decodedSlug = decodeURIComponent(slug);
+  return products.find((product) => product.slug === decodedSlug) ?? null;
 }
 
 export async function getBrands(): Promise<Brand[]> {

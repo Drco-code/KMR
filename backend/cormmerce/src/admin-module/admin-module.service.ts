@@ -15,6 +15,7 @@ import * as QRCode from 'qrcode';
 import { PrismaModuleService } from '../prisma-module/prisma-module.service';
 import { auth } from '../auth-module/auth';
 import { CloudinaryAdminUploadProvider } from '../cloudinary/cloudinary-admin-upload.provider';
+import { slugify } from '../product-module/slug';
 
 // Mirrors src/admin-module/dashboard/types.ts. Not imported from there
 // because that whole folder is excluded from this backend build (it's
@@ -109,6 +110,21 @@ const LOGIN_PAGE_HTML = `<!doctype html>
 @Injectable()
 export class AdminModuleService {
   constructor(private readonly prisma: PrismaModuleService) {}
+
+  private normalizeProductSlug(payload: Record<string, unknown>) {
+    const source = typeof payload.slug === 'string' && payload.slug.trim()
+      ? payload.slug
+      : payload.name;
+
+    if (typeof source !== 'string') return;
+
+    const slug = slugify(source);
+    if (!slug) {
+      throw new Error('Product slug must contain at least one letter or number');
+    }
+
+    payload.slug = slug;
+  }
 
   // Backs the AdminJS custom dashboard (src/admin-module/dashboard/Dashboard.tsx).
   // "Demand" is derived from QuoteRequestItem.productName — a text snapshot,
@@ -585,6 +601,7 @@ export class AdminModuleService {
                   new: {
                     before: (request: any) => {
                       if (request.payload) {
+                        this.normalizeProductSlug(request.payload);
                         delete request.payload.imagesMimeType;
                         delete request.payload.imagesFilename;
                         delete request.payload.imagesSize;
@@ -608,6 +625,7 @@ export class AdminModuleService {
                   edit: {
                     before: (request: any) => {
                       if (request.payload) {
+                        this.normalizeProductSlug(request.payload);
                         delete request.payload.imagesMimeType;
                         delete request.payload.imagesFilename;
                         delete request.payload.imagesSize;
