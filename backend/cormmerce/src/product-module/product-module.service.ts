@@ -4,6 +4,7 @@ import { PrismaModuleService } from '../prisma-module/prisma-module.service';
 import { CreateProductModuleDto } from './dto/create-product-module.dto';
 import { UpdateProductModuleDto } from './dto/update-product-module.dto';
 import { slugify } from './slug';
+import { normalizeYouTubeUrl } from './youtube';
 
 @Injectable()
 export class ProductModuleService {
@@ -61,6 +62,7 @@ export class ProductModuleService {
         )
       : [];
     const images = [...providedImages, ...uploadedUrls];
+    const youtubeUrls = (createProductModuleDto.youtubeUrls ?? []).map(normalizeYouTubeUrl);
 
     // Index-aligned with `images` (see schema comment on Product.imagesMimeType)
     // — pasted URLs have no known metadata, so they get blank placeholders.
@@ -89,6 +91,7 @@ export class ProductModuleService {
           description: createProductModuleDto.description,
           priceDescription: createProductModuleDto.priceDescription,
           images,
+          youtubeUrls,
           imagesMimeType,
           imagesFilename,
           imagesSize,

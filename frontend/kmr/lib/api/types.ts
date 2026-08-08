@@ -21,6 +21,7 @@ export interface Product {
   description: string | null;
   priceDescription: string | null;
   images: string[];
+  youtubeUrls: string[];
   isActive: boolean;
   isFeatured: boolean;
   categories: ProductCategoryRef[];

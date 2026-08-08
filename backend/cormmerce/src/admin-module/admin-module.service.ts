@@ -6,7 +6,7 @@
 // dashboard. Instead this builds a plain Express middleware that checks
 // the SAME Better Auth session cookie already used by the rest of the
 // API (see auth-module/auth.ts) — one login, everywhere.
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import * as path from 'path';
 import { readFile } from 'fs/promises';
 import type { RequestHandler } from 'express';
@@ -16,6 +16,7 @@ import { PrismaModuleService } from '../prisma-module/prisma-module.service';
 import { auth } from '../auth-module/auth';
 import { CloudinaryAdminUploadProvider } from '../cloudinary/cloudinary-admin-upload.provider';
 import { slugify } from '../product-module/slug';
+import { normalizeYouTubeUrl } from '../product-module/youtube';
 
 // Mirrors src/admin-module/dashboard/types.ts. Not imported from there
 // because that whole folder is excluded from this backend build (it's
@@ -124,6 +125,23 @@ export class AdminModuleService {
     }
 
     payload.slug = slug;
+  }
+
+  private normalizeProductYouTubeUrls(payload: Record<string, unknown>) {
+    for (const [key, value] of Object.entries(payload)) {
+      if (key !== 'youtubeUrls' && !/^youtubeUrls\.\d+$/.test(key)) continue;
+
+      if (Array.isArray(value)) {
+        payload[key] = value.map((url) => {
+          if (typeof url !== 'string') {
+            throw new BadRequestException('Each video must be a YouTube URL');
+          }
+          return normalizeYouTubeUrl(url);
+        });
+      } else if (typeof value === 'string' && value.trim()) {
+        payload[key] = normalizeYouTubeUrl(value);
+      }
+    }
   }
 
   // Backs the AdminJS custom dashboard (src/admin-module/dashboard/Dashboard.tsx).
@@ -558,6 +576,9 @@ export class AdminModuleService {
                   imagesMimeType: { isVisible: false },
                   imagesFilename: { isVisible: false },
                   imagesSize: { isVisible: false },
+                  youtubeUrls: {
+                    description: 'Add one or more YouTube links. Videos appear after images on the product page.',
+                  },
                   // AdminJS's built-in rich text editor (TipTap-based —
                   // bold/italic/headings/lists/links/blockquotes) stores its
                   // output as an HTML string straight into this same
@@ -602,6 +623,7 @@ export class AdminModuleService {
                     before: (request: any) => {
                       if (request.payload) {
                         this.normalizeProductSlug(request.payload);
+                        this.normalizeProductYouTubeUrls(request.payload);
                         delete request.payload.imagesMimeType;
                         delete request.payload.imagesFilename;
                         delete request.payload.imagesSize;
@@ -626,6 +648,7 @@ export class AdminModuleService {
                     before: (request: any) => {
                       if (request.payload) {
                         this.normalizeProductSlug(request.payload);
+                        this.normalizeProductYouTubeUrls(request.payload);
                         delete request.payload.imagesMimeType;
                         delete request.payload.imagesFilename;
                         delete request.payload.imagesSize;

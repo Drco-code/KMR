@@ -101,6 +101,11 @@ model Product {
   // the full array powers the product-page image carousel.
   images String[] @default([])
 
+  // YouTube videos shown after all product images in the storefront gallery.
+  // Only canonical YouTube watch URLs are stored, so video files never use
+  // application or Cloudinary storage.
+  youtubeUrls String[] @default([])
+
   // Sidecar arrays, index-aligned with `images`. Written automatically by
   // @adminjs/upload (see AdminModuleService's uploadFeature `properties`
   // config) whenever staff upload a file through the admin dashboard —

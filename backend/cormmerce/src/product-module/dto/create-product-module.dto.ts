@@ -37,6 +37,11 @@ export class CreateProductModuleDto {
   images?: string[];
 
   @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  youtubeUrls?: string[];
+
+  @IsOptional()
   @IsBoolean()
   isActive?: boolean;
 

@@ -50,9 +50,10 @@ export default async function ProductPage({
       )}
 
       <div className="grid grid-cols-1 gap-12 pt-8 md:grid-cols-2">
-        <ProductImageCarousel
-          images={getValidImages(product.images)}
-          alt={product.name}
+          <ProductImageCarousel
+            images={getValidImages(product.images)}
+            youtubeUrls={product.youtubeUrls ?? []}
+            alt={product.name}
         />
 
         <div className="flex flex-col gap-6">
