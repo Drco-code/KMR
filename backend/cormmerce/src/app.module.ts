@@ -13,6 +13,7 @@ import { CategoryModuleModule } from './category-module/category-module.module';
 import { ProductModuleModule } from './product-module/product-module.module';
 import { BrandModuleModule } from './brand-module/brand-module.module';
 import { PromoModuleModule } from './promo-module/promo-module.module';
+import { ContactInfoModuleModule } from './contact-info-module/contact-info-module.module';
 import { QuoteRequestModuleModule } from './quote-request-module/quote-request-module.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { ClodinaryService } from './clodinary/clodinary.service';
@@ -44,6 +45,7 @@ const arcjetMode = process.env.ARCJET_MODE === 'LIVE' ? 'LIVE' : 'DRY_RUN';
     ProductModuleModule,
     BrandModuleModule,
     PromoModuleModule,
+    ContactInfoModuleModule,
     QuoteRequestModuleModule,
     CloudinaryModule,
     AdminModuleModule,

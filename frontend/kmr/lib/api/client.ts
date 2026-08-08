@@ -1,4 +1,11 @@
-import type { Brand, Category, Product, PromoBanner, QuoteRequestPayload } from "./types";
+import type {
+  Brand,
+  Category,
+  ContactInfo,
+  Product,
+  PromoBanner,
+  QuoteRequestPayload,
+} from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -48,6 +55,10 @@ export async function getBrands(): Promise<Brand[]> {
 
 export async function getPromoBanner(): Promise<PromoBanner> {
   return apiFetch<PromoBanner>("/promo-module", { cache: "no-store" });
+}
+
+export async function getContactInfo(): Promise<ContactInfo> {
+  return apiFetch<ContactInfo>("/contact-info-module", { cache: "no-store" });
 }
 
 export async function submitQuoteRequest(payload: QuoteRequestPayload): Promise<void> {

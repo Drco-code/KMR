@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { MapPin } from "lucide-react";
+import { getContactInfo } from "@/lib/api/client";
 
 const SOCIAL_LINKS = [
   {
@@ -41,7 +43,12 @@ const FOOTER_COLUMNS = [
   },
 ];
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  // Address + mini map are staff-editable (ContactInfo singleton in the
+  // admin dashboard) — the block hides when either is unset.
+  const contactInfo = await getContactInfo();
+  const showLocation = Boolean(contactInfo?.address || contactInfo?.mapEmbedUrl);
+
   return (
     <footer className="bg-[#e2e2e2] px-6 py-16 md:px-20 md:py-24">
       <div className="mx-auto flex max-w-[1440px] flex-col gap-16">
@@ -86,6 +93,39 @@ export function SiteFooter() {
             </div>
           ))}
         </div>
+
+        {showLocation ? (
+          <div className="flex flex-col gap-8 border-t border-ink/10 pt-8 md:flex-row md:items-center md:justify-between">
+            {contactInfo.address ? (
+              <div className="flex items-start gap-4">
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-white text-gold ring-1 ring-ink/10">
+                  <MapPin className="size-5" />
+                </span>
+                <div className="flex flex-col gap-1">
+                  <h5 className="text-xs font-semibold tracking-[0.15em] text-ink uppercase">
+                    Visit Us
+                  </h5>
+                  <p className="text-sm leading-relaxed text-ink/70">
+                    {contactInfo.address}
+                  </p>
+                </div>
+              </div>
+            ) : null}
+            {contactInfo.mapEmbedUrl ? (
+              // Admin-supplied iframe src (Google Maps embed or OpenStreetMap
+              // embed). Muted grayscale by default; color on hover.
+              <iframe
+                src={contactInfo.mapEmbedUrl}
+                title="KMR location map"
+                loading="lazy"
+                allowFullScreen
+                referrerPolicy="no-referrer-when-downgrade"
+                className="h-48 w-full max-w-md rounded-sm border border-ink/10 grayscale transition-all duration-500 hover:grayscale-0 md:w-[420px]"
+              />
+            ) : null}
+          </div>
+        ) : null}
+
         <div className="border-t border-ink/10 pt-8 text-center">
           <p className="text-xs tracking-[0.1em] text-ink/60 uppercase">
             © {new Date().getFullYear()} KMR Architectural Coatings. All rights reserved.

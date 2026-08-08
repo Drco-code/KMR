@@ -606,6 +606,7 @@ export class AdminModuleService {
       'Product',
       'Brand',
       'PromoBanner',
+      'ContactInfo',
       'QuoteRequest',
       'QuoteRequestItem',
     ];
@@ -843,7 +844,26 @@ export class AdminModuleService {
                         delete: { isVisible: false },
                       },
                     }
-                  : {},
+                  : name === 'ContactInfo'
+                    ? {
+                        properties: {
+                          // Address text can run long — textarea beats a single-line input.
+                          address: { type: 'textarea' },
+                          mapEmbedUrl: {
+                            type: 'textarea',
+                            description:
+                              'Paste the iframe src from Google Maps (Share → Embed a map → copy the src= URL) or an OpenStreetMap embed URL. Only http(s) values are shown; leave empty to hide the map in the footer.',
+                          },
+                        },
+                        actions: {
+                          // Exactly one contact/location row exists (seeded by
+                          // the migration) — staff edit it, they don't create
+                          // or delete it. Hiding new/delete keeps it a singleton.
+                          new: { isVisible: false },
+                          delete: { isVisible: false },
+                        },
+                      }
+                    : {},
         // Lets staff pick one or more images straight from their PC/device
         // instead of pasting Cloudinary URLs by hand. See
         // CloudinaryAdminUploadProvider for how each uploaded file is mapped

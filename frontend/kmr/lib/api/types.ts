@@ -50,6 +50,14 @@ export interface PromoBanner {
   link: string | null;
 }
 
+// The singleton contact/location row served by GET /contact-info-module,
+// powering the footer's "Visit Us" block (address + mini map). Null fields
+// mean "not set" and the footer hides the matching part.
+export interface ContactInfo {
+  address: string | null;
+  mapEmbedUrl: string | null;
+}
+
 export interface QuoteRequestItem {
   productName: string;
   quantity: number;

@@ -219,6 +219,29 @@ model PromoBanner {
 }
 
 // ==========================================
+// 📍 4. CONTACT / LOCATION INFO
+// ==========================================
+// A singleton row (exactly one exists — seeded by the migration, and the
+// admin dashboard hides new/delete for this resource, mirroring PromoBanner).
+// Powers the storefront footer's "Visit Us" block: the physical address text
+// and the mini-map iframe. Staff update it from the AdminJS dashboard
+// whenever the showroom moves; the footer re-reads it on every request, so
+// changes go live immediately with no redeploy.
+
+model ContactInfo {
+  id      String  @id @default(uuid())
+  // Physical showroom/office address, shown in the footer.
+  address String?
+  // iframe `src` for the mini map — paste a Google Maps "Embed a map" URL
+  // (the src inside the share → embed snippet) or an OpenStreetMap embed
+  // URL. Only http(s) values are accepted by the API; empty hides the map.
+  mapEmbedUrl String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ==========================================
 // 📋 2. BACKUP AUDIT TRAIL / QUOTE LOGS
 // ==========================================
 // Right before the site redirects a customer into WhatsApp, the
