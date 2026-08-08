@@ -49,6 +49,43 @@ import * as adminJsMetadataClient from '../../generated/prisma-legacy';
 
 const ADMIN_ROOT_PATH = '/admin';
 
+// Matches the Product.youtubeUrls key and any flattened `youtubeUrls.N`
+// index keys AdminJS's form may submit (see normalizeProductYouTubeUrls).
+const YOUTUBE_URLS_KEY = /^youtubeUrls(?:\.\d+)?$/;
+
+function isYouTubeUrlsKey(key: string): boolean {
+  return YOUTUBE_URLS_KEY.test(key);
+}
+
+// Orders flattened keys by numeric index so `youtubeUrls.10` sorts after
+// `youtubeUrls.2` regardless of the order they arrive in; the bare
+// `youtubeUrls` key (which can hold a whole array) sorts first.
+function compareYouTubeUrlsKeys(a: string, b: string): number {
+  const indexOf = (key: string) =>
+    key === 'youtubeUrls' ? -1 : Number(key.slice('youtubeUrls.'.length));
+  return indexOf(a) - indexOf(b);
+}
+
+// Product.youtubeUrls is a String[] column, but @adminjs/prisma misdetects
+// every array column as a plain string property (its Property class never
+// overrides isArray — see Property.js in that package). The old single text
+// input therefore round-tripped a multi-video array as its JSON string,
+// e.g. '["url1","url2"]'. Before normalizing, try to parse that shape back
+// into a list; anything that isn't a JSON array of strings is treated as one
+// plain URL and validated by normalizeYouTubeUrl.
+function parseJsonStringArray(value: string): string[] | null {
+  if (!/^\s*\[/.test(value)) return null;
+  try {
+    const parsed: unknown = JSON.parse(value);
+    if (Array.isArray(parsed) && parsed.every((item) => typeof item === 'string')) {
+      return parsed;
+    }
+  } catch {
+    // not JSON — fall through to single-URL handling
+  }
+  return null;
+}
+
 const LOGIN_PAGE_HTML = `<!doctype html>
 <html>
   <head>
@@ -127,20 +164,62 @@ export class AdminModuleService {
     payload.slug = slug;
   }
 
-  private normalizeProductYouTubeUrls(payload: Record<string, unknown>) {
-    for (const [key, value] of Object.entries(payload)) {
-      if (key !== 'youtubeUrls' && !/^youtubeUrls\.\d+$/.test(key)) continue;
+  // @adminjs/prisma's Property class never overrides isArray(), so every
+  // String[] column is misdetected as a plain string property (same class of
+  // adapter bug as imagesSize — see the schema.prisma comment there).
+  // Product.youtubeUrls is the first array column actually exposed to the
+  // AdminJS edit form, so the base new/edit handler submits its value as a
+  // bare string, which Prisma rejects — youtubeUrls must be a String[]. This
+  // collapses every shape the form can submit (bare string, JSON-stringified
+  // list from the old text input, or youtubeUrls.N flattened keys from the
+  // array editor) into a real array, before the adapter's prepareParams
+  // passes the value through untouched to prisma.product.update().
+  private normalizeProductYouTubeUrls(
+    payload: Record<string, unknown>,
+    originalParams?: Record<string, unknown>,
+  ) {
+    const keys = Object.keys(payload)
+      .filter(isYouTubeUrlsKey)
+      .sort(compareYouTubeUrlsKeys);
 
-      if (Array.isArray(value)) {
-        payload[key] = value.map((url) => {
-          if (typeof url !== 'string') {
-            throw new BadRequestException('Each video must be a YouTube URL');
-          }
-          return normalizeYouTubeUrl(url);
-        });
-      } else if (typeof value === 'string' && value.trim()) {
-        payload[key] = normalizeYouTubeUrl(value);
+    // The array editor submits nothing at all once every input is removed,
+    // which is indistinguishable from "field not touched" — except when the
+    // record being edited actually had videos. In that case the admin
+    // deliberately cleared them all, so write an empty array instead of
+    // silently keeping the old videos on save.
+    if (keys.length === 0) {
+      const hadVideos = Object.keys(originalParams ?? {}).some(isYouTubeUrlsKey);
+      if (hadVideos) payload.youtubeUrls = [];
+      return;
+    }
+
+    const collected: unknown[] = [];
+    for (const key of keys) {
+      const value = payload[key];
+      if (value === undefined || value === null) continue;
+      if (Array.isArray(value)) collected.push(...value);
+      else collected.push(value);
+    }
+
+    const rawValues =
+      collected.length === 1 && typeof collected[0] === 'string'
+        ? parseJsonStringArray(collected[0]) ?? collected
+        : collected;
+
+    const urls: string[] = [];
+    for (const value of rawValues) {
+      if (typeof value !== 'string') {
+        throw new BadRequestException('Each video must be a YouTube URL');
       }
+      // The array editor leaves blank rows behind whenever the admin removes
+      // an input — drop them rather than failing validation on every save.
+      if (!value.trim()) continue;
+      urls.push(normalizeYouTubeUrl(value));
+    }
+
+    payload.youtubeUrls = urls;
+    for (const key of keys) {
+      if (key !== 'youtubeUrls') delete payload[key];
     }
   }
 
@@ -577,6 +656,15 @@ export class AdminModuleService {
                   imagesFilename: { isVisible: false },
                   imagesSize: { isVisible: false },
                   youtubeUrls: {
+                    // isArray makes AdminJS render a proper add/remove URL list
+                    // (the description promises "one or more" links, but the
+                    // adapter misdetecting the String[] column as a plain
+                    // string otherwise leaves only a single text input). The
+                    // filter is hidden because the adapter's convertFilter
+                    // emits `{ contains }` on the array column, which Prisma
+                    // rejects — filtering products by video URL would 500.
+                    isArray: true,
+                    isVisible: { list: true, show: true, edit: true, filter: false },
                     description: 'Add one or more YouTube links. Videos appear after images on the product page.',
                   },
                   // AdminJS's built-in rich text editor (TipTap-based —
@@ -645,10 +733,17 @@ export class AdminModuleService {
                   // unconditional sync attempt) avoids needing to branch on
                   // request.method here at all.
                   edit: {
-                    before: (request: any) => {
+                    before: (request: any, context: any) => {
                       if (request.payload) {
                         this.normalizeProductSlug(request.payload);
-                        this.normalizeProductYouTubeUrls(request.payload);
+                        // originalParams lets the hook distinguish "field not
+                        // touched" from "all videos removed" (see
+                        // normalizeProductYouTubeUrls) so clearing every URL
+                        // actually persists.
+                        this.normalizeProductYouTubeUrls(
+                          request.payload,
+                          context?.record?.params,
+                        );
                         delete request.payload.imagesMimeType;
                         delete request.payload.imagesFilename;
                         delete request.payload.imagesSize;
