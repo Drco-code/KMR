@@ -23,11 +23,6 @@ const MEGA_MENU_ITEMS = [
 ];
 
 export function MobileNav({ categories }: { categories: Category[] }) {
-  const phone = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
-  const contactHref = phone
-    ? `https://wa.me/${phone}?text=${encodeURIComponent("Hi KMR, I'd like to get in touch.")}`
-    : null;
-
   return (
     <Sheet>
       <SheetTrigger
@@ -159,21 +154,17 @@ export function MobileNav({ categories }: { categories: Category[] }) {
             Consultancy
           </SheetClose>
 
-          {contactHref && (
-            <SheetClose
-              render={
-                <a
-                  href={contactHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-2 flex items-center justify-center gap-2 rounded-full bg-black py-3 text-sm font-semibold tracking-wide text-white uppercase"
-                />
-              }
-            >
-              <Phone className="size-4" />
-              Contact Us
-            </SheetClose>
-          )}
+          <SheetClose
+            render={
+              <Link
+                href="/contact"
+                className="mt-2 flex items-center justify-center gap-2 rounded-full bg-black py-3 text-sm font-semibold tracking-wide text-white uppercase"
+              />
+            }
+          >
+            <Phone className="size-4" />
+            Contact Us
+          </SheetClose>
         </nav>
       </SheetContent>
     </Sheet>

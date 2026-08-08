@@ -36,6 +36,7 @@ const FOOTER_COLUMNS = [
     links: [
       { href: "/quote", label: "Request a Quote" },
       { href: "/consultancy", label: "Consultancy" },
+      { href: "/contact", label: "Contact Us" },
     ],
   },
 ];
