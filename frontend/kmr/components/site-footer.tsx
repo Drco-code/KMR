@@ -54,7 +54,7 @@ export async function SiteFooter() {
       <div className="mx-auto flex max-w-[1440px] flex-col gap-16">
         <div
           className={`grid grid-cols-1 gap-10 sm:grid-cols-2 md:grid-cols-4 ${
-            showLocation ? "lg:grid-cols-5" : "lg:grid-cols-4"
+            showLocation ? "lg:grid-cols-6" : "lg:grid-cols-4"
           }`}
         >
           <div className="flex flex-col gap-6">
@@ -98,7 +98,9 @@ export async function SiteFooter() {
           ))}
 
           {showLocation ? (
-            <div className="flex flex-col gap-4">
+            // The location column gets double width on desktop (lg:col-span-2)
+            // so the mini map renders big enough to be useful.
+            <div className="flex flex-col gap-4 lg:col-span-2">
               <h5 className="flex items-center gap-2 text-xs font-semibold tracking-[0.15em] text-ink uppercase">
                 <MapPin className="size-3.5 text-gold" />
                 Visit Us
@@ -117,7 +119,7 @@ export async function SiteFooter() {
                   loading="lazy"
                   allowFullScreen
                   referrerPolicy="no-referrer-when-downgrade"
-                  className="h-40 w-full rounded-sm border border-ink/10 grayscale transition-all duration-500 hover:grayscale-0"
+                  className="h-52 w-full rounded-sm border border-ink/10 grayscale transition-all duration-500 hover:grayscale-0 md:h-56"
                 />
               ) : null}
             </div>
