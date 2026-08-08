@@ -3,7 +3,18 @@
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
 
-const databaseUrl = process.env["DATABASE_URL"];
+// Migrations use MIGRATE_DATABASE_URL when set, falling back to DATABASE_URL.
+// The production database is Neon, and its *pooled* URL (the "-pooler"
+// segment) routes through a connection pooler that cannot hold Postgres
+// advisory locks — the session-level lock prisma migrate deploy needs to
+// serialize migrations. That surfaces during Render's build as error P1002
+// ("Timed out trying to acquire a postgres advisory lock"). Pointing
+// MIGRATE_DATABASE_URL at Neon's *direct* connection string (from the Neon
+// dashboard: Connect → direct, no "-pooler") makes migrate deploy talk to
+// the database directly and the lock works normally. Local dev is
+// unaffected: this env var is unset there, so it falls back to DATABASE_URL.
+const databaseUrl =
+  process.env["MIGRATE_DATABASE_URL"] ?? process.env["DATABASE_URL"];
 
 if (!databaseUrl) {
   throw new Error("DATABASE_URL is required for Prisma configuration.");
