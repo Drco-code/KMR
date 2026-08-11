@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaModuleService } from '../prisma-module/prisma-module.service';
 import { CreateCategoryModuleDto } from './dto/create-category-module.dto';
 import { UpdateCategoryModuleDto } from './dto/update-category-module.dto';
@@ -32,6 +32,20 @@ export class CategoryModuleService {
   }
 
   async create(createCategoryModuleDto: CreateCategoryModuleDto) {
+    // Case-insensitive duplicate guard: "Paint" and "paint" are the same
+    // category, and the DB unique constraint on name only catches exact
+    // matches. Reject duplicates with a clear message instead of creating a
+    // near-duplicate row with a suffixed slug.
+    const duplicate = await this.prisma.category.findFirst({
+      where: { name: { equals: createCategoryModuleDto.name, mode: 'insensitive' } },
+      select: { id: true },
+    });
+    if (duplicate) {
+      throw new ConflictException(
+        `A category named "${createCategoryModuleDto.name}" already exists`,
+      );
+    }
+
     const slug = await this.buildUniqueSlug(
       createCategoryModuleDto.slug ?? createCategoryModuleDto.name,
     );

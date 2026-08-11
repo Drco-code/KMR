@@ -164,6 +164,65 @@ export class AdminModuleService {
     payload.slug = slug;
   }
 
+  // Category counterpart to normalizeProductSlug. The Category new/edit form
+  // exposes `slug` as a required-looking text input with no auto-generation
+  // (unlike Product, whose before-hook fills it from the name), so staff who
+  // leave it blank get a generic save failure and the category never appears
+  // on the storefront — the "I made a category but it isn't showing" symptom.
+  // It also has no duplicate protection: re-adding an existing name (or a
+  // case variant like "Paint" vs "paint") falls through to a raw Prisma
+  // unique-constraint error instead of a clear message. This hook auto-fills
+  // the slug from the name when blank and rejects case-insensitive
+  // name/slug duplicates before the write. Throws AdminJS's ValidationError
+  // so the message renders inline on the offending form field.
+  private async normalizeCategoryParams(
+    payload: Record<string, unknown>,
+    ValidationErrorCtor: new (errors: Record<string, { message: string }>) => Error,
+    recordId?: string,
+  ) {
+    const name = typeof payload.name === 'string' ? payload.name.trim() : '';
+    if (!name) {
+      throw new ValidationErrorCtor({ name: { message: 'Category name is required' } });
+    }
+    payload.name = name;
+
+    const source =
+      typeof payload.slug === 'string' && payload.slug.trim()
+        ? payload.slug
+        : name;
+
+    const slug = slugify(source);
+    if (!slug) {
+      throw new ValidationErrorCtor({
+        slug: { message: 'Category slug must contain at least one letter or number' },
+      });
+    }
+    payload.slug = slug;
+
+    const excludeSelf = recordId ? { id: { not: recordId } } : {};
+
+    // Case-insensitive so "Paint" and "paint" can't both be created.
+    const duplicateName = await this.prisma.category.findFirst({
+      where: { name: { equals: name, mode: 'insensitive' }, ...excludeSelf },
+      select: { id: true },
+    });
+    if (duplicateName) {
+      throw new ValidationErrorCtor({
+        name: { message: `A category named "${name}" already exists` },
+      });
+    }
+
+    const duplicateSlug = await this.prisma.category.findFirst({
+      where: { slug: { equals: slug, mode: 'insensitive' }, ...excludeSelf },
+      select: { id: true },
+    });
+    if (duplicateSlug) {
+      throw new ValidationErrorCtor({
+        slug: { message: `The slug "${slug}" is already in use by another category` },
+      });
+    }
+  }
+
   // @adminjs/prisma's Property class never overrides isArray(), so every
   // String[] column is misdetected as a plain string property (same class of
   // adapter bug as imagesSize — see the schema.prisma comment there).
@@ -515,7 +574,7 @@ export class AdminModuleService {
   // between what the build-time bundler sees and what the running app serves.
   private async buildAdminInstance() {
     const [
-      { default: AdminJS, ComponentLoader },
+      { default: AdminJS, ComponentLoader, ValidationError },
       { default: AdminJSExpress },
       { Database, Resource, getModelByName },
       { default: uploadFeature },
@@ -828,6 +887,48 @@ export class AdminModuleService {
                 ? {
                     properties: {
                       parentId: { components: { edit: categoryParentSelectComponent } },
+                    },
+                    // The Category form's `slug` field has no auto-generation
+                    // (the Product form's normalizeProductSlug handles that,
+                    // but Category never had an equivalent hook), so staff who
+                    // leave it blank get a generic save failure and the
+                    // category never appears anywhere — "I created a category
+                    // but it isn't showing". It also has no duplicate
+                    // protection, so re-adding an existing name (or a case
+                    // variant like "Paint" vs "paint") hits a raw Prisma
+                    // unique-constraint error. These hooks auto-fill the slug
+                    // from the name and reject case-insensitive duplicates
+                    // with a clear message on the form field.
+                    actions: {
+                      new: {
+                        // Must be async and return `request` — AdminJS chains
+                        // hook results and uses the final return value as the
+                        // action's request. The normalize call mutates the
+                        // payload in place and throws ValidationError to
+                        // abort the save on duplicates, so awaiting it first
+                        // keeps both behaviors intact.
+                        before: async (request: any) => {
+                          if (request.payload) {
+                            await this.normalizeCategoryParams(
+                              request.payload,
+                              ValidationError,
+                            );
+                          }
+                          return request;
+                        },
+                      },
+                      edit: {
+                        before: async (request: any, context: any) => {
+                          if (request.payload) {
+                            await this.normalizeCategoryParams(
+                              request.payload,
+                              ValidationError,
+                              context?.record?.params?.id,
+                            );
+                          }
+                          return request;
+                        },
+                      },
                     },
                   }
                 : name === 'PromoBanner'
