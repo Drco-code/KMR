@@ -42,11 +42,12 @@ export default async function Home() {
         <ScrollReveal className="mx-auto grid max-w-[1440px] grid-cols-1 items-center gap-12 md:grid-cols-2">
           <div className="relative aspect-[4/3] w-full overflow-hidden">
             <Image
-              src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=1200&q=80&fit=crop&auto=format"
-              alt="Welder at work, sparks flying"
+              src="/images/who-we-are.png"
+              alt="Child's hand covered in colourful finger paints"
               fill
               className="object-cover"
               sizes="(min-width: 768px) 50vw, 100vw"
+              priority
             />
           </div>
           <div className="flex flex-col items-start gap-6">
