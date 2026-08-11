@@ -45,7 +45,7 @@ const FOOTER_COLUMNS = [
 
 export async function SiteFooter() {
   // Address + mini map are staff-editable (ContactInfo singleton in the
-  // admin dashboard) — the block hides when either is unset.
+  // admin dashboard), the block hides when either is unset.
   const contactInfo = await getContactInfo();
   const showLocation = Boolean(contactInfo?.address || contactInfo?.mapEmbedUrl);
 

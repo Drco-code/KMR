@@ -1,7 +1,7 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
 // Mirrors CatalogView's layout (heading/sort row, sidebar filter, product
-// grid) so the page's shape appears instantly instead of a blank screen —
+// grid) so the page's shape appears instantly instead of a blank screen, 
 // shown automatically by Next.js while the catalog's data fetch is in flight.
 export function CatalogSkeleton() {
   return (

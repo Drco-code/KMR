@@ -41,11 +41,11 @@ export interface ResolvedCatalog {
 }
 
 // Category is a self-referential tree (see backend schema.prisma), and a
-// product can now be filed under multiple categories (Product.categories) —
+// product can now be filed under multiple categories (Product.categories),
 // a leaf category most of the time, but nothing stops staff from assigning
 // it to a parent "group header" category too. Browsing a parent category
 // should show everything filed under it OR any of its descendants, not just
-// products filed on that exact row — otherwise a product assigned one level
+// products filed on that exact row, otherwise a product assigned one level
 // off from where a visitor expects it to be filed just silently disappears
 // from both listings. This builds, for every category, the set of its own
 // id plus every descendant's id.
@@ -86,7 +86,7 @@ function sortComparator(sort: CatalogSort): (a: Product, b: Product) => number {
         const priceA = parsePrice(a.priceDescription);
         const priceB = parsePrice(b.priceDescription);
         // Products with no parseable price sink to the end regardless of
-        // direction — an unpriced item isn't "cheapest", it's unranked.
+        // direction, an unpriced item isn't "cheapest", it's unranked.
         if (priceA === null && priceB === null) return 0;
         if (priceA === null) return 1;
         if (priceB === null) return -1;

@@ -6,13 +6,13 @@ import { gsap } from "@/lib/gsap";
 import { cn } from "@/lib/utils";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 
-// Wraps next/image (fill mode) with a Cloudinary size/format transform —
+// Wraps next/image (fill mode) with a Cloudinary size/format transform,
 // the real fix for slow loads, since stored URLs are untransformed
-// originals — plus a shimmer placeholder and a fade/scale reveal once the
+// originals, plus a shimmer placeholder and a fade/scale reveal once the
 // image actually decodes, instead of an abrupt pop-in.
 //
 // The reveal is triggered imperatively (from the callback ref and from
-// onLoad directly), not from a useEffect/useGSAP dependency array — a
+// onLoad directly), not from a useEffect/useGSAP dependency array, a
 // cached image can finish loading before a dependency-driven effect ever
 // gets to run, and driving the animation off of a "loaded" state introduces
 // a render-timing race. Triggering it directly from whichever fires first
@@ -40,7 +40,7 @@ export function RevealImage({
         ease: "power2.out",
         // Clear the inline transform GSAP leaves behind so CSS-driven
         // hover effects (e.g. ProductCard's group-hover:scale-105) can
-        // still take over afterward — inline styles otherwise win.
+        // still take over afterward, inline styles otherwise win.
         clearProps: "transform",
       }
     );

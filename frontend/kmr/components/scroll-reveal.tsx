@@ -6,7 +6,7 @@ import { gsap } from "@/lib/gsap";
 
 // Fades + lifts content in as it scrolls into view. Pass `stagger` to
 // animate each direct child in sequence instead of the wrapper as a whole
-// (used for grids/lists). Respects prefers-reduced-motion — reduced-motion
+// (used for grids/lists). Respects prefers-reduced-motion, reduced-motion
 // users get the final state immediately, no motion at all.
 export function ScrollReveal({
   children,

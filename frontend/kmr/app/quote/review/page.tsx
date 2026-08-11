@@ -27,7 +27,7 @@ function buildWhatsAppMessage(
     `Items:`,
     ...items.map((item) => {
       const price = formatPrice(item.priceDescription);
-      return `- ${item.name} (Qty: ${item.quantity})${price ? ` — ${price}` : ""}`;
+      return `- ${item.name} (Qty: ${item.quantity})${price ? `: ${price}` : ""}`;
     }),
   ];
   return lines.join("\n");
@@ -73,7 +73,7 @@ export default function QuoteReviewPage() {
         })),
       });
     } catch {
-      // best-effort audit trail — the WhatsApp message is the real order channel
+      // best-effort audit trail, the WhatsApp message is the real order channel
     }
 
     const message = buildWhatsAppMessage(name, company, location, items);

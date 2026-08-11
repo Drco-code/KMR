@@ -19,7 +19,7 @@ export default async function Home() {
 
   return (
     <div className="flex flex-col">
-      {/* Image-only hero — copy and CTAs will be added back once the direction is confirmed */}
+      {/* Image-only hero, copy and CTAs will be added back once the direction is confirmed */}
       <section className="relative min-h-[50vh] overflow-hidden bg-ink md:min-h-[calc(100vh-120px)]">
         <HeroBackground />
       </section>
@@ -59,7 +59,7 @@ export default async function Home() {
             </h2>
             <p className="max-w-xl text-lg text-white/60">
               KMR City Ventures is a Ghanaian building-materials house
-              built on one belief — the right finish changes everything.
+              built on one belief. The right finish changes everything.
               From premium coatings and artisanal pigments to timber and
               professional-grade tools, we supply what architects,
               painters, and builders actually trust: products vetted by

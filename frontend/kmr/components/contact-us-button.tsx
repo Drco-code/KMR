@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Phone } from "lucide-react";
 
-// Header "Contact Us" pill — links to the full contact page (previously a
+// Header "Contact Us" pill, links to the full contact page (previously a
 // direct WhatsApp link; WhatsApp now lives on the page itself and in the
 // floating action button).
 export function ContactUsButton() {

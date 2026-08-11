@@ -4,9 +4,9 @@ import { useRef, type ElementType } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "@/lib/gsap";
 
-// Word-by-word mask reveal for headline moments — each word rises up from
+// Word-by-word mask reveal for headline moments, each word rises up from
 // behind a clipped edge rather than just fading in. Reserved for page-level
-// headlines (hero, catalog/product titles), not every heading — section
+// headlines (hero, catalog/product titles), not every heading, section
 // titles keep the plainer ScrollReveal fade so this stays a deliberate
 // signature moment instead of blanket motion.
 export function TextReveal({

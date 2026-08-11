@@ -46,7 +46,7 @@ function CategoryAccordion({
   const contentId = useId();
 
   // Stagger the child links in when the card expands. Reduced-motion users
-  // just see the links appear with the card — no movement.
+  // just see the links appear with the card, no movement.
   useGSAP(
     () => {
       const el = linkListRef.current;
@@ -71,7 +71,7 @@ function CategoryAccordion({
     { dependencies: [open], scope: linkListRef }
   );
 
-  // A nav item whose root has no children is just a plain catalog link —
+  // A nav item whose root has no children is just a plain catalog link,
   // rendered as a card row so it sits consistently with the accordions.
   if (!root || columns.length === 0) {
     return (
@@ -110,7 +110,7 @@ function CategoryAccordion({
         id={contentId}
         // inert while collapsed so the clipped links leave the tab order and
         // accessibility tree (the native <details> this replaces hid them
-        // too) — without it, Tab can land on invisible links.
+        // too), without it, Tab can land on invisible links.
         inert={!open}
         className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out motion-reduce:transition-none ${
           open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"

@@ -1,6 +1,6 @@
 // Fallback for routes without a bespoke skeleton (see app/loading.tsx).
 // Routes with real layout to preview (catalog, product) get their own
-// skeleton instead — this one is intentionally minimal.
+// skeleton instead, this one is intentionally minimal.
 export function PageLoader() {
   return (
     <div className="flex min-h-[60vh] w-full flex-col items-center justify-center gap-6 px-6 py-24">

@@ -1,5 +1,5 @@
 // Product/brand images are stored as plain, untransformed Cloudinary
-// delivery URLs (see CloudinaryAdminUploadProvider on the backend) — often
+// delivery URLs (see CloudinaryAdminUploadProvider on the backend), often
 // the full original upload, sometimes several MB. Rather than transforming
 // at upload time (which would need re-uploading every existing image to
 // change), we rewrite the URL at display time: insert an f_auto,q_auto,w_*

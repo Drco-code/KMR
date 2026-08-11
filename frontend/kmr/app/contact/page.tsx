@@ -6,10 +6,10 @@ import { ContactForm } from "@/components/contact-form";
 export const metadata: Metadata = {
   title: "Contact | KMR",
   description:
-    "Get in touch with KMR City Ventures — questions about products, projects, wholesale pricing, or consultancy.",
+    "Get in touch with KMR City Ventures about products, projects, wholesale pricing, or consultancy.",
 };
 
-// Placeholder contact details — replace with the real phone, email and
+// Placeholder contact details: replace with the real phone, email and
 // showroom once they're confirmed. Cards render as-is, so swapping the
 // strings here is all that's needed.
 const CONTACT_DETAILS = [

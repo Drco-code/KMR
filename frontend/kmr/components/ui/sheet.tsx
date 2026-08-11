@@ -17,7 +17,7 @@ function SheetTrigger({ ...props }: SheetPrimitive.Trigger.Props) {
 
 function SheetClose({ nativeButton = false, ...props }: SheetPrimitive.Close.Props) {
   // Every SheetClose in this app renders a Link/anchor via `render`, not a
-  // real <button> — default nativeButton to false so Base UI doesn't warn
+  // real <button>, default nativeButton to false so Base UI doesn't warn
   // about missing native button semantics. Still overridable per-usage.
   return <SheetPrimitive.Close data-slot="sheet-close" nativeButton={nativeButton} {...props} />
 }

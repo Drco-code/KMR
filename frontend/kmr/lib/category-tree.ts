@@ -65,7 +65,7 @@ export function buildMegaMenuTree(categories: Category[], rootId: string): MegaM
 }
 
 // Finds a top-level category by its slug (used to look up the root id for
-// each nav item's mega menu). The root itself must have showInNav: true —
+// each nav item's mega menu). The root itself must have showInNav: true, 
 // if staff hide a nav item's root category, the whole nav item disappears
 // (mega-menu.tsx falls back to a plain "/catalog" link when this returns
 // undefined).

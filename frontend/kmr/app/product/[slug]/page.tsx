@@ -11,7 +11,7 @@ import { TextReveal } from "@/components/text-reveal";
 
 // Product.description is written by staff through AdminJS's rich text
 // editor (see backend admin-module.service.ts) and stored as raw HTML.
-// It's still sanitized before rendering here — an allowlist limited to
+// It's still sanitized before rendering here, an allowlist limited to
 // the formatting that editor actually produces, nothing that could
 // execute script or load an external resource.
 function sanitizeDescription(html: string): string {

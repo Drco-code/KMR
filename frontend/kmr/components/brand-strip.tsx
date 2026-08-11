@@ -29,7 +29,7 @@ function prefersReducedMotion(): boolean {
   );
 }
 
-// Homepage "Our Brands" section — circular logo, name and one-line tagline
+// Homepage "Our Brands" section, circular logo, name and one-line tagline
 // per brand, matching the client's reference layout. The 4-column desktop
 // layout paginates through the catalog (auto-advancing, pausing on hover)
 // once there are more than 4 brands; below lg and with 4 or fewer brands
@@ -63,7 +63,7 @@ export function BrandStrip({ brands }: { brands: Brand[] }) {
 
   const startAutoAdvance = useCallback(() => {
     stopAutoAdvance();
-    // No auto-rotation for reduced-motion users — manual arrows/dots still
+    // No auto-rotation for reduced-motion users, manual arrows/dots still
     // work.
     if (!shouldRotate || prefersReducedMotion()) return;
     timerRef.current = window.setInterval(

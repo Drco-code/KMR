@@ -47,7 +47,7 @@ export function MegaMenu({
   const columns = root ? buildMegaMenuTree(categories, root.id) : [];
 
   // Skip the animation on the very first mount (panel starts hidden via
-  // the base classes below) — only animate on actual open/close toggles.
+  // the base classes below), only animate on actual open/close toggles.
   const mounted = useRef(false);
   useGSAP(
     () => {

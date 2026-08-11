@@ -12,7 +12,7 @@ export function NavSearch() {
   const inputRef = useRef<HTMLInputElement>(null);
   const panelRef = useRef<HTMLFormElement>(null);
 
-  // Same imperative-trigger pattern as MegaMenu's panel transition — driven
+  // Same imperative-trigger pattern as MegaMenu's panel transition, driven
   // directly by the open/close actions, not a state-dependency effect, so
   // there's no race with when the panel is actually interactive.
   function animateOpen() {
@@ -42,7 +42,7 @@ export function NavSearch() {
   }
 
   // Uses the functional setState form so the open/close decision is always
-  // based on the real current state, never a possibly-stale closure — the
+  // based on the real current state, never a possibly-stale closure, the
   // header button and the input's onBlur can both fire in the same event
   // tick (a click blurs the input first), and both need to agree on which
   // direction to animate.
@@ -73,7 +73,7 @@ export function NavSearch() {
       <button
         type="button"
         // Stops the button from stealing focus, which would blur the input
-        // first and fire its own onBlur close — letting this button's own
+        // first and fire its own onBlur close, letting this button's own
         // click handler be the single source of truth for toggling.
         onMouseDown={(e) => e.preventDefault()}
         onClick={() => (open ? closeSearch() : openSearch())}

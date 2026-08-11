@@ -1,7 +1,7 @@
 import { MessageCircle } from "lucide-react";
 
 // Floating WhatsApp bubble with a hover/focus label so visitors know what it
-// is. Pure CSS (group-hover / group-focus-visible) — no client JS needed.
+// is. Pure CSS (group-hover / group-focus-visible), no client JS needed.
 export function WhatsAppFab() {
   const phone = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
   if (!phone) return null;

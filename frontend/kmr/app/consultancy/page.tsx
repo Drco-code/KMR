@@ -32,7 +32,7 @@ export default function ConsultancyPage() {
           Consultancy Services
         </h1>
         <p className="max-w-xl text-lg text-ink-muted">
-          Beyond the collection — our in-house colorists and application
+          Beyond the collection, our in-house colorists and application
           specialists help you bring architectural-grade finishes to life.
         </p>
       </div>

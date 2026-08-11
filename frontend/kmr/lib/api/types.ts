@@ -26,7 +26,7 @@ export interface Product {
   isFeatured: boolean;
   categories: ProductCategoryRef[];
   createdAt: string;
-  // Aggregated from quote-request history — see resolveCatalog's
+  // Aggregated from quote-request history, see resolveCatalog's
   // "best-selling" sort. A proxy for popularity, not confirmed sales.
   totalQuantityRequested: number;
 }
@@ -43,7 +43,7 @@ export interface Brand {
 }
 
 // The active promo banner for the header bar, as served by GET /promo-module.
-// The backend always returns an object — a null message means no promo is
+// The backend always returns an object, a null message means no promo is
 // running and the bar hides (a bare null would serialize to an empty body).
 export interface PromoBanner {
   message: string | null;

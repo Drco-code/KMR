@@ -12,7 +12,7 @@ import type { Category, Product } from "@/lib/api/types";
 
 // Filters/sort/pagination are all derived from data already sitting in
 // memory (`products`/`categories`, fetched once by the server page). Doing
-// this client-side keeps every checkbox/sort/page interaction instant —
+// this client-side keeps every checkbox/sort/page interaction instant, 
 // previously each one went through router.push, which re-ran the server
 // page and re-fetched the whole catalog (cache: "no-store") before the
 // in-memory filtering even ran.

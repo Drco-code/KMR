@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 type Status = "idle" | "submitting" | "success";
 
-// Placeholder contact form — there's no backend for messages yet, so submit
+// Placeholder contact form, there's no backend for messages yet, so submit
 // simulates a short delay and shows a success state. Wire this to a real
 // endpoint (or a mail/WhatsApp provider) when one exists.
 export function ContactForm() {
@@ -35,7 +35,7 @@ export function ContactForm() {
         <div className="flex flex-col gap-2">
           <h2 className="font-display text-3xl text-ink">Message Sent</h2>
           <p className="max-w-sm text-ink-muted">
-            Thanks{name ? `, ${name.split(" ")[0]}` : ""} — we&apos;ve received
+            Thanks{name ? `, ${name.split(" ")[0]}` : ""}. We&apos;ve received
             your message and will get back to you shortly.
           </p>
         </div>

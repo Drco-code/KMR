@@ -52,7 +52,7 @@ export function ProductImageCarousel({
   }, [index, paused, slides]);
 
   // Crossfades every slide's opacity toward the active index instead of
-  // hard-swapping the mounted image — this is what makes slides "animate
+  // hard-swapping the mounted image, this is what makes slides "animate
   // through each other" rather than cut.
   useEffect(() => {
     slideRefs.current.forEach((el, i) => {
