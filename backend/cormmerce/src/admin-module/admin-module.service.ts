@@ -164,34 +164,62 @@ export class AdminModuleService {
     payload.slug = slug;
   }
 
-  // Category counterpart to normalizeProductSlug. The Category new/edit form
-  // exposes `slug` as a required-looking text input with no auto-generation
-  // (unlike Product, whose before-hook fills it from the name), so staff who
-  // leave it blank get a generic save failure and the category never appears
-  // on the storefront — the "I made a category but it isn't showing" symptom.
-  // It also has no duplicate protection: re-adding an existing name (or a
-  // case variant like "Paint" vs "paint") falls through to a raw Prisma
-  // unique-constraint error instead of a clear message. This hook auto-fills
-  // the slug from the name when blank and rejects case-insensitive
-  // name/slug duplicates before the write. Throws AdminJS's ValidationError
-  // so the message renders inline on the offending form field.
+  // Category counterpart to normalizeProductSlug, plus duplicate protection.
+  // The Category new/edit form deliberately hides the technical `slug` field
+  // (see the resource properties above), so this hook fills it in: from the
+  // name on create, or preserving the record's existing slug on edit (a
+  // category can have a slug that differs from its name — regenerating from
+  // the name would silently rewrite the category's URL on an unrelated edit).
+  // It also rejects case-insensitive name/slug duplicates before the write,
+  // so re-adding an existing name (or a case variant like "Paint" vs
+  // "paint") shows a clear message instead of a raw Prisma
+  // unique-constraint error. Throws AdminJS's ValidationError so the message
+  // renders inline on the offending form field.
   private async normalizeCategoryParams(
     payload: Record<string, unknown>,
     ValidationErrorCtor: new (errors: Record<string, { message: string }>) => Error,
     recordId?: string,
   ) {
-    const name = typeof payload.name === 'string' ? payload.name.trim() : '';
-    if (!name) {
+    // Key PRESENCE is what distinguishes "field not part of this form" from
+    // "field cleared to empty". The Category Tree page's inline edit posts a
+    // partial payload (only showInNav or navOrder — neither the name nor slug
+    // key) through this same edit action, so those keys are simply absent.
+    // A real new/edit form always includes the `name` key (visible, required
+    // in AdminJS) even when the admin empties it — and in that case we must
+    // still reject the empty name rather than skip validation.
+    const rawName =
+      typeof payload.name === 'string' ? payload.name.trim() : undefined;
+    const rawSlug =
+      typeof payload.slug === 'string' && payload.slug.trim()
+        ? payload.slug.trim()
+        : undefined;
+
+    // Partial save from the Category Tree page — neither key present.
+    if (rawName === undefined && rawSlug === undefined) return;
+
+    if (rawName === undefined || !rawName) {
       throw new ValidationErrorCtor({ name: { message: 'Category name is required' } });
     }
-    payload.name = name;
+    payload.name = rawName;
 
-    const source =
-      typeof payload.slug === 'string' && payload.slug.trim()
-        ? payload.slug
-        : name;
+    // The slug field is hidden from the form, so its key is absent on both
+    // new and edit submissions — derive it: from the name on create, or
+    // preserving the record's existing slug on edit (a category can have a
+    // slug that differs from its name — regenerating from the name would
+    // silently rewrite the category's URL on an unrelated edit).
+    let slug: string;
+    if (rawSlug) {
+      slug = slugify(rawSlug);
+    } else if (recordId) {
+      const existing = await this.prisma.category.findUnique({
+        where: { id: recordId },
+        select: { slug: true },
+      });
+      slug = existing?.slug ?? slugify(rawName);
+    } else {
+      slug = slugify(rawName);
+    }
 
-    const slug = slugify(source);
     if (!slug) {
       throw new ValidationErrorCtor({
         slug: { message: 'Category slug must contain at least one letter or number' },
@@ -203,12 +231,12 @@ export class AdminModuleService {
 
     // Case-insensitive so "Paint" and "paint" can't both be created.
     const duplicateName = await this.prisma.category.findFirst({
-      where: { name: { equals: name, mode: 'insensitive' }, ...excludeSelf },
+      where: { name: { equals: rawName, mode: 'insensitive' }, ...excludeSelf },
       select: { id: true },
     });
     if (duplicateName) {
       throw new ValidationErrorCtor({
-        name: { message: `A category named "${name}" already exists` },
+        name: { message: `A category named "${rawName}" already exists` },
       });
     }
 
@@ -885,20 +913,58 @@ export class AdminModuleService {
                 }
               : name === 'Category'
                 ? {
+                    // The new/edit form is deliberately minimal: staff only
+                    // pick a name, an optional parent, and whether it shows in
+                    // the nav. The raw technical fields (`slug`, `navOrder`,
+                    // timestamps) are hidden from the form — `slug` is
+                    // auto-generated from the name by normalizeCategoryParams
+                    // (see below), and ordering is managed on the dedicated
+                    // Category Tree page instead of this form. `position`
+                    // keeps the visible fields in a sensible order: name,
+                    // parent, show-in-nav.
                     properties: {
-                      parentId: { components: { edit: categoryParentSelectComponent } },
+                      name: {
+                        position: 1,
+                        description:
+                          'The name shoppers see in menus and filters, e.g. "Interior Paint".',
+                      },
+                      parentId: {
+                        position: 2,
+                        components: { edit: categoryParentSelectComponent },
+                        description:
+                          'Where this category appears. Leave empty to make it a top-level menu category.',
+                      },
+                      showInNav: {
+                        position: 3,
+                        description:
+                          'Show this category in the storefront nav menus. Turn off to keep it browsable only via the catalog filter.',
+                      },
+                      slug: {
+                        // Auto-generated from the name — never a field staff
+                        // need to fill in (normalizeCategoryParams fills it
+                        // before the write).
+                        isVisible: { list: true, show: true, edit: false, filter: false },
+                        description: 'Auto-generated from the name. No need to type this.',
+                      },
+                      navOrder: {
+                        // Ordering is managed on the Category Tree page, not
+                        // this form.
+                        isVisible: { list: true, show: true, edit: false, filter: false },
+                      },
+                      createdAt: { isVisible: { list: true, show: true, edit: false, filter: false } },
+                      updatedAt: { isVisible: { list: true, show: true, edit: false, filter: false } },
                     },
-                    // The Category form's `slug` field has no auto-generation
-                    // (the Product form's normalizeProductSlug handles that,
-                    // but Category never had an equivalent hook), so staff who
-                    // leave it blank get a generic save failure and the
-                    // category never appears anywhere — "I created a category
-                    // but it isn't showing". It also has no duplicate
-                    // protection, so re-adding an existing name (or a case
-                    // variant like "Paint" vs "paint") hits a raw Prisma
-                    // unique-constraint error. These hooks auto-fill the slug
-                    // from the name and reject case-insensitive duplicates
-                    // with a clear message on the form field.
+                    // Slug auto-generation + duplicate protection for the
+                    // new/edit forms: `slug` used to be a required-looking
+                    // text input with no auto-fill, so staff who left it blank
+                    // got a generic save failure and the category never
+                    // appeared anywhere — "I created a category but it isn't
+                    // showing". Re-adding an existing name (or a case variant
+                    // like "Paint" vs "paint") also hit a raw Prisma
+                    // unique-constraint error instead of a clear message.
+                    // These hooks auto-fill the slug from the name, preserve
+                    // it on edit, and reject case-insensitive duplicates with
+                    // a clear message on the form field.
                     actions: {
                       new: {
                         // Must be async and return `request` — AdminJS chains
