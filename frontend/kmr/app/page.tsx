@@ -55,7 +55,7 @@ export default async function Home() {
                   To be revealed
                 </h3>
                 <p className="text-xs text-ink-muted">
-                  Curated with our team — details coming soon.
+                  Curated with our team, details coming soon.
                 </p>
               </div>
             </div>
