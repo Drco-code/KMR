@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useRef, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { ChevronDown, Menu, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -169,7 +170,15 @@ export function MobileNav({ categories }: { categories: Category[] }) {
       {/* bg-secondary canvas makes the white floating category cards stand out. */}
       <SheetContent side="right" className="bg-secondary">
         <SheetHeader>
-          <SheetTitle className="font-display text-xl">KMR</SheetTitle>
+          <SheetTitle>
+            <Image
+              src="/images/logo.png"
+              alt="KMR City Ventures"
+              width={480}
+              height={384}
+              className="h-8 w-auto"
+            />
+          </SheetTitle>
         </SheetHeader>
         <nav className="flex flex-col gap-1 px-4 pb-4">
           <SheetClose

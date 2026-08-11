@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 import { CartBadge } from "@/components/cart-badge";
@@ -43,11 +44,15 @@ export async function SiteHeader() {
         </div>
       ) : null}
       <div className="flex h-20 items-center justify-between border-b border-border bg-background px-6 md:px-20">
-        <Link
-          href="/"
-          className="font-display text-xl font-bold tracking-tight text-ink md:text-2xl"
-        >
-          KMR
+        <Link href="/" className="flex items-center">
+          <Image
+            src="/images/logo.png"
+            alt="KMR City Ventures"
+            width={480}
+            height={384}
+            priority
+            className="h-10 w-auto md:h-11"
+          />
         </Link>
 
         <nav className="hidden items-center gap-3 2xl:flex">

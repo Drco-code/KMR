@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { MapPin } from "lucide-react";
 import { getContactInfo } from "@/lib/api/client";
@@ -58,9 +59,13 @@ export async function SiteFooter() {
           }`}
         >
           <div className="flex flex-col gap-6">
-            <span className="font-display text-2xl font-semibold text-ink">
-              KMR
-            </span>
+            <Image
+              src="/images/logo.png"
+              alt="KMR City Ventures"
+              width={480}
+              height={384}
+              className="h-10 w-auto"
+            />
             <p className="text-sm text-ink/70">
               Defining spaces through color. Premium architectural coatings
               and artisanal pigments.
