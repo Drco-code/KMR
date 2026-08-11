@@ -115,12 +115,12 @@ export function BrandStrip({ brands }: { brands: Brand[] }) {
     const logo = getValidImages(brand.logo)[0];
     const image = (
       <Image
-        src={cloudinaryUrl(logo, 320)}
+        src={cloudinaryUrl(logo, 512)}
         alt={`${brand.name} logo`}
         width={320}
         height={320}
         sizes="(min-width: 1024px) 25vw, 50vw"
-        className="size-24 object-contain md:size-28"
+        className="size-32 object-contain md:size-40"
       />
     );
 
@@ -129,21 +129,19 @@ export function BrandStrip({ brands }: { brands: Brand[] }) {
         key={brand.id}
         className="flex w-full max-w-[300px] flex-1 flex-col items-center text-center"
       >
-        <div className="bg-white p-2 shadow-[0_12px_32px_-16px_rgba(26,28,28,0.35)] ring-1 ring-border transition-transform duration-300 hover:scale-105">
-          {brand.websiteUrl ? (
-            <a
-              href={brand.websiteUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={brand.name}
-              className="block"
-            >
-              {image}
-            </a>
-          ) : (
-            image
-          )}
-        </div>
+        {brand.websiteUrl ? (
+          <a
+            href={brand.websiteUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={brand.name}
+            className="block transition-transform duration-300 hover:scale-105"
+          >
+            {image}
+          </a>
+        ) : (
+          image
+        )}
         <h3 className="mt-5 text-sm font-bold tracking-[0.18em] text-ink uppercase">
           {brand.name}
         </h3>
