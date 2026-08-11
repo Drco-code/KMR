@@ -1,21 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getBrands, getProducts } from "@/lib/api/client";
-import { ProductGrid } from "@/components/product-grid";
+import { getBrands } from "@/lib/api/client";
 import { BrandStrip } from "@/components/brand-strip";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { HeroBackground } from "@/components/hero-background";
 
 export default async function Home() {
-  const [products, brands] = await Promise.all([
-    getProducts(),
-    getBrands(),
-  ]);
-  // "Signature Collections" is staff-curated via the isFeatured flag in
-  // the admin panel. Falls back to the most recent products so the
-  // section isn't empty before anything's been marked featured.
-  const featuredProducts = products.filter((product) => product.isFeatured);
-  const featured = (featuredProducts.length > 0 ? featuredProducts : products).slice(0, 3);
+  const brands = await getBrands();
 
   return (
     <div className="flex flex-col">
@@ -33,8 +24,42 @@ export default async function Home() {
             Signature Collections
           </h2>
         </ScrollReveal>
-        <div className="mx-auto w-full max-w-[1200px]">
-          <ProductGrid products={featured} />
+        {/* Placeholder cards until the client confirms the direction for
+            signature collections — real curated products get wired back
+            in once the idea is set. */}
+        <div className="grid w-full grid-cols-1 justify-items-center gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3].map((n) => (
+            <div
+              key={n}
+              className="flex w-full max-w-[300px] flex-col overflow-hidden rounded-md border border-dashed border-ink/15 bg-white"
+            >
+              <div className="flex aspect-square w-full items-center justify-center bg-ink/[0.03]">
+                <svg
+                  width="44"
+                  height="44"
+                  viewBox="0 0 44 44"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  className="text-ink/20"
+                >
+                  <path d="M22 5 L39 22 L22 39 L5 22 Z" />
+                  <circle cx="22" cy="22" r="5.5" />
+                </svg>
+              </div>
+              <div className="flex flex-col gap-2 p-4 pt-3">
+                <span className="text-[10px] font-medium tracking-[0.1em] text-gold uppercase">
+                  Signature Collection 0{n}
+                </span>
+                <h3 className="font-sans text-sm font-medium text-ink">
+                  To be revealed
+                </h3>
+                <p className="text-xs text-ink-muted">
+                  Curated with our team — details coming soon.
+                </p>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
