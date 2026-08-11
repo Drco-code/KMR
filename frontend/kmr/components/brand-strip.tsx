@@ -29,9 +29,9 @@ function prefersReducedMotion(): boolean {
   );
 }
 
-// Homepage "Our Brands" section, circular logo, name and one-line tagline
-// per brand, matching the client's reference layout. The 4-column desktop
-// layout paginates through the catalog (auto-advancing, pausing on hover)
+// Homepage "Our Brands" section, full uncropped logo, name and one-line
+// tagline per brand, matching the client's reference layout. The 4-column
+// desktop layout paginates through the catalog (auto-advancing, pausing on hover)
 // once there are more than 4 brands; below lg and with 4 or fewer brands
 // every brand is shown statically in a centered wrapped grid.
 export function BrandStrip({ brands }: { brands: Brand[] }) {
@@ -120,7 +120,7 @@ export function BrandStrip({ brands }: { brands: Brand[] }) {
         width={320}
         height={320}
         sizes="(min-width: 1024px) 25vw, 50vw"
-        className="size-24 rounded-full object-cover md:size-28"
+        className="size-24 object-contain md:size-28"
       />
     );
 
@@ -129,7 +129,7 @@ export function BrandStrip({ brands }: { brands: Brand[] }) {
         key={brand.id}
         className="flex w-full max-w-[300px] flex-1 flex-col items-center text-center"
       >
-        <div className="overflow-hidden rounded-full bg-white shadow-[0_12px_32px_-16px_rgba(26,28,28,0.35)] ring-1 ring-border transition-transform duration-300 hover:scale-105">
+        <div className="bg-white p-2 shadow-[0_12px_32px_-16px_rgba(26,28,28,0.35)] ring-1 ring-border transition-transform duration-300 hover:scale-105">
           {brand.websiteUrl ? (
             <a
               href={brand.websiteUrl}
