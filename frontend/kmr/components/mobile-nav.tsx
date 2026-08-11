@@ -176,7 +176,7 @@ export function MobileNav({ categories }: { categories: Category[] }) {
               alt="KMR City Ventures"
               width={480}
               height={385}
-              className="h-10 w-auto rounded-sm ring-1 ring-border"
+              className="h-10 w-auto"
             />
           </SheetTitle>
         </SheetHeader>

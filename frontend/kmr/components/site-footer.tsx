@@ -64,7 +64,7 @@ export async function SiteFooter() {
               alt="KMR City Ventures"
               width={480}
               height={385}
-              className="h-11 w-auto rounded-sm ring-1 ring-border"
+              className="h-11 w-auto"
             />
             <p className="text-sm text-ink/70">
               Defining spaces through color. Premium architectural coatings
