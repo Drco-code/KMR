@@ -49,7 +49,7 @@ export default function ContactPage() {
           Get In Touch
         </span>
         <h1 className="font-display text-4xl text-ink md:text-5xl">Contact Us</h1>
-        <p className="max-w-xl text-lg text-ink-muted">
+        <p className="max-w-xl text-lg text-ink-muted md:text-justify md:hyphens-auto">
           Questions about our collection, a project in progress, or wholesale
           pricing? Our team is happy to help.
         </p>

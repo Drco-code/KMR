@@ -31,7 +31,7 @@ export default function ConsultancyPage() {
         <h1 className="font-display text-4xl text-ink md:text-5xl">
           Consultancy Services
         </h1>
-        <p className="max-w-xl text-lg text-ink-muted">
+        <p className="max-w-xl text-lg text-ink-muted md:text-justify md:hyphens-auto">
           Beyond the collection, our in-house colorists and application
           specialists help you bring architectural-grade finishes to life.
         </p>
@@ -48,7 +48,7 @@ export default function ConsultancyPage() {
             <div className="aspect-video flex-1 bg-secondary" />
             <div className="flex flex-1 flex-col gap-4">
               <h2 className="font-display text-3xl text-ink">{service.title}</h2>
-              <p className="text-ink-muted">{service.description}</p>
+              <p className="text-ink-muted md:text-justify md:hyphens-auto">{service.description}</p>
               <Link
                 href="/quote"
                 className="text-sm font-semibold tracking-[0.05em] text-gold uppercase underline underline-offset-4"

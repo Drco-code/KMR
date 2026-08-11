@@ -57,7 +57,7 @@ export default async function Home() {
             <h2 className="font-display text-4xl text-white md:text-5xl">
               Where Colour Meets Craft.
             </h2>
-            <p className="max-w-xl text-lg text-white/60">
+            <p className="max-w-xl text-lg text-white/60 md:text-justify md:hyphens-auto">
               KMR City Ventures is a Ghanaian building-materials house
               built on one belief. The right finish changes everything.
               From premium coatings and artisanal pigments to timber and

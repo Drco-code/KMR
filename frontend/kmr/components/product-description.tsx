@@ -46,7 +46,7 @@ export function ProductDescription({ html }: { html: string }) {
           <div className="relative mt-4">
             <div ref={scrollRef} className="max-h-80 overflow-y-auto pr-2">
               <div
-                className="prose prose-sm max-w-md text-ink-muted prose-headings:text-ink prose-strong:text-ink"
+                className="prose prose-sm max-w-md text-ink-muted prose-headings:text-ink prose-strong:text-ink md:text-justify md:hyphens-auto"
                 dangerouslySetInnerHTML={{ __html: html }}
               />
             </div>
