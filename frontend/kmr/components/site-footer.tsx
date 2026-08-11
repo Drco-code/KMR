@@ -63,8 +63,8 @@ export async function SiteFooter() {
               src="/images/logo.png"
               alt="KMR City Ventures"
               width={480}
-              height={384}
-              className="h-10 w-auto"
+              height={385}
+              className="h-11 w-auto rounded-sm ring-1 ring-border"
             />
             <p className="text-sm text-ink/70">
               Defining spaces through color. Premium architectural coatings

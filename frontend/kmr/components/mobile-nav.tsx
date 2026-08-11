@@ -175,8 +175,8 @@ export function MobileNav({ categories }: { categories: Category[] }) {
               src="/images/logo.png"
               alt="KMR City Ventures"
               width={480}
-              height={384}
-              className="h-8 w-auto"
+              height={385}
+              className="h-10 w-auto rounded-sm ring-1 ring-border"
             />
           </SheetTitle>
         </SheetHeader>
