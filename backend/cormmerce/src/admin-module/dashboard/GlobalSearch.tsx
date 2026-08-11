@@ -187,7 +187,7 @@ const GlobalSearch: React.FC = () => {
                     <Box flex style={{ gap: '8px' }}>
                       <Button
                         as="a"
-                        href={`/admin/resources/${key}/records/${hit.id}`}
+                        href={`/admin/resources/${key}/records/${hit.id}/show`}
                         variant="outline"
                         size="sm"
                       >
