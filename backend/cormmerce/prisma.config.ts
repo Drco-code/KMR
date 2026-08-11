@@ -3,18 +3,35 @@
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
 
-// Migrations use MIGRATE_DATABASE_URL when set, falling back to DATABASE_URL.
+// Migrations use MIGRATE_DATABASE_URL when set, otherwise a direct
+// connection derived from DATABASE_URL.
+//
 // The production database is Neon, and its *pooled* URL (the "-pooler"
-// segment) routes through a connection pooler that cannot hold Postgres
-// advisory locks — the session-level lock prisma migrate deploy needs to
-// serialize migrations. That surfaces during Render's build as error P1002
-// ("Timed out trying to acquire a postgres advisory lock"). Pointing
-// MIGRATE_DATABASE_URL at Neon's *direct* connection string (from the Neon
-// dashboard: Connect → direct, no "-pooler") makes migrate deploy talk to
-// the database directly and the lock works normally. Local dev is
-// unaffected: this env var is unset there, so it falls back to DATABASE_URL.
+// host segment) routes through a connection pooler that cannot hold
+// Postgres advisory locks — the session-level lock prisma migrate deploy
+// needs to serialize migrations. That surfaces during Render's build as
+// error P1002 ("Timed out trying to acquire a postgres advisory lock").
+// Neon's *direct* URL is identical except the "-pooler" segment is dropped,
+// so rather than require a second MIGRATE_DATABASE_URL env var to be
+// hand-configured on Render, we derive the direct URL from the pooled one
+// when no override is set. The existing MIGRATE_DATABASE_URL escape hatch
+// is kept for providers whose direct URL can't be derived (e.g. local
+// Postgres). Local dev is unaffected: DATABASE_URL there is a plain
+// connection string with no "-pooler" segment, so it passes through as-is.
+function toDirectDatabaseUrl(url: string): string {
+  if (!url) return url;
+  // Only derive for Neon pooled endpoints — strip the "-pooler" segment from
+  // the host. Guarded on "neon.tech" so credentials, database names, or
+  // query params elsewhere in the string can never be mangled, and any other
+  // provider (local Postgres, Prisma Postgres, ...) passes through untouched.
+  if (url.includes('neon.tech')) {
+    return url.replace(/-pooler\./, '.');
+  }
+  return url;
+}
+
 const databaseUrl =
-  process.env["MIGRATE_DATABASE_URL"] ?? process.env["DATABASE_URL"];
+  process.env["MIGRATE_DATABASE_URL"] ?? toDirectDatabaseUrl(process.env["DATABASE_URL"] ?? '');
 
 if (!databaseUrl) {
   throw new Error("DATABASE_URL is required for Prisma configuration.");
