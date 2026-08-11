@@ -49,7 +49,7 @@ export async function SiteHeader() {
             src="/images/logo.png"
             alt="KMR City Ventures"
             width={480}
-            height={385}
+            height={317}
             priority
             className="h-12 w-auto md:h-14"
           />

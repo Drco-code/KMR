@@ -63,7 +63,7 @@ export async function SiteFooter() {
               src="/images/logo.png"
               alt="KMR City Ventures"
               width={480}
-              height={385}
+              height={317}
               className="h-11 w-auto"
             />
             <p className="text-sm text-ink/70">
