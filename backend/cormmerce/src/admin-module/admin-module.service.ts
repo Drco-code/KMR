@@ -1223,6 +1223,13 @@ export class AdminModuleService {
                               request.payload,
                               ValidationError,
                             );
+                            // CategoryParentSelect sends '' when no parent is
+                            // selected — convert to null so Prisma stores a
+                            // proper NULL for the FK (avoids storing an empty
+                            // string that downstream filters may mishandle).
+                            if (!request.payload.parentId) {
+                              request.payload.parentId = null;
+                            }
                           }
                           return request;
                         },
@@ -1253,7 +1260,9 @@ export class AdminModuleService {
                             }
                             // Also normalise null-ish values sent by the
                             // isClearable Select (option cleared → null/empty).
-                            if (request.payload.parentId === null || request.payload.parentId === undefined) {
+                            // Converts '', null, and undefined to null so
+                            // Prisma stores a proper NULL for the FK column.
+                            if (!request.payload.parentId) {
                               request.payload.parentId = null;
                             }
                           }
