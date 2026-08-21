@@ -17,6 +17,8 @@ export interface QuoteCartItem {
 
 interface QuoteCartState {
   items: QuoteCartItem[];
+  lastAddedAt: number | null;
+  lastAddedQuantity: number;
   addItem: (item: Omit<QuoteCartItem, "quantity">, quantity?: number) => void;
   removeItem: (itemKey: string) => void;
   setQuantity: (itemKey: string, quantity: number) => void;
@@ -27,6 +29,8 @@ export const useQuoteCart = create<QuoteCartState>()(
   persist(
     (set) => ({
       items: [],
+      lastAddedAt: null,
+      lastAddedQuantity: 1,
       addItem: (item, quantity = 1) =>
         set((state) => {
           const existing = state.items.find((i) => i.itemKey === item.itemKey);
@@ -37,9 +41,15 @@ export const useQuoteCart = create<QuoteCartState>()(
                   ? { ...i, quantity: i.quantity + quantity }
                   : i
               ),
+              lastAddedAt: Date.now(),
+              lastAddedQuantity: quantity,
             };
           }
-          return { items: [...state.items, { ...item, quantity }] };
+          return {
+            items: [...state.items, { ...item, quantity }],
+            lastAddedAt: Date.now(),
+            lastAddedQuantity: quantity,
+          };
         }),
       removeItem: (itemKey) =>
         set((state) => ({
@@ -56,7 +66,10 @@ export const useQuoteCart = create<QuoteCartState>()(
         })),
       clear: () => set({ items: [] }),
     }),
-    { name: "aura-hue-quote-cart" }
+    {
+      name: "aura-hue-quote-cart",
+      partialize: (state) => ({ items: state.items }),
+    }
   )
 );
 

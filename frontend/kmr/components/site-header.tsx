@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingCart } from "lucide-react";
-import { CartBadge } from "@/components/cart-badge";
+import { HeaderCartButton } from "@/components/header-cart-button";
 import { MobileNav } from "@/components/mobile-nav";
 import { NavSearch } from "@/components/nav-search";
 import { MegaMenu } from "@/components/mega-menu";
@@ -66,14 +65,7 @@ export async function SiteHeader() {
 
         <div className="flex items-center gap-3">
           <NavSearch />
-          <Link
-            href="/quote"
-            className="relative flex size-9 items-center justify-center text-ink transition-colors hover:text-gold"
-          >
-            <ShoppingCart className="size-[18px]" />
-            <CartBadge />
-            <span className="sr-only">View quote cart</span>
-          </Link>
+          <HeaderCartButton />
           <ContactUsButton />
           <MobileNav categories={categories} />
         </div>
