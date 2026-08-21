@@ -1235,6 +1235,27 @@ export class AdminModuleService {
                               ValidationError,
                               context?.record?.params?.id,
                             );
+                            // The CategoryParentSelect component may submit an
+                            // empty string for parentId if it failed to pre-
+                            // populate the existing parent (e.g. because the
+                            // AdminJS adapter surfaces the FK under a different
+                            // key on the edit form vs list results). Guard
+                            // against this by restoring the existing parentId
+                            // from the record when the payload sends '' or
+                            // undefined — an admin who genuinely wants to make
+                            // the category top-level must clear the dropdown,
+                            // which sets parentId to null (not empty string).
+                            if (
+                              request.payload.parentId === '' &&
+                              context?.record?.params?.parentId
+                            ) {
+                              request.payload.parentId = context.record.params.parentId;
+                            }
+                            // Also normalise null-ish values sent by the
+                            // isClearable Select (option cleared → null/empty).
+                            if (request.payload.parentId === null || request.payload.parentId === undefined) {
+                              request.payload.parentId = null;
+                            }
                           }
                           return request;
                         },

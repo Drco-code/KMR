@@ -31,7 +31,14 @@ const CategoryParentSelect: React.FC<EditPropertyProps> = (props) => {
       .catch(() => setOptions([]));
   }, [record.id]);
 
-  const currentValue = record.params[property.path] as string | undefined;
+  // AdminJS/Prisma adapter surfaces the FK scalar as `parentId` on the edit
+  // form but as `parent` (the relation name) in list results.  Check both so
+  // the dropdown always pre-populates the current parent when editing.
+  const currentValue =
+    (record.params[property.path] as string | undefined) ||
+    (record.params['parentId'] as string | undefined) ||
+    (record.params['parent'] as string | undefined) ||
+    '';
   const selected = options?.find((o) => o.value === currentValue) ?? null;
 
   return (
