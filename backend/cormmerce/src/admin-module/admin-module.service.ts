@@ -175,11 +175,23 @@ const LOGIN_PAGE_HTML = `<!doctype html>
 export class AdminModuleService {
   constructor(private readonly prisma: PrismaModuleService) {}
 
-  private normalizeProductSlug(payload: Record<string, unknown>) {
-    const source = typeof payload.slug === 'string' && payload.slug.trim()
-      ? payload.slug
-      : payload.name;
+  private normalizeProductSlug(
+    payload: Record<string, unknown>,
+    existingRecord?: Record<string, unknown>,
+  ) {
+    const submittedSlug = typeof payload.slug === 'string' ? payload.slug.trim() : '';
 
+    // On edit: if the slug field was left blank (AdminJS submits empty string
+    // for hidden/untouched fields), preserve the existing slug from the DB
+    // record rather than regenerating from name. Re-generating changes the
+    // slug whenever a product is edited, which breaks any frontend link
+    // currently pointing to the old slug (/product/<old-slug> → 404).
+    if (!submittedSlug && existingRecord && typeof existingRecord.slug === 'string') {
+      payload.slug = existingRecord.slug;
+      return;
+    }
+
+    const source = submittedSlug || payload.name;
     if (typeof source !== 'string') return;
 
     const slug = slugify(source);
@@ -944,6 +956,18 @@ export class AdminModuleService {
                     isVisible: { list: true, show: true, edit: false, filter: false },
                     components: { list: productThumbnailCellComponent },
                   },
+                  // The slug drives the /product/<slug> frontend URL. Making
+                  // it editable in the edit form is dangerous: any accidental
+                  // change silently breaks the existing URL for all visitors
+                  // (Next.js fetches by slug, so the old URL returns a 404
+                  // immediately). It is intentionally read-only: visible in
+                  // list/show for reference, hidden in edit so edits always
+                  // preserve the existing slug. Admins who genuinely need to
+                  // rename a slug should do so via the DB directly or a
+                  // dedicated rename flow that also handles redirects.
+                  slug: {
+                    isVisible: { list: true, show: true, edit: false, filter: false },
+                  },
                   imagesMimeType: { isVisible: false },
                   imagesFilename: { isVisible: false },
                   imagesSize: { isVisible: false },
@@ -1025,9 +1049,13 @@ export class AdminModuleService {
                   // unconditional sync attempt) avoids needing to branch on
                   // request.method here at all.
                   edit: {
-                    before: (request: any, context: any) => {
-                      if (request.payload) {
-                        this.normalizeProductSlug(request.payload);
+                     before: (request: any, context: any) => {
+                       if (request.payload) {
+                         // Pass the existing DB record so normalizeProductSlug
+                         // can preserve the current slug when the field is
+                         // absent from the edit form (edit has isVisible:false),
+                         // preventing slug changes that would cause 404s.
+                         this.normalizeProductSlug(request.payload, context?.record?.params);
                         // originalParams lets the hook distinguish "field not
                         // touched" from "all videos removed" (see
                         // normalizeProductYouTubeUrls) so clearing every URL
