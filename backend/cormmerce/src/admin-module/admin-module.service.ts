@@ -1086,7 +1086,7 @@ export class AdminModuleService {
                 : name === 'SignatureCollection'
                   ? {
                       navigation: {
-                        name: 'Signature Collections',
+                        name: 'KMR Paint Collections',
                         icon: 'PaintBucket',
                       },
                       properties: {

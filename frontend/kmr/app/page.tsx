@@ -60,7 +60,7 @@ export default async function Home() {
             The Collection
           </span>
           <h2 className="font-display text-4xl text-ink md:text-5xl">
-            Signature Collections
+            KMR Paint Collections
           </h2>
         </ScrollReveal>
         <ScrollReveal
@@ -92,7 +92,7 @@ export default async function Home() {
               </div>
               <div className="p-4 pt-3">
                 <span className="text-[10px] font-medium tracking-[0.1em] text-gold uppercase">
-                  Signature Collection
+                  KMR Paint Collection
                 </span>
                 <p className="mt-1 text-sm font-semibold tracking-[0.04em] text-ink uppercase">
                   {label}

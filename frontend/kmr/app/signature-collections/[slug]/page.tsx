@@ -31,7 +31,7 @@ export default async function SignatureCollectionPage({
         href="/"
         className="text-xs font-medium tracking-[0.15em] text-gold uppercase"
       >
-        ← Signature Collections
+        ← KMR Paint Collections
       </Link>
 
       <div className="grid grid-cols-1 gap-12 pt-8 md:grid-cols-2">

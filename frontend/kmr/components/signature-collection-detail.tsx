@@ -55,7 +55,7 @@ export function SignatureCollectionDetail({ collection }: SignatureCollectionDet
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-3">
         <span className="text-xs font-medium tracking-[0.2em] text-gold uppercase">
-          Signature Collection
+          KMR Paint Collection
         </span>
         <h1 className="font-display text-4xl text-ink md:text-5xl">{collection.name}</h1>
         {collection.description ? (
