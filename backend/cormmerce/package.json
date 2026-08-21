@@ -7,6 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "postinstall": "prisma generate",
+    "migrate:deploy": "node prisma/run-migrations.js",
     "build": "nest build",
     "bundle:admin": "node dist/src/admin-module/bundle-admin.js",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
