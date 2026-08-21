@@ -12,7 +12,6 @@ import type { Brand } from "@/lib/api/types";
 
 const PER_VIEW = 4;
 const AUTO_ADVANCE_MS = 5000;
-const DESKTOP_QUERY = "(min-width: 1024px)";
 
 function chunk<T>(items: T[], size: number): T[][] {
   const chunks: T[][] = [];
@@ -31,27 +30,18 @@ function prefersReducedMotion(): boolean {
 
 // Homepage "Our Brands" section, full uncropped logo, name and one-line
 // tagline per brand, matching the client's reference layout. The 4-column
-// desktop layout paginates through the catalog (auto-advancing, pausing on hover)
-// once there are more than 4 brands; below lg and with 4 or fewer brands
-// every brand is shown statically in a centered wrapped grid.
+// desktop/mobile layout paginates through the catalog (auto-advancing, pausing on hover)
+// once there are more than 4 brands; with 4 or fewer brands every brand is shown
+// statically in a centered grid.
 export function BrandStrip({ brands }: { brands: Brand[] }) {
   const withLogos = brands.filter((brand) => getValidImages(brand.logo).length > 0);
-  const [isDesktop, setIsDesktop] = useState(false);
   const [page, setPage] = useState(0);
   const pageRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<number | null>(null);
 
-  useEffect(() => {
-    const mq = window.matchMedia(DESKTOP_QUERY);
-    const sync = () => setIsDesktop(mq.matches);
-    sync();
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, []);
-
   const pages = chunk(withLogos, PER_VIEW);
   const pageCount = pages.length;
-  const shouldRotate = isDesktop && pageCount > 1;
+  const shouldRotate = pageCount > 1;
   const currentPage = shouldRotate ? page % pageCount : 0;
 
   const stopAutoAdvance = useCallback(() => {
