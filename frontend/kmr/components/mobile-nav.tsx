@@ -153,13 +153,13 @@ function CategoryAccordion({
 export function MobileNav({ categories }: { categories: Category[] }) {
   const t = useTranslations("nav");
 
-  const MEGA_MENU_ITEMS = [
-    { label: t("tools"), slug: "tools" },
-    { label: t("outdoorEquipment"), slug: "outdoor-equipment" },
-    { label: t("buildingMaterials"), slug: "building-materials" },
-    { label: t("homeEssentials"), slug: "home-essentials" },
-    { label: t("autoEssentials"), slug: "auto-essentials" },
-  ];
+
+  // Build nav items dynamically from the API: any root-level category with
+  // showInNav=true becomes an accordion in the mobile nav. Sorted by navOrder
+  // so the admin controls the order from the Category Tree page.
+  const rootNavCategories = categories
+    .filter((c) => c.showInNav && !c.parentId)
+    .sort((a, b) => a.navOrder - b.navOrder || a.name.localeCompare(b.name));
 
   return (
     <Sheet>
@@ -211,11 +211,11 @@ export function MobileNav({ categories }: { categories: Category[] }) {
             <span className="px-1 text-xs font-semibold tracking-[0.15em] text-ink-muted uppercase">
               {t("browseByCategory")}
             </span>
-            {MEGA_MENU_ITEMS.map((item) => (
+            {rootNavCategories.map((cat) => (
               <CategoryAccordion
-                key={item.slug}
-                label={item.label}
-                slug={item.slug}
+                key={cat.slug}
+                label={cat.name}
+                slug={cat.slug}
                 categories={categories}
               />
             ))}

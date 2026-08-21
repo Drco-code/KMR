@@ -13,20 +13,19 @@ import { getCategories, getPromoBanner } from "@/lib/api/client";
 export async function SiteHeader() {
   const t = useTranslations("nav");
 
-  const MEGA_MENU_ITEMS = [
-    { label: t("tools"), slug: "tools" },
-    { label: t("outdoorEquipment"), slug: "outdoor-equipment" },
-    { label: t("buildingMaterials"), slug: "building-materials" },
-    { label: t("homeEssentials"), slug: "home-essentials" },
-    { label: t("autoEssentials"), slug: "auto-essentials" },
-  ];
-
   // The promo bar is admin-managed (PromoBanner resource in the dashboard):
   // it only renders while a message is set and the banner is active.
   const [categories, promo] = await Promise.all([
     getCategories(),
     getPromoBanner(),
   ]);
+
+  // Build nav items dynamically from the API: any root-level category with
+  // showInNav=true becomes a top-level mega-menu entry. Sorted by navOrder
+  // so the admin controls the order from the Category Tree page.
+  const rootNavCategories = categories
+    .filter((c) => c.showInNav && !c.parentId)
+    .sort((a, b) => a.navOrder - b.navOrder || a.name.localeCompare(b.name));
 
   return (
     <header className="sticky top-0 z-40">
@@ -59,8 +58,8 @@ export async function SiteHeader() {
         </Link>
 
         <nav className="hidden items-center gap-3 2xl:flex">
-          {MEGA_MENU_ITEMS.map((item) => (
-            <MegaMenu key={item.slug} label={item.label} slug={item.slug} categories={categories} />
+          {rootNavCategories.map((cat) => (
+            <MegaMenu key={cat.slug} label={cat.name} slug={cat.slug} categories={categories} />
           ))}
           <NavLink href="/consultancy">{t("b2bSolutions")}</NavLink>
           <NavLink href="/catalog">{t("topSellers")}</NavLink>
