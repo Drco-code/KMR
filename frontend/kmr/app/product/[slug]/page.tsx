@@ -57,7 +57,7 @@ export default async function ProductPage({
         />
 
         <div className="flex flex-col gap-6">
-          <TextReveal as="h1" className="font-display text-4xl text-ink md:text-5xl">
+          <TextReveal as="h1" className="font-display text-2xl font-normal text-ink md:text-3xl">
             {product.name}
           </TextReveal>
           {formatPrice(product.priceDescription) && (

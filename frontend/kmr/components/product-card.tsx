@@ -49,7 +49,7 @@ export function ProductCard({
         )}
 
         {/* Product Name - Full, not truncated */}
-        <h3 className="font-sans text-sm font-medium leading-snug text-ink">
+        <h3 className="font-display text-sm font-normal leading-snug text-ink">
           <Link href={`/product/${product.slug}`} className="hover:text-gold transition-colors">
             {product.name}
           </Link>
