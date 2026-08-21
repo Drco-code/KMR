@@ -18,6 +18,7 @@ import { QuoteRequestModuleModule } from './quote-request-module/quote-request-m
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { ClodinaryService } from './clodinary/clodinary.service';
 import { AdminModuleModule } from './admin-module/admin-module.module';
+import { SignatureCollectionModule } from './signature-collection-module/signature-collection-module.module';
 
 import 'dotenv/config';
 
@@ -49,6 +50,7 @@ const arcjetMode = process.env.ARCJET_MODE === 'LIVE' ? 'LIVE' : 'DRY_RUN';
     QuoteRequestModuleModule,
     CloudinaryModule,
     AdminModuleModule,
+    SignatureCollectionModule,
   ],
   controllers: [AppController],
   providers: [

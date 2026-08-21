@@ -150,7 +150,7 @@ export default function QuoteReviewPage() {
           <h2 className="font-display text-2xl text-ink">Itemized Summary</h2>
           <Separator />
           {items.map((item) => (
-            <div key={item.productId} className="flex items-center justify-between gap-6 text-sm">
+            <div key={item.itemKey} className="flex items-center justify-between gap-6 text-sm">
               <div className="flex min-w-0 flex-col">
                 <span className="text-ink">{item.name}</span>
                 <span className="text-xs text-ink-muted">Qty: {item.quantity}</span>

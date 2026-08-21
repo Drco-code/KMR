@@ -23,7 +23,7 @@ export function QuoteCartLine({ item }: { item: QuoteCartItem }) {
 
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <Link
-          href={`/product/${item.slug}`}
+          href={item.href ?? `/product/${item.slug}`}
           className="truncate font-display text-lg text-ink"
         >
           {item.name}
@@ -36,7 +36,7 @@ export function QuoteCartLine({ item }: { item: QuoteCartItem }) {
       <div className="flex items-center gap-3 border border-border px-2 py-1">
         <button
           type="button"
-          onClick={() => setQuantity(item.productId, item.quantity - 1)}
+          onClick={() => setQuantity(item.itemKey, item.quantity - 1)}
           className="flex size-6 items-center justify-center text-ink hover:text-gold"
           aria-label="Decrease quantity"
         >
@@ -45,7 +45,7 @@ export function QuoteCartLine({ item }: { item: QuoteCartItem }) {
         <span className="w-4 text-center text-sm">{item.quantity}</span>
         <button
           type="button"
-          onClick={() => setQuantity(item.productId, item.quantity + 1)}
+          onClick={() => setQuantity(item.itemKey, item.quantity + 1)}
           className="flex size-6 items-center justify-center text-ink hover:text-gold"
           aria-label="Increase quantity"
         >
@@ -55,7 +55,7 @@ export function QuoteCartLine({ item }: { item: QuoteCartItem }) {
 
       <button
         type="button"
-        onClick={() => removeItem(item.productId)}
+        onClick={() => removeItem(item.itemKey)}
         className="flex size-8 items-center justify-center text-ink-muted hover:text-destructive"
         aria-label="Remove item"
       >

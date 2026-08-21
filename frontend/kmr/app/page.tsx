@@ -1,12 +1,51 @@
 import Image from "next/image";
 import Link from "next/link";
 import { getBrands } from "@/lib/api/client";
+import { getSignatureCollections } from "@/lib/api/client";
 import { BrandStrip } from "@/components/brand-strip";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { HeroBackground } from "@/components/hero-background";
+import type { SignatureCollectionType } from "@/lib/api/types";
+
+const SIGNATURE_SLOTS: Array<{
+  type: SignatureCollectionType;
+  name: string;
+  fallbackSlug: string;
+  image: string;
+}> = [
+  {
+    type: "EMULSION",
+    name: "KMR Emulsion Paint",
+    fallbackSlug: "kmr-emulsion-paint",
+    image: "/images/optimized/signature-1.webp",
+  },
+  {
+    type: "OIL",
+    name: "KMR Oil Paint",
+    fallbackSlug: "kmr-oil-paint",
+    image: "/images/optimized/signature-2.webp",
+  },
+  {
+    type: "POP",
+    name: "KMR POP Paint",
+    fallbackSlug: "kmr-pop-paint",
+    image: "/images/optimized/signature-3.webp",
+  },
+  {
+    type: "GRAFFIATE",
+    name: "KMR Graffiate Paint",
+    fallbackSlug: "kmr-graffiate-paint",
+    image: "/images/optimized/signature-4.webp",
+  },
+];
 
 export default async function Home() {
-  const brands = await getBrands();
+  const [brands, signatureCollections] = await Promise.all([
+    getBrands(),
+    getSignatureCollections(),
+  ]);
+
+  const byType = new Map(signatureCollections.map((collection) => [collection.type, collection]));
 
   return (
     <div className="flex flex-col">
@@ -24,28 +63,28 @@ export default async function Home() {
             Signature Collections
           </h2>
         </ScrollReveal>
-        {/* Signature collection teasers, placeholder images until the
-            client confirms the direction for this section. */}
         <ScrollReveal
           className="grid w-full grid-cols-1 justify-items-center gap-6 sm:grid-cols-2 lg:grid-cols-4"
           stagger={0.08}
           y={16}
           duration={0.6}
         >
-          {[
-            { src: "/images/optimized/signature-1.webp", n: 1 },
-            { src: "/images/optimized/signature-2.webp", n: 2 },
-            { src: "/images/optimized/signature-3.webp", n: 3 },
-            { src: "/images/optimized/signature-4.webp", n: 4 },
-          ].map((image) => (
-            <div
-              key={image.n}
+          {SIGNATURE_SLOTS.map((slot) => {
+            const collection = byType.get(slot.type);
+            const href = `/signature-collections/${collection?.slug ?? slot.fallbackSlug}`;
+            const imageSrc = collection?.heroImage || slot.image;
+            const label = collection?.name || slot.name;
+
+            return (
+            <Link
+              key={slot.type}
+              href={href}
               className="group flex w-full max-w-[300px] flex-col overflow-hidden rounded-md border border-gray-200 bg-white transition-all duration-300 hover:shadow-xl"
             >
               <div className="relative aspect-square w-full overflow-hidden">
                 <Image
-                  src={image.src}
-                  alt={`Signature Collection ${String(image.n).padStart(2, "0")}`}
+                  src={imageSrc}
+                  alt={label}
                   fill
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
                   sizes="300px"
@@ -53,11 +92,15 @@ export default async function Home() {
               </div>
               <div className="p-4 pt-3">
                 <span className="text-[10px] font-medium tracking-[0.1em] text-gold uppercase">
-                  Signature Collection {String(image.n).padStart(2, "0")}
+                  Signature Collection
                 </span>
+                <p className="mt-1 text-sm font-semibold tracking-[0.04em] text-ink uppercase">
+                  {label}
+                </p>
               </div>
-            </div>
-          ))}
+            </Link>
+            );
+          })}
         </ScrollReveal>
       </section>
 

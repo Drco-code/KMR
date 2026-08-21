@@ -35,7 +35,7 @@ export default function QuotePage() {
         <div className="flex flex-col gap-8 md:max-w-2xl">
           <div className="flex flex-col">
             {items.map((item) => (
-              <QuoteCartLine key={item.productId} item={item} />
+              <QuoteCartLine key={item.itemKey} item={item} />
             ))}
           </div>
           <div className="flex items-center justify-between">

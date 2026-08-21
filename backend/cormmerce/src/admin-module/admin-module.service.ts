@@ -52,6 +52,9 @@ const ADMIN_ROOT_PATH = '/admin';
 // Matches the Product.youtubeUrls key and any flattened `youtubeUrls.N`
 // index keys AdminJS's form may submit (see normalizeProductYouTubeUrls).
 const YOUTUBE_URLS_KEY = /^youtubeUrls(?:\.\d+)?$/;
+const HEX_COLOR = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
+const RGB_COLOR =
+  /^rgb\(\s*(25[0-5]|2[0-4]\d|1?\d?\d)\s*,\s*(25[0-5]|2[0-4]\d|1?\d?\d)\s*,\s*(25[0-5]|2[0-4]\d|1?\d?\d)\s*\)$/i;
 
 function isYouTubeUrlsKey(key: string): boolean {
   return YOUTUBE_URLS_KEY.test(key);
@@ -84,6 +87,29 @@ function parseJsonStringArray(value: string): string[] | null {
     // not JSON — fall through to single-URL handling
   }
   return null;
+}
+
+function normalizeColorCode(raw: string): string | null {
+  const value = raw.trim();
+  if (HEX_COLOR.test(value)) {
+    const shortHex = value.slice(1);
+    if (shortHex.length === 3) {
+      const [r, g, b] = shortHex.split('');
+      return `#${r}${r}${g}${g}${b}${b}`.toUpperCase();
+    }
+    return value.toUpperCase();
+  }
+
+  const rgbMatch = value.match(RGB_COLOR);
+  if (!rgbMatch) return null;
+  const [, r, g, b] = rgbMatch;
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
+function isWhiteColorCode(value: string): boolean {
+  const normalized = normalizeColorCode(value);
+  if (!normalized) return false;
+  return normalized === '#FFFFFF' || normalized === 'rgb(255, 255, 255)';
 }
 
 const LOGIN_PAGE_HTML = `<!doctype html>
@@ -307,6 +333,98 @@ export class AdminModuleService {
     payload.youtubeUrls = urls;
     for (const key of keys) {
       if (key !== 'youtubeUrls') delete payload[key];
+    }
+  }
+
+  private normalizeSignatureCollectionSlug(payload: Record<string, unknown>) {
+    const source = typeof payload.slug === 'string' && payload.slug.trim()
+      ? payload.slug
+      : payload.name;
+
+    if (typeof source !== 'string') return;
+
+    const slug = slugify(source);
+    if (!slug) {
+      throw new Error(
+        'Signature Collection slug must contain at least one letter or number',
+      );
+    }
+
+    payload.slug = slug;
+  }
+
+  private async normalizeSignatureVariantParams(
+    payload: Record<string, unknown>,
+    ValidationErrorCtor: new (errors: Record<string, { message: string }>) => Error,
+    variantId?: string,
+  ) {
+    const sizeLabel =
+      typeof payload.sizeLabel === 'string' ? payload.sizeLabel.trim() : undefined;
+    const colorName =
+      typeof payload.colorName === 'string' ? payload.colorName.trim() : undefined;
+    const rawColorCode =
+      typeof payload.colorCode === 'string' ? payload.colorCode.trim() : undefined;
+
+    if (!sizeLabel) {
+      throw new ValidationErrorCtor({
+        sizeLabel: { message: 'Size is required' },
+      });
+    }
+    payload.sizeLabel = sizeLabel;
+
+    if (!rawColorCode) {
+      throw new ValidationErrorCtor({
+        colorCode: { message: 'Color code is required' },
+      });
+    }
+
+    const normalizedColorCode = normalizeColorCode(rawColorCode);
+    if (!normalizedColorCode) {
+      throw new ValidationErrorCtor({
+        colorCode: { message: 'Use a valid hex or rgb color code' },
+      });
+    }
+    payload.colorCode = normalizedColorCode;
+
+    const collectionIdValue = payload.collectionId;
+    let collectionId = typeof collectionIdValue === 'string' ? collectionIdValue : undefined;
+    if (!collectionId && variantId) {
+      const existingVariant = await this.prisma.signatureCollectionVariant.findUnique({
+        where: { id: variantId },
+        select: { collectionId: true },
+      });
+      collectionId = existingVariant?.collectionId;
+    }
+
+    if (!collectionId) {
+      throw new ValidationErrorCtor({
+        collectionId: { message: 'Collection is required' },
+      });
+    }
+
+    const collection = await this.prisma.signatureCollection.findUnique({
+      where: { id: collectionId },
+      select: { type: true },
+    });
+    if (!collection) {
+      throw new ValidationErrorCtor({
+        collectionId: { message: 'Collection not found' },
+      });
+    }
+
+    if (collection.type === 'POP') {
+      if (!isWhiteColorCode(normalizedColorCode)) {
+        throw new ValidationErrorCtor({
+          colorCode: { message: 'POP Paint supports only white variants' },
+        });
+      }
+      payload.colorName = 'White';
+    } else if (!colorName) {
+      throw new ValidationErrorCtor({
+        colorName: { message: 'Color name is required' },
+      });
+    } else {
+      payload.colorName = colorName;
     }
   }
 
@@ -657,6 +775,10 @@ export class AdminModuleService {
       'ProductQrCode',
       path.join(__dirname, 'dashboard', 'ProductQrCode'),
     );
+    const colorHexInputComponent = componentLoader.add(
+      'ColorHexInput',
+      path.join(__dirname, 'dashboard', 'ColorHexInput'),
+    );
 
     // AdminJS's built-in logout button only renders when it manages its own
     // session (buildAuthenticatedRouter); this app shares Better Auth's
@@ -692,6 +814,8 @@ export class AdminModuleService {
       'Category',
       'Product',
       'Brand',
+      'SignatureCollection',
+      'SignatureCollectionVariant',
       'PromoBanner',
       'ContactInfo',
       'QuoteRequest',
@@ -997,7 +1121,81 @@ export class AdminModuleService {
                       },
                     },
                   }
-                : name === 'PromoBanner'
+                : name === 'SignatureCollection'
+                  ? {
+                      navigation: {
+                        name: 'Signature Collections',
+                        icon: 'PaintBucket',
+                      },
+                      properties: {
+                        description: { type: 'textarea' },
+                        heroImage: {
+                          description:
+                            'Optional image URL shown on the storefront collection card and PDP.',
+                        },
+                        sortOrder: {
+                          description:
+                            'Lower values show first on the storefront collection menu.',
+                        },
+                        type: {
+                          description:
+                            'Paint family for this signature collection (drives homepage slot).',
+                        },
+                      },
+                      actions: {
+                        new: {
+                          before: (request: any) => {
+                            if (request.payload) this.normalizeSignatureCollectionSlug(request.payload);
+                            return request;
+                          },
+                        },
+                        edit: {
+                          before: (request: any) => {
+                            if (request.payload) this.normalizeSignatureCollectionSlug(request.payload);
+                            return request;
+                          },
+                        },
+                      },
+                    }
+                  : name === 'SignatureCollectionVariant'
+                    ? {
+                        navigation: {
+                          name: 'Signature Collections',
+                          icon: 'PaintBucket',
+                        },
+                        properties: {
+                          colorCode: {
+                            components: { edit: colorHexInputComponent },
+                            description: 'Pick a color or type a hex/rgb value.',
+                          },
+                        },
+                        actions: {
+                          new: {
+                            before: async (request: any) => {
+                              if (request.payload) {
+                                await this.normalizeSignatureVariantParams(
+                                  request.payload,
+                                  ValidationError,
+                                );
+                              }
+                              return request;
+                            },
+                          },
+                          edit: {
+                            before: async (request: any, context: any) => {
+                              if (request.payload) {
+                                await this.normalizeSignatureVariantParams(
+                                  request.payload,
+                                  ValidationError,
+                                  context?.record?.params?.id,
+                                );
+                              }
+                              return request;
+                            },
+                          },
+                        },
+                      }
+                    : name === 'PromoBanner'
                   ? {
                       properties: {
                         // Promo copy can be long — textarea beats a single-line input.

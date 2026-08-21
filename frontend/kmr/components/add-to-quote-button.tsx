@@ -14,9 +14,11 @@ export function AddToQuoteButton({ product }: { product: Product }) {
 
   function handleAdd() {
     addItem({
+      itemKey: product.id,
       productId: product.id,
       name: product.name,
       slug: product.slug,
+      href: `/product/${product.slug}`,
       priceDescription: product.priceDescription,
       coverImage: getValidImages(product.images)[0] ?? null,
     });

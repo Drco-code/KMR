@@ -150,6 +150,44 @@ model Product {
   updatedAt DateTime @updatedAt
 }
 
+enum SignatureCollectionType {
+  EMULSION
+  OIL
+  POP
+  GRAFFIATE
+}
+
+model SignatureCollection {
+  id          String                  @id @default(uuid())
+  name        String
+  slug        String                  @unique
+  type        SignatureCollectionType @unique
+  description String?                 @db.Text
+  heroImage   String?
+  isActive    Boolean                 @default(true)
+  sortOrder   Int                     @default(0)
+  variants    SignatureCollectionVariant[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SignatureCollectionVariant {
+  id           String             @id @default(uuid())
+  collectionId String
+  collection   SignatureCollection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  colorName    String
+  colorCode    String
+  sizeLabel    String
+  isActive     Boolean            @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([collectionId])
+  @@unique([collectionId, colorCode, sizeLabel])
+}
+
 // Join table for the Product<->Category many-to-many relationship. One row
 // per (product, category) assignment. Exactly one row per product must have
 // isPrimary: true — that's the category the storefront uses for the

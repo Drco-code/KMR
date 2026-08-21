@@ -5,6 +5,7 @@ import type {
   Product,
   PromoBanner,
   QuoteRequestPayload,
+  SignatureCollection,
 } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -66,4 +67,22 @@ export async function submitQuoteRequest(payload: QuoteRequestPayload): Promise<
     method: "POST",
     body: JSON.stringify(payload),
   });
+}
+
+export async function getSignatureCollections(): Promise<SignatureCollection[]> {
+  return apiFetch<SignatureCollection[]>("/signature-collection-module", { cache: "no-store" });
+}
+
+export async function getSignatureCollectionBySlug(
+  slug: string
+): Promise<SignatureCollection | null> {
+  try {
+    const decodedSlug = decodeURIComponent(slug);
+    return await apiFetch<SignatureCollection>(
+      `/signature-collection-module/${encodeURIComponent(decodedSlug)}`,
+      { cache: "no-store" }
+    );
+  } catch {
+    return null;
+  }
 }
