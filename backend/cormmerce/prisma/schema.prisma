@@ -164,28 +164,13 @@ model SignatureCollection {
   type        SignatureCollectionType @unique
   description String?                 @db.Text
   heroImage   String?
+  sizes       String[]                @default([])
+  colors      Json                    @default("[]")
   isActive    Boolean                 @default(true)
   sortOrder   Int                     @default(0)
-  variants    SignatureCollectionVariant[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-}
-
-model SignatureCollectionVariant {
-  id           String             @id @default(uuid())
-  collectionId String
-  collection   SignatureCollection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
-  colorName    String
-  colorCode    String
-  sizeLabel    String
-  isActive     Boolean            @default(true)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([collectionId])
-  @@unique([collectionId, colorCode, sizeLabel])
 }
 
 // Join table for the Product<->Category many-to-many relationship. One row

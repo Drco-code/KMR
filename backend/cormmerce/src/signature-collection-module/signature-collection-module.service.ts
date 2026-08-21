@@ -9,24 +9,12 @@ export class SignatureCollectionModuleService {
     return this.prisma.signatureCollection.findMany({
       where: { isActive: true },
       orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
-      include: {
-        variants: {
-          where: { isActive: true },
-          orderBy: [{ colorName: 'asc' }, { sizeLabel: 'asc' }],
-        },
-      },
     });
   }
 
   async findBySlug(slug: string) {
     const collection = await this.prisma.signatureCollection.findFirst({
       where: { slug: decodeURIComponent(slug), isActive: true },
-      include: {
-        variants: {
-          where: { isActive: true },
-          orderBy: [{ colorName: 'asc' }, { sizeLabel: 'asc' }],
-        },
-      },
     });
 
     if (!collection) {

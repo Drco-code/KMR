@@ -33,13 +33,9 @@ export interface Product {
 
 export type SignatureCollectionType = "EMULSION" | "OIL" | "POP" | "GRAFFIATE";
 
-export interface SignatureCollectionVariant {
-  id: string;
-  collectionId: string;
-  colorName: string;
-  colorCode: string;
-  sizeLabel: string;
-  isActive: boolean;
+export interface SignatureColorOption {
+  name: string;
+  code: string;
 }
 
 export interface SignatureCollection {
@@ -49,9 +45,10 @@ export interface SignatureCollection {
   type: SignatureCollectionType;
   description: string | null;
   heroImage: string | null;
+  sizes: string[];
+  colors: SignatureColorOption[];
   isActive: boolean;
   sortOrder: number;
-  variants: SignatureCollectionVariant[];
 }
 
 export interface Brand {

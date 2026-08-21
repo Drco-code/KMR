@@ -336,95 +336,50 @@ export class AdminModuleService {
     }
   }
 
-  private normalizeSignatureCollectionSlug(payload: Record<string, unknown>) {
-    const source = typeof payload.slug === 'string' && payload.slug.trim()
-      ? payload.slug
-      : payload.name;
+  private normalizeSignatureCollectionPayload(payload: Record<string, unknown>) {
+    const source =
+      typeof payload.slug === 'string' && payload.slug.trim()
+        ? payload.slug
+        : payload.name;
 
-    if (typeof source !== 'string') return;
-
-    const slug = slugify(source);
-    if (!slug) {
-      throw new Error(
-        'Signature Collection slug must contain at least one letter or number',
-      );
-    }
-
-    payload.slug = slug;
-  }
-
-  private async normalizeSignatureVariantParams(
-    payload: Record<string, unknown>,
-    ValidationErrorCtor: new (errors: Record<string, { message: string }>) => Error,
-    variantId?: string,
-  ) {
-    const sizeLabel =
-      typeof payload.sizeLabel === 'string' ? payload.sizeLabel.trim() : undefined;
-    const colorName =
-      typeof payload.colorName === 'string' ? payload.colorName.trim() : undefined;
-    const rawColorCode =
-      typeof payload.colorCode === 'string' ? payload.colorCode.trim() : undefined;
-
-    if (!sizeLabel) {
-      throw new ValidationErrorCtor({
-        sizeLabel: { message: 'Size is required' },
-      });
-    }
-    payload.sizeLabel = sizeLabel;
-
-    if (!rawColorCode) {
-      throw new ValidationErrorCtor({
-        colorCode: { message: 'Color code is required' },
-      });
-    }
-
-    const normalizedColorCode = normalizeColorCode(rawColorCode);
-    if (!normalizedColorCode) {
-      throw new ValidationErrorCtor({
-        colorCode: { message: 'Use a valid hex or rgb color code' },
-      });
-    }
-    payload.colorCode = normalizedColorCode;
-
-    const collectionIdValue = payload.collectionId;
-    let collectionId = typeof collectionIdValue === 'string' ? collectionIdValue : undefined;
-    if (!collectionId && variantId) {
-      const existingVariant = await this.prisma.signatureCollectionVariant.findUnique({
-        where: { id: variantId },
-        select: { collectionId: true },
-      });
-      collectionId = existingVariant?.collectionId;
-    }
-
-    if (!collectionId) {
-      throw new ValidationErrorCtor({
-        collectionId: { message: 'Collection is required' },
-      });
-    }
-
-    const collection = await this.prisma.signatureCollection.findUnique({
-      where: { id: collectionId },
-      select: { type: true },
-    });
-    if (!collection) {
-      throw new ValidationErrorCtor({
-        collectionId: { message: 'Collection not found' },
-      });
-    }
-
-    if (collection.type === 'POP') {
-      if (!isWhiteColorCode(normalizedColorCode)) {
-        throw new ValidationErrorCtor({
-          colorCode: { message: 'POP Paint supports only white variants' },
-        });
+    if (typeof source === 'string') {
+      const slug = slugify(source);
+      if (slug) {
+        payload.slug = slug;
       }
-      payload.colorName = 'White';
-    } else if (!colorName) {
-      throw new ValidationErrorCtor({
-        colorName: { message: 'Color name is required' },
-      });
-    } else {
-      payload.colorName = colorName;
+    }
+
+    if (typeof payload.colors === 'string') {
+      try {
+        const parsed = JSON.parse(payload.colors);
+        if (Array.isArray(parsed)) {
+          payload.colors = parsed;
+        }
+      } catch {
+        payload.colors = [];
+      }
+    }
+
+    if (typeof payload.sizes === 'string') {
+      const rawSizes = payload.sizes;
+      try {
+        const parsed = JSON.parse(rawSizes);
+        if (Array.isArray(parsed)) {
+          payload.sizes = parsed.map((s) => String(s).trim()).filter(Boolean);
+        } else {
+          payload.sizes = rawSizes
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean);
+        }
+      } catch {
+        payload.sizes = rawSizes
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean);
+      }
+    } else if (Array.isArray(payload.sizes)) {
+      payload.sizes = payload.sizes.map((s) => String(s).trim()).filter(Boolean);
     }
   }
 
@@ -779,6 +734,14 @@ export class AdminModuleService {
       'ColorHexInput',
       path.join(__dirname, 'dashboard', 'ColorHexInput'),
     );
+    const signatureColorsManagerComponent = componentLoader.add(
+      'SignatureColorsManager',
+      path.join(__dirname, 'dashboard', 'SignatureColorsManager'),
+    );
+    const signatureSizesManagerComponent = componentLoader.add(
+      'SignatureSizesManager',
+      path.join(__dirname, 'dashboard', 'SignatureSizesManager'),
+    );
 
     // AdminJS's built-in logout button only renders when it manages its own
     // session (buildAuthenticatedRouter); this app shares Better Auth's
@@ -815,7 +778,6 @@ export class AdminModuleService {
       'Product',
       'Brand',
       'SignatureCollection',
-      'SignatureCollectionVariant',
       'PromoBanner',
       'ContactInfo',
       'QuoteRequest',
@@ -1141,61 +1103,29 @@ export class AdminModuleService {
                           description:
                             'Paint family for this signature collection (drives homepage slot).',
                         },
+                        colors: {
+                          components: { edit: signatureColorsManagerComponent },
+                        },
+                        sizes: {
+                          components: { edit: signatureSizesManagerComponent },
+                        },
                       },
                       actions: {
                         new: {
                           before: (request: any) => {
-                            if (request.payload) this.normalizeSignatureCollectionSlug(request.payload);
+                            if (request.payload) this.normalizeSignatureCollectionPayload(request.payload);
                             return request;
                           },
                         },
                         edit: {
                           before: (request: any) => {
-                            if (request.payload) this.normalizeSignatureCollectionSlug(request.payload);
+                            if (request.payload) this.normalizeSignatureCollectionPayload(request.payload);
                             return request;
                           },
                         },
                       },
                     }
-                  : name === 'SignatureCollectionVariant'
-                    ? {
-                        navigation: {
-                          name: 'Signature Collections',
-                          icon: 'PaintBucket',
-                        },
-                        properties: {
-                          colorCode: {
-                            components: { edit: colorHexInputComponent },
-                            description: 'Pick a color or type a hex/rgb value.',
-                          },
-                        },
-                        actions: {
-                          new: {
-                            before: async (request: any) => {
-                              if (request.payload) {
-                                await this.normalizeSignatureVariantParams(
-                                  request.payload,
-                                  ValidationError,
-                                );
-                              }
-                              return request;
-                            },
-                          },
-                          edit: {
-                            before: async (request: any, context: any) => {
-                              if (request.payload) {
-                                await this.normalizeSignatureVariantParams(
-                                  request.payload,
-                                  ValidationError,
-                                  context?.record?.params?.id,
-                                );
-                              }
-                              return request;
-                            },
-                          },
-                        },
-                      }
-                    : name === 'PromoBanner'
+                : name === 'PromoBanner'
                   ? {
                       properties: {
                         // Promo copy can be long — textarea beats a single-line input.
