@@ -12,17 +12,61 @@ export function formatPrice(priceDescription: string | null | undefined): string
   if (!/^\d[\d,]*(\.\d+)?$/.test(withoutSign)) return trimmed;
 
   const amount = Number(withoutSign.replace(/,/g, ""));
+  return formatAmount(amount);
+}
+
+export function formatAmount(amount: number): string {
   return `GH₵${amount.toLocaleString("en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`;
 }
 
-// Numeric value for sorting by price. Free-text notes like "Inquire for
-// wholesale rate" have no parseable number, callers should sink those to
-// the end of the list regardless of sort direction, not treat them as ₵0.
+// Numeric value for sorting or calculating totals.
 export function parsePrice(priceDescription: string | null | undefined): number | null {
   if (!priceDescription) return null;
-  const match = priceDescription.replace(/,/g, "").match(/\d+(\.\d+)?/);
-  return match ? Number(match[0]) : null;
+  const trimmed = priceDescription.trim();
+  const withoutSign = trimmed.replace(/^(GH₵|₵)/, "").trim();
+  if (!/^\d[\d,]*(\.\d+)?$/.test(withoutSign)) return null;
+  const amount = Number(withoutSign.replace(/,/g, ""));
+  return isNaN(amount) ? null : amount;
+}
+
+export function getItemSubtotal(
+  priceDescription: string | null | undefined,
+  quantity: number
+): number | null {
+  const unitPrice = parsePrice(priceDescription);
+  if (unitPrice === null) return null;
+  return unitPrice * quantity;
+}
+
+export function calculateCartEstimatedTotal(
+  items: Array<{ priceDescription: string | null | undefined; quantity: number }>
+): {
+  total: number;
+  hasPricedItems: boolean;
+  unpricedCount: number;
+  formattedTotal: string;
+} {
+  let total = 0;
+  let pricedCount = 0;
+  let unpricedCount = 0;
+
+  for (const item of items) {
+    const unitPrice = parsePrice(item.priceDescription);
+    if (unitPrice !== null) {
+      total += unitPrice * item.quantity;
+      pricedCount += 1;
+    } else {
+      unpricedCount += 1;
+    }
+  }
+
+  return {
+    total,
+    hasPricedItems: pricedCount > 0,
+    unpricedCount,
+    formattedTotal: formatAmount(total),
+  };
 }

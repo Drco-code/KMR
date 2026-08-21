@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Minus, Plus, X } from "lucide-react";
 import { useQuoteCart, type QuoteCartItem } from "@/lib/store/quote-cart";
 import { isValidImageSrc } from "@/lib/image";
-import { formatPrice } from "@/lib/price";
+import { formatPrice, formatAmount, getItemSubtotal } from "@/lib/price";
 
 export function QuoteCartLine({ item }: { item: QuoteCartItem }) {
   const setQuantity = useQuoteCart((state) => state.setQuantity);
@@ -59,9 +59,25 @@ export function QuoteCartLine({ item }: { item: QuoteCartItem }) {
           </div>
         )}
 
-        {formatPrice(item.priceDescription) && (
-          <p className="text-sm text-ink-muted">{formatPrice(item.priceDescription)}</p>
-        )}
+        {(() => {
+          const subtotal = getItemSubtotal(item.priceDescription, item.quantity);
+          if (subtotal !== null) {
+            return (
+              <p className="text-sm font-medium text-ink">
+                {formatAmount(subtotal)}
+                {item.quantity > 1 && (
+                  <span className="text-xs font-normal text-ink-muted ml-1.5">
+                    ({formatPrice(item.priceDescription)} each)
+                  </span>
+                )}
+              </p>
+            );
+          }
+          if (formatPrice(item.priceDescription)) {
+            return <p className="text-sm text-ink-muted">{formatPrice(item.priceDescription)}</p>;
+          }
+          return null;
+        })()}
       </div>
 
       <div className="flex items-center gap-3 border border-border px-2 py-1">

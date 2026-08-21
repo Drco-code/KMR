@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useQuoteCart } from "@/lib/store/quote-cart";
 import { QuoteCartLine } from "@/components/quote-cart-line";
 import { Button } from "@/components/ui/button";
+import { calculateCartEstimatedTotal } from "@/lib/price";
 
 export default function QuotePage() {
   const items = useQuoteCart((state) => state.items);
@@ -38,15 +39,35 @@ export default function QuotePage() {
               <QuoteCartLine key={item.itemKey} item={item} />
             ))}
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-ink-muted">
-              {items.reduce((sum, i) => sum + i.quantity, 0)} item(s)
-            </span>
-            <Link href="/quote/review">
-              <Button className="rounded-sm bg-black px-10 py-6 text-sm font-semibold tracking-[0.1em] text-white uppercase hover:bg-black/90">
-                Continue
-              </Button>
-            </Link>
+          <div className="flex flex-col gap-4 border-t border-border pt-6">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-ink-muted">
+                {items.reduce((sum, i) => sum + i.quantity, 0)} item(s)
+              </span>
+              {(() => {
+                const { total, hasPricedItems, unpricedCount, formattedTotal } = calculateCartEstimatedTotal(items);
+                if (!hasPricedItems) {
+                  return <span className="font-medium text-ink">Pricing on Request</span>;
+                }
+                return (
+                  <div className="text-right">
+                    <span className="text-xs text-ink-muted block">Estimated Total</span>
+                    <span className="text-xl font-semibold text-ink">{formattedTotal}</span>
+                    {unpricedCount > 0 && (
+                      <span className="text-xs text-gold block">+ {unpricedCount} custom/quote item(s)</span>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <Link href="/quote/review" className="w-full sm:w-auto">
+                <Button className="w-full rounded-sm bg-black px-10 py-6 text-sm font-semibold tracking-[0.1em] text-white uppercase hover:bg-black/90 sm:w-auto">
+                  Continue to Review
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       )}

@@ -5,7 +5,12 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useQuoteCart, type QuoteCartItem } from "@/lib/store/quote-cart";
 import { submitQuoteRequest } from "@/lib/api/client";
-import { formatPrice } from "@/lib/price";
+import {
+  formatPrice,
+  formatAmount,
+  getItemSubtotal,
+  calculateCartEstimatedTotal,
+} from "@/lib/price";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,6 +41,8 @@ function buildWhatsAppMessage(
   location: string,
   items: QuoteCartItem[]
 ) {
+  const { hasPricedItems, unpricedCount, formattedTotal } = calculateCartEstimatedTotal(items);
+
   const lines = [
     `Hi KMR, I'd like to request a quote.`,
     ``,
@@ -46,9 +53,18 @@ function buildWhatsAppMessage(
     `Items:`,
     ...items.map((item) => {
       const lineName = formatItemLine(item);
-      const price = formatPrice(item.priceDescription);
-      return `- ${lineName} (Qty: ${item.quantity})${price ? `: ${price}` : ""}`;
+      const subtotal = getItemSubtotal(item.priceDescription, item.quantity);
+      if (subtotal !== null) {
+        const unit = formatPrice(item.priceDescription);
+        return `- ${lineName} (Qty: ${item.quantity}) — ${formatAmount(subtotal)}${item.quantity > 1 ? ` (${unit} each)` : ""}`;
+      }
+      const rawPrice = formatPrice(item.priceDescription);
+      return `- ${lineName} (Qty: ${item.quantity})${rawPrice ? `: ${rawPrice}` : ""}`;
     }),
+    ``,
+    ...(hasPricedItems
+      ? [`Estimated Total: ${formattedTotal}${unpricedCount > 0 ? ` (+ ${unpricedCount} custom/quote item(s))` : ""}`]
+      : [`Estimated Total: Pricing on Request`]),
   ];
   return lines.join("\n");
 }
@@ -76,6 +92,8 @@ export default function QuoteReviewPage() {
       </div>
     );
   }
+
+  const { hasPricedItems, unpricedCount, formattedTotal } = calculateCartEstimatedTotal(items);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -171,6 +189,8 @@ export default function QuoteReviewPage() {
           <Separator />
           {items.map((item) => {
             const displayName = getItemDisplayName(item);
+            const subtotal = getItemSubtotal(item.priceDescription, item.quantity);
+
             return (
               <div key={item.itemKey} className="flex items-start justify-between gap-6 text-sm">
                 <div className="flex min-w-0 flex-col gap-1">
@@ -201,16 +221,48 @@ export default function QuoteReviewPage() {
                   )}
                   <span className="text-xs text-ink-muted">Qty: {item.quantity}</span>
                 </div>
-                {formatPrice(item.priceDescription) && (
-                  <span className="text-ink-muted shrink-0">{formatPrice(item.priceDescription)}</span>
-                )}
+
+                <div className="text-right shrink-0">
+                  {subtotal !== null ? (
+                    <div>
+                      <span className="font-medium text-ink block">{formatAmount(subtotal)}</span>
+                      {item.quantity > 1 && (
+                        <span className="text-xs text-ink-muted block">
+                          ({formatPrice(item.priceDescription)} ea)
+                        </span>
+                      )}
+                    </div>
+                  ) : formatPrice(item.priceDescription) ? (
+                    <span className="text-ink-muted">{formatPrice(item.priceDescription)}</span>
+                  ) : null}
+                </div>
               </div>
             );
           })}
           <Separator />
-          <p className="text-sm text-ink-muted">
-            {items.reduce((sum, i) => sum + i.quantity, 0)} item(s)
-          </p>
+
+          <div className="flex flex-col gap-2 pt-1">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-ink-muted">
+                {items.reduce((sum, i) => sum + i.quantity, 0)} item(s)
+              </span>
+              {hasPricedItems ? (
+                <div className="text-right">
+                  <span className="text-xs text-ink-muted block">Estimated Total</span>
+                  <span className="text-xl font-bold text-ink">{formattedTotal}</span>
+                  {unpricedCount > 0 && (
+                    <span className="text-xs text-gold block">+ {unpricedCount} custom/quote item(s)</span>
+                  )}
+                </div>
+              ) : (
+                <span className="font-medium text-ink">Pricing on Request</span>
+              )}
+            </div>
+
+            <p className="text-[11px] text-ink-muted/80">
+              * Final order confirmation, delivery, and applicable bulk rates will be confirmed directly with your sales representative.
+            </p>
+          </div>
         </div>
       </div>
     </div>
