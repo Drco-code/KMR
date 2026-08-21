@@ -1,4 +1,4 @@
-import { MessageCircle } from "lucide-react";
+import { WhatsAppIcon } from "@/components/icons/whatsapp-icon";
 
 // Floating WhatsApp bubble with a hover/focus label so visitors know what it
 // is. Pure CSS (group-hover / group-focus-visible), no client JS needed.
@@ -15,7 +15,7 @@ export function WhatsAppFab() {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="group fixed right-8 bottom-8 z-40 flex size-14 items-center justify-center rounded-xl bg-[#25d366] shadow-lg transition-transform hover:scale-105"
+      className="group fixed right-6 bottom-6 md:right-8 md:bottom-8 z-40 flex size-14 items-center justify-center rounded-full bg-[#25d366] text-white shadow-xl transition-all duration-300 hover:scale-110 hover:bg-[#20ba59] hover:shadow-2xl"
     >
       <span
         aria-hidden
@@ -24,7 +24,7 @@ export function WhatsAppFab() {
         Chat with us on WhatsApp
         <span className="absolute top-1/2 -right-1 h-2 w-2 -translate-y-1/2 rotate-45 bg-ink" />
       </span>
-      <MessageCircle className="size-7 text-white" fill="white" strokeWidth={0} />
+      <WhatsAppIcon className="size-8 fill-current" />
       <span className="sr-only">Chat on WhatsApp</span>
     </a>
   );

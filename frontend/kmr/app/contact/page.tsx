@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Clock, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
+import { Clock, Mail, MapPin, Phone } from "lucide-react";
+import { WhatsAppIcon } from "@/components/icons/whatsapp-icon";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { ContactForm } from "@/components/contact-form";
 
@@ -86,7 +87,7 @@ export default function ContactPage() {
               className="group flex items-center gap-4 rounded-sm border border-border bg-white p-6 transition-colors duration-300 hover:border-gold/50"
             >
               <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[#25d366]/10 text-[#1fae54] transition-transform duration-300 group-hover:scale-105">
-                <MessageCircle className="size-5" fill="currentColor" strokeWidth={0} />
+                <WhatsAppIcon className="size-6 fill-current" />
               </span>
               <div className="flex flex-col gap-1">
                 <span className="text-xs font-semibold tracking-[0.15em] text-ink-muted uppercase">
