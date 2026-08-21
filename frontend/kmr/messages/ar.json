@@ -1,0 +1,117 @@
+{
+  "nav": {
+    "tools": "أدوات",
+    "outdoorEquipment": "معدات خارجية",
+    "buildingMaterials": "مواد البناء",
+    "homeEssentials": "مستلزمات المنزل",
+    "autoEssentials": "مستلزمات السيارة",
+    "b2bSolutions": "حلول الأعمال",
+    "topSellers": "الأكثر مبيعاً",
+    "consultancy": "الاستشارات",
+    "home": "الرئيسية",
+    "allProducts": "جميع المنتجات",
+    "browseByCategory": "تصفح حسب الفئة",
+    "contactUs": "اتصل بنا",
+    "openMenu": "فتح القائمة"
+  },
+  "footer": {
+    "tagline": "تحديد المساحات من خلال الألوان. طلاءات معمارية متميزة وأصباغ حرفية.",
+    "shop": "تسوق",
+    "service": "خدمة",
+    "support": "الدعم",
+    "fullCatalog": "الكتالوج الكامل",
+    "interiorEnamels": "مينا داخلية",
+    "exteriorCoatings": "طلاءات خارجية",
+    "specialtyFinishes": "تشطيبات خاصة",
+    "colorMatching": "مطابقة الألوان",
+    "professionalApplication": "التطبيق الاحترافي",
+    "projectSpecs": "مواصفات المشروع",
+    "requestQuote": "طلب عرض أسعار",
+    "contact": "اتصل بنا",
+    "visitUs": "زورنا",
+    "copyright": "© {year} KMR للطلاء المعماري. جميع الحقوق محفوظة."
+  },
+  "product": {
+    "addToCart": "أضف إلى السلة",
+    "kmrPaintCollection": "مجموعة طلاء KMR"
+  },
+  "cart": {
+    "addedToQuoteCart": "تمت الإضافة إلى عربة العروض",
+    "viewCart": "عرض السلة ({count})",
+    "checkout": "إتمام الشراء",
+    "qty": "الكمية:",
+    "dismissNotification": "إغلاق الإشعار",
+    "viewQuoteCart": "عرض عربة العروض ({count} عنصر)"
+  },
+  "quote": {
+    "orderInquiry": "استفسار عن الطلب",
+    "yourQuoteCart": "عربة عروض الأسعار",
+    "emptyCart": "لم تضف أي عناصر إلى عرض الأسعار بعد.",
+    "browseCatalog": "تصفح الكتالوج",
+    "items": "{count} عنصر",
+    "estimatedTotal": "الإجمالي التقديري",
+    "pricingOnRequest": "الأسعار عند الطلب",
+    "customItems": "+ {count} عنصر مخصص",
+    "continueToReview": "متابعة المراجعة"
+  },
+  "contact": {
+    "sendMessage": "إرسال رسالة",
+    "formSubtitle": "أخبرنا بما تبحث عنه وسنتولى الأمر من هناك.",
+    "fullName": "الاسم الكامل",
+    "namePlaceholder": "اسمك",
+    "email": "البريد الإلكتروني",
+    "emailPlaceholder": "example@email.com",
+    "phone": "الهاتف",
+    "phoneOptional": "(اختياري)",
+    "phonePlaceholder": "+233 XX XXX XXXX",
+    "message": "الرسالة",
+    "messagePlaceholder": "كيف يمكننا مساعدتك؟",
+    "send": "إرسال الرسالة",
+    "sending": "جاري الإرسال…",
+    "successTitle": "تم إرسال الرسالة",
+    "successBody": "شكراً{name}. لقد تلقينا رسالتك وسنرد عليك قريباً.",
+    "sendAnother": "إرسال رسالة أخرى"
+  },
+  "consultancy": {
+    "heading": "الاستشارة الفنية متاحة",
+    "body": "للمشاريع المعمارية الكبيرة والتشطيبات الصناعية المتخصصة، تحدث مع فنيينا المتخصصين للحصول على خطة تكامل مخصصة.",
+    "cta": "جدولة استشارة احترافية"
+  },
+  "whatsapp": {
+    "tooltip": "تحدث معنا على واتساب",
+    "srOnly": "تحدث عبر واتساب",
+    "message": "مرحباً KMR، أود الاستفسار عن مجموعتكم."
+  },
+  "home": {
+    "theCollection": "المجموعة",
+    "paintCollections": "مجموعات طلاء KMR",
+    "whoWeAre": "من نحن",
+    "tagline": "حيث يلتقي اللون بالحرفة.",
+    "about": "KMR City Ventures هي شركة غانية لمواد البناء مبنية على اعتقاد واحد: التشطيب الصحيح يغير كل شيء. من الطلاءات الفاخرة والأصباغ الحرفية إلى الأخشاب والأدوات الاحترافية، نوفر ما يثق به المهندسون المعماريون والرسامون والبنائون.",
+    "yearsOf": "سنوات من",
+    "experience": "الخبرة",
+    "learnMore": "اعرف المزيد"
+  },
+  "catalog": {
+    "heading": "مجموعة الأجهزة والطلاء الموسعة",
+    "intro": "منظومتنا المهنية الكاملة. من الأصباغ الحرفية إلى الأجهزة الدقيقة للمهندس المعماري.",
+    "searchResults": "نتائج البحث",
+    "fullRange": "النطاق الكامل",
+    "noProductsSearch": "لا توجد منتجات تطابق \"{query}\". جرب بحثاً مختلفاً.",
+    "noProductsCategory": "لم يتم العثور على منتجات للفئات المحددة."
+  },
+  "sort": {
+    "featured": "مميز",
+    "newest": "الأحدث",
+    "priceAsc": "السعر: من الأقل إلى الأعلى",
+    "priceDesc": "السعر: من الأعلى إلى الأقل",
+    "nameAsc": "الاسم: أ-ي"
+  },
+  "language": {
+    "en": "English",
+    "ar": "العربية",
+    "zh": "中文",
+    "tr": "Türkçe",
+    "selectLanguage": "اختر اللغة"
+  }
+}

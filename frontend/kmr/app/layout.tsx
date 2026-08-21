@@ -1,44 +1,14 @@
-import type { Metadata } from "next";
-import { Playfair_Display, Hanken_Grotesk } from "next/font/google";
-import "./globals.css";
-import { SiteHeader } from "@/components/site-header";
-import { SiteFooter } from "@/components/site-footer";
-import { WhatsAppFab } from "@/components/whatsapp-fab";
-
-const hankenGrotesk = Hanken_Grotesk({
-  variable: "--font-sans",
-  subsets: ["latin"],
-});
-
-const playfairDisplay = Playfair_Display({
-  variable: "--font-display",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  style: ["normal", "italic"],
-});
-
-export const metadata: Metadata = {
-  title: "KMR | Architectural Paint & Hardware",
-  description:
-    "Premium architectural coatings and artisanal pigments. Browse the collection and request a quote.",
-};
-
+// This root layout is intentionally minimal.
+// The real layout (with <html>, <body>, fonts, providers) lives at
+// app/[locale]/layout.tsx which next-intl's middleware routes all
+// requests into via the [locale] segment.
+//
+// Next.js requires a root layout to exist; this one satisfies that
+// requirement while delegating all real rendering to the locale layout.
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
-  return (
-    <html
-      lang="en"
-      className={`${hankenGrotesk.variable} ${playfairDisplay.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col bg-background text-foreground">
-        <SiteHeader />
-        <main className="flex-1">{children}</main>
-        <SiteFooter />
-        <WhatsAppFab />
-      </body>
-    </html>
-  );
+}) {
+  return children;
 }

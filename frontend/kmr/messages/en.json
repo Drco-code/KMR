@@ -1,0 +1,117 @@
+{
+  "nav": {
+    "tools": "Tools",
+    "outdoorEquipment": "Outdoor Equipment",
+    "buildingMaterials": "Building Materials",
+    "homeEssentials": "Home Essentials",
+    "autoEssentials": "Auto Essentials",
+    "b2bSolutions": "B2B Solutions",
+    "topSellers": "Top Sellers",
+    "consultancy": "Consultancy",
+    "home": "Home",
+    "allProducts": "All Products",
+    "browseByCategory": "Browse by Category",
+    "contactUs": "Contact Us",
+    "openMenu": "Open menu"
+  },
+  "footer": {
+    "tagline": "Defining spaces through color. Premium architectural coatings and artisanal pigments.",
+    "shop": "Shop",
+    "service": "Service",
+    "support": "Support",
+    "fullCatalog": "Full Catalog",
+    "interiorEnamels": "Interior Enamels",
+    "exteriorCoatings": "Exterior Coatings",
+    "specialtyFinishes": "Specialty Finishes",
+    "colorMatching": "Color Matching",
+    "professionalApplication": "Professional Application",
+    "projectSpecs": "Project Specs",
+    "requestQuote": "Request a Quote",
+    "contact": "Contact Us",
+    "visitUs": "Visit Us",
+    "copyright": "© {year} KMR Architectural Coatings. All rights reserved."
+  },
+  "product": {
+    "addToCart": "Add to cart",
+    "kmrPaintCollection": "KMR Paint Collection"
+  },
+  "cart": {
+    "addedToQuoteCart": "Added to Quote Cart",
+    "viewCart": "View Cart ({count})",
+    "checkout": "Checkout",
+    "qty": "Qty:",
+    "dismissNotification": "Dismiss notification",
+    "viewQuoteCart": "View quote cart ({count} items)"
+  },
+  "quote": {
+    "orderInquiry": "Order Inquiry",
+    "yourQuoteCart": "Your Quote Cart",
+    "emptyCart": "You haven't added any items to your quote yet.",
+    "browseCatalog": "Browse the Catalog",
+    "items": "{count} item(s)",
+    "estimatedTotal": "Estimated Total",
+    "pricingOnRequest": "Pricing on Request",
+    "customItems": "+ {count} custom/quote item(s)",
+    "continueToReview": "Continue to Review"
+  },
+  "contact": {
+    "sendMessage": "Send a Message",
+    "formSubtitle": "Tell us what you're looking for and we'll take it from there.",
+    "fullName": "Full Name",
+    "namePlaceholder": "Your name",
+    "email": "Email",
+    "emailPlaceholder": "you@example.com",
+    "phone": "Phone",
+    "phoneOptional": "(optional)",
+    "phonePlaceholder": "+233 XX XXX XXXX",
+    "message": "Message",
+    "messagePlaceholder": "How can we help?",
+    "send": "Send Message",
+    "sending": "Sending…",
+    "successTitle": "Message Sent",
+    "successBody": "Thanks{name}. We've received your message and will get back to you shortly.",
+    "sendAnother": "Send another message"
+  },
+  "consultancy": {
+    "heading": "Technical Consultancy Available",
+    "body": "For large scale architectural projects and specialized industrial finishes, speak with our master technicians for a bespoke integration plan.",
+    "cta": "Schedule Professional Consultation"
+  },
+  "whatsapp": {
+    "tooltip": "Chat with us on WhatsApp",
+    "srOnly": "Chat on WhatsApp",
+    "message": "Hi KMR, I'd like to ask about your collection."
+  },
+  "home": {
+    "theCollection": "The Collection",
+    "paintCollections": "KMR Paint Collections",
+    "whoWeAre": "Who We Are",
+    "tagline": "Where Colour Meets Craft.",
+    "about": "KMR City Ventures is a Ghanaian building-materials house built on one belief. The right finish changes everything. From premium coatings and artisanal pigments to timber and professional-grade tools, we supply what architects, painters, and builders actually trust: products vetted by people who use them, backed by consultants who match, specify, and apply.",
+    "yearsOf": "Years of",
+    "experience": "Experience",
+    "learnMore": "Learn More"
+  },
+  "catalog": {
+    "heading": "Expanded Hardware & Paint Collection",
+    "intro": "Our complete professional ecosystem. From artisanal pigments to precision hardware for the architectural visionary.",
+    "searchResults": "Search Results",
+    "fullRange": "Full Range",
+    "noProductsSearch": "No products match \"{query}\". Try a different search.",
+    "noProductsCategory": "No products found for the selected categories."
+  },
+  "sort": {
+    "featured": "Featured",
+    "newest": "Newest",
+    "priceAsc": "Price: Low to High",
+    "priceDesc": "Price: High to Low",
+    "nameAsc": "Name: A–Z"
+  },
+  "language": {
+    "en": "English",
+    "ar": "Arabic",
+    "zh": "Chinese",
+    "tr": "Turkish",
+    "selectLanguage": "Select Language"
+  }
+}

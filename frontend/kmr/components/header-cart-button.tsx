@@ -5,11 +5,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ShoppingCart, Check, X, ArrowRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useQuoteCart, useQuoteCartTotalItems, type QuoteCartItem } from "@/lib/store/quote-cart";
 import { isValidImageSrc } from "@/lib/image";
 import { formatPrice } from "@/lib/price";
 
 export function HeaderCartButton() {
+  const t = useTranslations("cart");
   const pathname = usePathname();
   const totalItems = useQuoteCartTotalItems();
   const lastAddedAt = useQuoteCart((state) => state.lastAddedAt);
@@ -100,7 +102,7 @@ export function HeaderCartButton() {
       <Link
         href="/quote"
         className="relative flex size-10 items-center justify-center text-ink transition-colors hover:text-gold group"
-        aria-label={`View quote cart (${totalItems} items)`}
+        aria-label={t("viewQuoteCart", { count: totalItems })}
       >
         {/* Cart Icon with Elastic Bounce */}
         <div className={`transition-transform origin-bottom ${isWiggling ? "animate-cart-wiggle text-gold" : ""}`}>
@@ -120,7 +122,7 @@ export function HeaderCartButton() {
           </div>
         )}
 
-        <span className="sr-only">View quote cart ({totalItems} items)</span>
+        <span className="sr-only">{t("viewQuoteCart", { count: totalItems })}</span>
       </Link>
 
       {/* Sleek Top-Right Glassmorphism Mini Cart Flyout Toast */}
@@ -140,14 +142,14 @@ export function HeaderCartButton() {
                 <Check className="size-3 stroke-[3]" />
               </span>
               <span className="text-xs font-semibold tracking-wider text-ink uppercase">
-                Added to Quote Cart
+                {t("addedToQuoteCart")}
               </span>
             </div>
             <button
               type="button"
               onClick={() => setShowToast(false)}
               className="text-ink-muted hover:text-ink transition-colors p-1 rounded-md"
-              aria-label="Dismiss notification"
+              aria-label={t("dismissNotification")}
             >
               <X className="size-4" />
             </button>
@@ -196,7 +198,7 @@ export function HeaderCartButton() {
               )}
 
               <div className="flex items-center justify-between text-xs text-ink-muted pt-0.5">
-                <span>Qty: <strong className="text-ink">{activeItem.quantity}</strong></span>
+                <span>{t("qty")} <strong className="text-ink">{activeItem.quantity}</strong></span>
                 {formatPrice(activeItem.priceDescription) && (
                   <span className="font-medium text-ink">{formatPrice(activeItem.priceDescription)}</span>
                 )}
@@ -211,7 +213,7 @@ export function HeaderCartButton() {
               onClick={() => setShowToast(false)}
               className="flex items-center justify-center rounded-md border border-border bg-white px-3 py-2 text-xs font-semibold tracking-wider text-ink uppercase hover:bg-zinc-50 transition-colors text-center"
             >
-              View Cart ({totalItems})
+              {t("viewCart", { count: totalItems })}
             </Link>
 
             <Link
@@ -219,7 +221,7 @@ export function HeaderCartButton() {
               onClick={() => setShowToast(false)}
               className="flex items-center justify-center gap-1 rounded-md bg-ink px-3 py-2 text-xs font-semibold tracking-wider text-white uppercase hover:bg-black/90 transition-colors text-center"
             >
-              Checkout <ArrowRight className="size-3" />
+              {t("checkout")} <ArrowRight className="size-3" />
             </Link>
           </div>
 

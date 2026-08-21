@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useQuoteCart } from "@/lib/store/quote-cart";
 import { getValidImages } from "@/lib/image";
 import { formatPrice } from "@/lib/price";
@@ -15,6 +16,7 @@ export function ProductCard({
   product: Product;
   categoryName?: string;
 }) {
+  const t = useTranslations("product");
   const addItem = useQuoteCart((state) => state.addItem);
   const coverImage = getValidImages(product.images)[0] ?? null;
 
@@ -83,7 +85,7 @@ export function ProductCard({
           }
           className="w-full rounded-md bg-[#1a2744] py-3 sm:py-4 text-sm font-semibold tracking-[0.02em] text-white transition-all duration-300 hover:bg-[#1a2744]/90 hover:shadow-md"
         >
-          Add to cart
+          {t("addToCart")}
         </Button>
       </div>
     </div>

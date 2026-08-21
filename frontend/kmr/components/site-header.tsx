@@ -1,22 +1,26 @@
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { HeaderCartButton } from "@/components/header-cart-button";
 import { MobileNav } from "@/components/mobile-nav";
 import { NavSearch } from "@/components/nav-search";
 import { MegaMenu } from "@/components/mega-menu";
 import { ContactUsButton } from "@/components/contact-us-button";
 import { NavLink } from "@/components/nav-link";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { getCategories, getPromoBanner } from "@/lib/api/client";
 
-const MEGA_MENU_ITEMS = [
-  { label: "Tools", slug: "tools" },
-  { label: "Outdoor Equipment", slug: "outdoor-equipment" },
-  { label: "Building Materials", slug: "building-materials" },
-  { label: "Home Essentials", slug: "home-essentials" },
-  { label: "Auto Essentials", slug: "auto-essentials" },
-];
-
 export async function SiteHeader() {
+  const t = useTranslations("nav");
+
+  const MEGA_MENU_ITEMS = [
+    { label: t("tools"), slug: "tools" },
+    { label: t("outdoorEquipment"), slug: "outdoor-equipment" },
+    { label: t("buildingMaterials"), slug: "building-materials" },
+    { label: t("homeEssentials"), slug: "home-essentials" },
+    { label: t("autoEssentials"), slug: "auto-essentials" },
+  ];
+
   // The promo bar is admin-managed (PromoBanner resource in the dashboard):
   // it only renders while a message is set and the banner is active.
   const [categories, promo] = await Promise.all([
@@ -58,14 +62,15 @@ export async function SiteHeader() {
           {MEGA_MENU_ITEMS.map((item) => (
             <MegaMenu key={item.slug} label={item.label} slug={item.slug} categories={categories} />
           ))}
-          <NavLink href="/consultancy">B2B Solutions</NavLink>
-          <NavLink href="/catalog">Top Sellers</NavLink>
-          <NavLink href="/consultancy">Consultancy</NavLink>
+          <NavLink href="/consultancy">{t("b2bSolutions")}</NavLink>
+          <NavLink href="/catalog">{t("topSellers")}</NavLink>
+          <NavLink href="/consultancy">{t("consultancy")}</NavLink>
         </nav>
 
         <div className="flex items-center gap-3">
           <NavSearch />
           <HeaderCartButton />
+          <LanguageSwitcher />
           <ContactUsButton />
           <MobileNav categories={categories} />
         </div>

@@ -4,6 +4,7 @@ import { useId, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronDown, Menu, Phone } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -16,15 +17,8 @@ import {
 import { useGSAP } from "@gsap/react";
 import { gsap } from "@/lib/gsap";
 import { buildMegaMenuTree, findRootCategoryBySlug } from "@/lib/category-tree";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import type { Category } from "@/lib/api/types";
-
-const MEGA_MENU_ITEMS = [
-  { label: "Tools", slug: "tools" },
-  { label: "Outdoor Equipment", slug: "outdoor-equipment" },
-  { label: "Building Materials", slug: "building-materials" },
-  { label: "Home Essentials", slug: "home-essentials" },
-  { label: "Auto Essentials", slug: "auto-essentials" },
-];
 
 // One top-level nav category, rendered as a floating card with an animated
 // expand/collapse. Height/opacity animate via a CSS grid-rows trick (smooth
@@ -157,13 +151,23 @@ function CategoryAccordion({
 }
 
 export function MobileNav({ categories }: { categories: Category[] }) {
+  const t = useTranslations("nav");
+
+  const MEGA_MENU_ITEMS = [
+    { label: t("tools"), slug: "tools" },
+    { label: t("outdoorEquipment"), slug: "outdoor-equipment" },
+    { label: t("buildingMaterials"), slug: "building-materials" },
+    { label: t("homeEssentials"), slug: "home-essentials" },
+    { label: t("autoEssentials"), slug: "auto-essentials" },
+  ];
+
   return (
     <Sheet>
       <SheetTrigger
         render={
           <Button variant="ghost" size="icon-sm" className="2xl:hidden">
             <Menu />
-            <span className="sr-only">Open menu</span>
+            <span className="sr-only">{t("openMenu")}</span>
           </Button>
         }
       />
@@ -189,7 +193,7 @@ export function MobileNav({ categories }: { categories: Category[] }) {
               />
             }
           >
-            Home
+            {t("home")}
           </SheetClose>
 
           <SheetClose
@@ -200,12 +204,12 @@ export function MobileNav({ categories }: { categories: Category[] }) {
               />
             }
           >
-            All Products
+            {t("allProducts")}
           </SheetClose>
 
           <div className="flex flex-col gap-2.5 border-y border-border py-4">
             <span className="px-1 text-xs font-semibold tracking-[0.15em] text-ink-muted uppercase">
-              Browse by Category
+              {t("browseByCategory")}
             </span>
             {MEGA_MENU_ITEMS.map((item) => (
               <CategoryAccordion
@@ -225,7 +229,7 @@ export function MobileNav({ categories }: { categories: Category[] }) {
               />
             }
           >
-            B2B Solutions
+            {t("b2bSolutions")}
           </SheetClose>
 
           <SheetClose
@@ -236,7 +240,7 @@ export function MobileNav({ categories }: { categories: Category[] }) {
               />
             }
           >
-            Top Sellers
+            {t("topSellers")}
           </SheetClose>
 
           <SheetClose
@@ -247,7 +251,7 @@ export function MobileNav({ categories }: { categories: Category[] }) {
               />
             }
           >
-            Consultancy
+            {t("consultancy")}
           </SheetClose>
 
           <SheetClose
@@ -259,8 +263,13 @@ export function MobileNav({ categories }: { categories: Category[] }) {
             }
           >
             <Phone className="size-4" />
-            Contact Us
+            {t("contactUs")}
           </SheetClose>
+
+          {/* Language switcher in mobile nav */}
+          <div className="mt-4 pt-4 border-t border-border flex justify-center">
+            <LanguageSwitcher />
+          </div>
         </nav>
       </SheetContent>
     </Sheet>

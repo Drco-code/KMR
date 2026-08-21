@@ -1,0 +1,78 @@
+"use client";
+
+import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { useQuoteCart } from "@/lib/store/quote-cart";
+import { QuoteCartLine } from "@/components/quote-cart-line";
+import { Button } from "@/components/ui/button";
+import { calculateCartEstimatedTotal } from "@/lib/price";
+
+export default function QuotePage() {
+  const t = useTranslations("quote");
+  const items = useQuoteCart((state) => state.items);
+
+  return (
+    <div className="flex flex-col gap-10 px-6 py-16 md:px-20 md:py-24">
+      <div className="flex flex-col gap-4">
+        <span className="text-xs font-medium tracking-[0.2em] text-gold uppercase">
+          {t("orderInquiry")}
+        </span>
+        <h1 className="font-display text-4xl text-ink md:text-5xl">
+          {t("yourQuoteCart")}
+        </h1>
+      </div>
+
+      {items.length === 0 ? (
+        <div className="flex flex-col items-start gap-6 py-16">
+          <p className="text-ink-muted">
+            {t("emptyCart")}
+          </p>
+          <Link
+            href="/catalog"
+            className="rounded-sm bg-black px-8 py-3 text-sm font-semibold tracking-[0.1em] text-white uppercase hover:bg-black/90"
+          >
+            {t("browseCatalog")}
+          </Link>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-8 md:max-w-2xl">
+          <div className="flex flex-col">
+            {items.map((item) => (
+              <QuoteCartLine key={item.itemKey} item={item} />
+            ))}
+          </div>
+          <div className="flex flex-col gap-4 border-t border-border pt-6">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-ink-muted">
+                {t("items", { count: items.reduce((sum, i) => sum + i.quantity, 0) })}
+              </span>
+              {(() => {
+                const { total, hasPricedItems, unpricedCount, formattedTotal } = calculateCartEstimatedTotal(items);
+                if (!hasPricedItems) {
+                  return <span className="font-medium text-ink">{t("pricingOnRequest")}</span>;
+                }
+                return (
+                  <div className="text-right">
+                    <span className="text-xs text-ink-muted block">{t("estimatedTotal")}</span>
+                    <span className="text-xl font-semibold text-ink">{formattedTotal}</span>
+                    {unpricedCount > 0 && (
+                      <span className="text-xs text-gold block">{t("customItems", { count: unpricedCount })}</span>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <Link href="/quote/review" className="w-full sm:w-auto">
+                <Button className="w-full rounded-sm bg-black px-10 py-6 text-sm font-semibold tracking-[0.1em] text-white uppercase hover:bg-black/90 sm:w-auto">
+                  {t("continueToReview")}
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

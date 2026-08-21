@@ -1,0 +1,117 @@
+{
+  "nav": {
+    "tools": "工具",
+    "outdoorEquipment": "户外设备",
+    "buildingMaterials": "建筑材料",
+    "homeEssentials": "家居必需品",
+    "autoEssentials": "汽车必需品",
+    "b2bSolutions": "企业解决方案",
+    "topSellers": "热销产品",
+    "consultancy": "咨询服务",
+    "home": "首页",
+    "allProducts": "全部产品",
+    "browseByCategory": "按类别浏览",
+    "contactUs": "联系我们",
+    "openMenu": "打开菜单"
+  },
+  "footer": {
+    "tagline": "以色彩定义空间。优质建筑涂料与手工颜料。",
+    "shop": "购物",
+    "service": "服务",
+    "support": "支持",
+    "fullCatalog": "完整目录",
+    "interiorEnamels": "室内搪瓷",
+    "exteriorCoatings": "外墙涂料",
+    "specialtyFinishes": "特种饰面",
+    "colorMatching": "颜色匹配",
+    "professionalApplication": "专业施工",
+    "projectSpecs": "项目规格",
+    "requestQuote": "申请报价",
+    "contact": "联系我们",
+    "visitUs": "拜访我们",
+    "copyright": "© {year} KMR 建筑涂料。保留所有权利。"
+  },
+  "product": {
+    "addToCart": "加入购物车",
+    "kmrPaintCollection": "KMR 涂料系列"
+  },
+  "cart": {
+    "addedToQuoteCart": "已加入报价车",
+    "viewCart": "查看购物车（{count}）",
+    "checkout": "结账",
+    "qty": "数量：",
+    "dismissNotification": "关闭通知",
+    "viewQuoteCart": "查看报价车（{count} 件）"
+  },
+  "quote": {
+    "orderInquiry": "订单询价",
+    "yourQuoteCart": "您的报价车",
+    "emptyCart": "您尚未向报价单添加任何商品。",
+    "browseCatalog": "浏览目录",
+    "items": "{count} 件商品",
+    "estimatedTotal": "预计总计",
+    "pricingOnRequest": "价格面议",
+    "customItems": "+ {count} 件定制商品",
+    "continueToReview": "继续审核"
+  },
+  "contact": {
+    "sendMessage": "发送消息",
+    "formSubtitle": "告诉我们您的需求，我们将为您提供服务。",
+    "fullName": "全名",
+    "namePlaceholder": "您的姓名",
+    "email": "电子邮件",
+    "emailPlaceholder": "you@example.com",
+    "phone": "电话",
+    "phoneOptional": "（可选）",
+    "phonePlaceholder": "+233 XX XXX XXXX",
+    "message": "消息",
+    "messagePlaceholder": "我们能为您做什么？",
+    "send": "发送消息",
+    "sending": "发送中…",
+    "successTitle": "消息已发送",
+    "successBody": "谢谢您{name}。我们已收到您的消息，将尽快回复您。",
+    "sendAnother": "再发一条消息"
+  },
+  "consultancy": {
+    "heading": "提供技术咨询",
+    "body": "针对大型建筑项目和专业工业饰面，请与我们的首席技术人员联系，获取定制整合方案。",
+    "cta": "预约专业咨询"
+  },
+  "whatsapp": {
+    "tooltip": "在WhatsApp上与我们聊天",
+    "srOnly": "通过WhatsApp聊天",
+    "message": "您好 KMR，我想了解您的产品系列。"
+  },
+  "home": {
+    "theCollection": "系列产品",
+    "paintCollections": "KMR 涂料系列",
+    "whoWeAre": "关于我们",
+    "tagline": "色彩与工艺的交汇之处。",
+    "about": "KMR City Ventures 是一家加纳建筑材料公司，建立在一个信念上：正确的饰面改变一切。从优质涂料和手工颜料到木材和专业工具，我们提供建筑师、油漆工和建筑商真正信赖的产品。",
+    "yearsOf": "年",
+    "experience": "经验",
+    "learnMore": "了解更多"
+  },
+  "catalog": {
+    "heading": "五金与涂料扩展系列",
+    "intro": "我们完整的专业生态系统。从手工颜料到为建筑视觉家提供的精密五金。",
+    "searchResults": "搜索结果",
+    "fullRange": "全系列",
+    "noProductsSearch": "没有与"{query}"匹配的产品。请尝试不同的搜索。",
+    "noProductsCategory": "未找到所选类别的产品。"
+  },
+  "sort": {
+    "featured": "推荐",
+    "newest": "最新",
+    "priceAsc": "价格：从低到高",
+    "priceDesc": "价格：从高到低",
+    "nameAsc": "名称：A–Z"
+  },
+  "language": {
+    "en": "English",
+    "ar": "العربية",
+    "zh": "中文",
+    "tr": "Türkçe",
+    "selectLanguage": "选择语言"
+  }
+}

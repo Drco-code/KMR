@@ -1,50 +1,53 @@
 import Image from "next/image";
 import Link from "next/link";
 import { MapPin } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { getContactInfo } from "@/lib/api/client";
 
-const SOCIAL_LINKS = [
-  {
-    label: "Instagram",
-    href: "https://www.instagram.com/kmrcityventuresltd?igsh=MXhpazZqZTQzZG5iOA==",
-    icon: InstagramIcon,
-  },
-  {
-    label: "TikTok",
-    href: "https://www.tiktok.com/@kmr.city.ventures?_r=1&_t=ZS-98bKtbJVQY5",
-    icon: TikTokIcon,
-  },
-];
-
-const FOOTER_COLUMNS = [
-  {
-    heading: "Shop",
-    links: [
-      { href: "/catalog", label: "Full Catalog" },
-      { href: "/catalog", label: "Interior Enamels" },
-      { href: "/catalog", label: "Exterior Coatings" },
-      { href: "/catalog", label: "Specialty Finishes" },
-    ],
-  },
-  {
-    heading: "Service",
-    links: [
-      { href: "/consultancy", label: "Color Matching" },
-      { href: "/consultancy", label: "Professional Application" },
-      { href: "/consultancy", label: "Project Specs" },
-    ],
-  },
-  {
-    heading: "Support",
-    links: [
-      { href: "/quote", label: "Request a Quote" },
-      { href: "/consultancy", label: "Consultancy" },
-      { href: "/contact", label: "Contact Us" },
-    ],
-  },
-];
-
 export async function SiteFooter() {
+  const t = useTranslations("footer");
+
+  const FOOTER_COLUMNS = [
+    {
+      heading: t("shop"),
+      links: [
+        { href: "/catalog", label: t("fullCatalog") },
+        { href: "/catalog", label: t("interiorEnamels") },
+        { href: "/catalog", label: t("exteriorCoatings") },
+        { href: "/catalog", label: t("specialtyFinishes") },
+      ],
+    },
+    {
+      heading: t("service"),
+      links: [
+        { href: "/consultancy", label: t("colorMatching") },
+        { href: "/consultancy", label: t("professionalApplication") },
+        { href: "/consultancy", label: t("projectSpecs") },
+      ],
+    },
+    {
+      heading: t("support"),
+      links: [
+        { href: "/quote", label: t("requestQuote") },
+        { href: "/consultancy", label: t("consultancy") },
+        { href: "/contact", label: t("contact") },
+      ],
+    },
+  ];
+
+  const SOCIAL_LINKS = [
+    {
+      label: "Instagram",
+      href: "https://www.instagram.com/kmrcityventuresltd?igsh=MXhpazZqZTQzZG5iOA==",
+      icon: InstagramIcon,
+    },
+    {
+      label: "TikTok",
+      href: "https://www.tiktok.com/@kmr.city.ventures?_r=1&_t=ZS-98bKtbJVQY5",
+      icon: TikTokIcon,
+    },
+  ];
+
   // Address + mini map are staff-editable (ContactInfo singleton in the
   // admin dashboard), the block hides when either is unset.
   const contactInfo = await getContactInfo();
@@ -67,8 +70,7 @@ export async function SiteFooter() {
               className="h-11 w-auto"
             />
             <p className="text-sm text-ink/70">
-              Defining spaces through color. Premium architectural coatings
-              and artisanal pigments.
+              {t("tagline")}
             </p>
             <div className="flex items-center gap-4">
               {SOCIAL_LINKS.map(({ label, href, icon: Icon }) => (
@@ -108,7 +110,7 @@ export async function SiteFooter() {
             <div className="flex flex-col gap-4 lg:col-span-2">
               <h5 className="flex items-center gap-2 text-xs font-semibold tracking-[0.15em] text-ink uppercase">
                 <MapPin className="size-3.5 text-gold" />
-                Visit Us
+                {t("visitUs")}
               </h5>
               {contactInfo.address ? (
                 <p className="text-sm leading-relaxed text-ink/70">
@@ -133,7 +135,7 @@ export async function SiteFooter() {
 
         <div className="border-t border-ink/10 pt-8 text-center">
           <p className="text-xs tracking-[0.1em] text-ink/60 uppercase">
-            © {new Date().getFullYear()} KMR Architectural Coatings. All rights reserved.
+            {t("copyright", { year: new Date().getFullYear() })}
           </p>
         </div>
       </div>

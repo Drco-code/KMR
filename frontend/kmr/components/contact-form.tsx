@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { Check } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +14,7 @@ type Status = "idle" | "submitting" | "success";
 // simulates a short delay and shows a success state. Wire this to a real
 // endpoint (or a mail/WhatsApp provider) when one exists.
 export function ContactForm() {
+  const t = useTranslations("contact");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -33,10 +35,9 @@ export function ContactForm() {
           <Check className="size-7" />
         </span>
         <div className="flex flex-col gap-2">
-          <h2 className="font-display text-3xl text-ink">Message Sent</h2>
+          <h2 className="font-display text-3xl text-ink">{t("successTitle")}</h2>
           <p className="max-w-sm text-ink-muted">
-            Thanks{name ? `, ${name.split(" ")[0]}` : ""}. We&apos;ve received
-            your message and will get back to you shortly.
+            {t("successBody", { name: name ? `, ${name.split(" ")[0]}` : "" })}
           </p>
         </div>
         <button
@@ -50,7 +51,7 @@ export function ContactForm() {
           }}
           className="text-sm font-semibold tracking-[0.05em] text-gold uppercase underline underline-offset-4 transition-colors hover:text-ink"
         >
-          Send another message
+          {t("sendAnother")}
         </button>
       </div>
     );
@@ -65,9 +66,9 @@ export function ContactForm() {
       className="flex flex-col gap-6 rounded-sm border border-border bg-white p-6 md:p-8"
     >
       <div className="flex flex-col gap-1.5">
-        <h2 className="font-display text-2xl text-ink">Send a Message</h2>
+        <h2 className="font-display text-2xl text-ink">{t("sendMessage")}</h2>
         <p className="text-sm text-ink-muted">
-          Tell us what you&apos;re looking for and we&apos;ll take it from there.
+          {t("formSubtitle")}
         </p>
       </div>
 
@@ -77,14 +78,14 @@ export function ContactForm() {
             htmlFor="contact-name"
             className="text-xs font-semibold tracking-[0.15em] text-ink uppercase"
           >
-            Full Name
+            {t("fullName")}
           </Label>
           <Input
             id="contact-name"
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Your name"
+            placeholder={t("namePlaceholder")}
             className={inputClasses}
           />
         </div>
@@ -93,7 +94,7 @@ export function ContactForm() {
             htmlFor="contact-email"
             className="text-xs font-semibold tracking-[0.15em] text-ink uppercase"
           >
-            Email
+            {t("email")}
           </Label>
           <Input
             id="contact-email"
@@ -101,7 +102,7 @@ export function ContactForm() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
+            placeholder={t("emailPlaceholder")}
             className={inputClasses}
           />
         </div>
@@ -112,14 +113,14 @@ export function ContactForm() {
           htmlFor="contact-phone"
           className="text-xs font-semibold tracking-[0.15em] text-ink uppercase"
         >
-          Phone <span className="normal-case text-ink-muted">(optional)</span>
+          {t("phone")} <span className="normal-case text-ink-muted">{t("phoneOptional")}</span>
         </Label>
         <Input
           id="contact-phone"
           type="tel"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          placeholder="+233 XX XXX XXXX"
+          placeholder={t("phonePlaceholder")}
           className={inputClasses}
         />
       </div>
@@ -129,14 +130,14 @@ export function ContactForm() {
           htmlFor="contact-message"
           className="text-xs font-semibold tracking-[0.15em] text-ink uppercase"
         >
-          Message
+          {t("message")}
         </Label>
         <Textarea
           id="contact-message"
           required
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          placeholder="How can we help?"
+          placeholder={t("messagePlaceholder")}
           rows={5}
           className="rounded-sm border-border bg-background px-4 py-3 text-sm text-ink placeholder:text-ink-muted/50 focus-visible:border-gold focus-visible:ring-gold/30"
         />
@@ -147,7 +148,7 @@ export function ContactForm() {
         disabled={status === "submitting"}
         className="mt-1 rounded-sm bg-black px-10 py-5 text-sm font-semibold tracking-[0.1em] text-white uppercase hover:bg-black/90"
       >
-        {status === "submitting" ? "Sending…" : "Send Message"}
+        {status === "submitting" ? t("sending") : t("send")}
       </Button>
     </form>
   );

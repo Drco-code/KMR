@@ -1,0 +1,117 @@
+{
+  "nav": {
+    "tools": "Aletler",
+    "outdoorEquipment": "Dış Mekan Ekipmanları",
+    "buildingMaterials": "Yapı Malzemeleri",
+    "homeEssentials": "Ev Temel Ürünleri",
+    "autoEssentials": "Otomotiv Ürünleri",
+    "b2bSolutions": "Kurumsal Çözümler",
+    "topSellers": "Çok Satanlar",
+    "consultancy": "Danışmanlık",
+    "home": "Ana Sayfa",
+    "allProducts": "Tüm Ürünler",
+    "browseByCategory": "Kategoriye Göre Gözat",
+    "contactUs": "Bize Ulaşın",
+    "openMenu": "Menüyü Aç"
+  },
+  "footer": {
+    "tagline": "Rengin mekânları tanımlaması. Premium mimari kaplamalar ve el yapımı pigmentler.",
+    "shop": "Mağaza",
+    "service": "Servis",
+    "support": "Destek",
+    "fullCatalog": "Tam Katalog",
+    "interiorEnamels": "İç Mekan Emayesi",
+    "exteriorCoatings": "Dış Cephe Kaplamalar",
+    "specialtyFinishes": "Özel Yüzeyler",
+    "colorMatching": "Renk Eşleştirme",
+    "professionalApplication": "Profesyonel Uygulama",
+    "projectSpecs": "Proje Özellikleri",
+    "requestQuote": "Teklif İste",
+    "contact": "Bize Ulaşın",
+    "visitUs": "Bizi Ziyaret Edin",
+    "copyright": "© {year} KMR Mimari Kaplamalar. Tüm hakları saklıdır."
+  },
+  "product": {
+    "addToCart": "Sepete Ekle",
+    "kmrPaintCollection": "KMR Boya Koleksiyonu"
+  },
+  "cart": {
+    "addedToQuoteCart": "Teklif Sepetine Eklendi",
+    "viewCart": "Sepeti Görüntüle ({count})",
+    "checkout": "Ödeme",
+    "qty": "Adet:",
+    "dismissNotification": "Bildirimi Kapat",
+    "viewQuoteCart": "Teklif sepetini görüntüle ({count} ürün)"
+  },
+  "quote": {
+    "orderInquiry": "Sipariş Sorgusu",
+    "yourQuoteCart": "Teklif Sepetiniz",
+    "emptyCart": "Henüz teklifinize herhangi bir ürün eklemediniz.",
+    "browseCatalog": "Kataloğa Gözat",
+    "items": "{count} ürün",
+    "estimatedTotal": "Tahmini Toplam",
+    "pricingOnRequest": "Fiyat Talep Üzerine",
+    "customItems": "+ {count} özel/teklif ürünü",
+    "continueToReview": "İncelemeye Devam Et"
+  },
+  "contact": {
+    "sendMessage": "Mesaj Gönder",
+    "formSubtitle": "Neye ihtiyacınız olduğunu bize söyleyin, gerisini biz halledelim.",
+    "fullName": "Ad Soyad",
+    "namePlaceholder": "Adınız",
+    "email": "E-posta",
+    "emailPlaceholder": "siz@ornek.com",
+    "phone": "Telefon",
+    "phoneOptional": "(isteğe bağlı)",
+    "phonePlaceholder": "+233 XX XXX XXXX",
+    "message": "Mesaj",
+    "messagePlaceholder": "Size nasıl yardımcı olabiliriz?",
+    "send": "Mesaj Gönder",
+    "sending": "Gönderiliyor…",
+    "successTitle": "Mesaj Gönderildi",
+    "successBody": "Teşekkürler{name}. Mesajınızı aldık, en kısa sürede size döneceğiz.",
+    "sendAnother": "Başka mesaj gönder"
+  },
+  "consultancy": {
+    "heading": "Teknik Danışmanlık Mevcut",
+    "body": "Büyük ölçekli mimari projeler ve özel endüstriyel yüzeyler için, özelleştirilmiş entegrasyon planı için baş teknisyenlerimizle görüşün.",
+    "cta": "Profesyonel Danışmanlık Planlayın"
+  },
+  "whatsapp": {
+    "tooltip": "WhatsApp'ta bizimle sohbet edin",
+    "srOnly": "WhatsApp'ta sohbet et",
+    "message": "Merhaba KMR, koleksiyonunuz hakkında bilgi almak istiyorum."
+  },
+  "home": {
+    "theCollection": "Koleksiyon",
+    "paintCollections": "KMR Boya Koleksiyonları",
+    "whoWeAre": "Biz Kimiz",
+    "tagline": "Rengin Zanaatla Buluştuğu Yer.",
+    "about": "KMR City Ventures, tek bir inançla kurulmuş bir Ganalı yapı malzemeleri firmasıdır: Doğru yüzey her şeyi değiştirir. Premium kaplamalar ve el yapımı pigmentlerden ahşap ve profesyonel aletlere kadar, mimarların, boyacıların ve inşaatçıların gerçekten güvendiği ürünleri sunuyoruz.",
+    "yearsOf": "Yıllık",
+    "experience": "Deneyim",
+    "learnMore": "Daha Fazla Bilgi"
+  },
+  "catalog": {
+    "heading": "Genişletilmiş Hırdavat ve Boya Koleksiyonu",
+    "intro": "Eksiksiz profesyonel ekosistemimiz. El yapımı pigmentlerden mimari vizyoner için hassas hırdavata kadar.",
+    "searchResults": "Arama Sonuçları",
+    "fullRange": "Tam Yelpazeye",
+    "noProductsSearch": "\"{query}\" için ürün bulunamadı. Farklı bir arama deneyin.",
+    "noProductsCategory": "Seçilen kategoriler için ürün bulunamadı."
+  },
+  "sort": {
+    "featured": "Öne Çıkan",
+    "newest": "En Yeni",
+    "priceAsc": "Fiyat: Düşükten Yükseğe",
+    "priceDesc": "Fiyat: Yüksekten Düşüğe",
+    "nameAsc": "İsim: A–Z"
+  },
+  "language": {
+    "en": "English",
+    "ar": "العربية",
+    "zh": "中文",
+    "tr": "Türkçe",
+    "selectLanguage": "Dil Seçin"
+  }
+}

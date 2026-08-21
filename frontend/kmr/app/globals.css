@@ -192,4 +192,39 @@
 .animate-toast-progress {
   animation: toast-progress 3.5s linear forwards;
 }
+
+/* ── RTL / Arabic font overrides ────────────────────────────────────────── */
+
+/* Use the Arabic font when html[lang="ar"] is set */
+html[lang="ar"] {
+  font-family: var(--font-arabic), var(--font-sans), system-ui, sans-serif;
+  --font-sans: var(--font-arabic);
+}
+
+/* Use the SC (Simplified Chinese) font when html[lang="zh"] is set */
+html[lang="zh"] {
+  font-family: var(--font-chinese), var(--font-sans), system-ui, sans-serif;
+  --font-sans: var(--font-chinese);
+}
+
+/* RTL — flip the language switcher tooltip so it appears to the left */
+html[dir="rtl"] .group .pointer-events-none.right-full {
+  right: auto;
+  left: 100%;
+  margin-right: 0;
+  margin-left: 0.75rem;
+}
+
+html[dir="rtl"] .group .pointer-events-none.right-full span.-right-1 {
+  right: auto;
+  left: -4px;
+}
+
+/* RTL — WhatsApp FAB tooltip appears on the right in RTL */
+html[dir="rtl"] .group.fixed .pointer-events-none {
+  right: 100%;
+  left: auto;
+  margin-right: 0.75rem;
+  margin-left: 0;
+}
 
