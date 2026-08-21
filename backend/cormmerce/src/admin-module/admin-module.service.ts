@@ -1093,8 +1093,11 @@ export class AdminModuleService {
                         description: { type: 'textarea' },
                         heroImage: {
                           description:
-                            'Optional image URL shown on the storefront collection card and PDP.',
+                            'Optional legacy cover image URL (fallback if no images are uploaded below).',
                         },
+                        imagesMimeType: { isVisible: false },
+                        imagesFilename: { isVisible: false },
+                        imagesSize: { isVisible: false },
                         sortOrder: {
                           description:
                             'Lower values show first on the storefront collection menu.',
@@ -1113,13 +1116,19 @@ export class AdminModuleService {
                       actions: {
                         new: {
                           before: (request: any) => {
-                            if (request.payload) this.normalizeSignatureCollectionPayload(request.payload);
+                            if (request.payload) {
+                              this.normalizeSignatureCollectionPayload(request.payload);
+                              delete request.payload.imagesSize;
+                            }
                             return request;
                           },
                         },
                         edit: {
                           before: (request: any) => {
-                            if (request.payload) this.normalizeSignatureCollectionPayload(request.payload);
+                            if (request.payload) {
+                              this.normalizeSignatureCollectionPayload(request.payload);
+                              delete request.payload.imagesSize;
+                            }
                             return request;
                           },
                         },
@@ -1164,7 +1173,7 @@ export class AdminModuleService {
         // CloudinaryAdminUploadProvider for how each uploaded file is mapped
         // onto an entry in Product.images (images[0] is the cover image).
         features:
-          name === 'Product'
+          name === 'Product' || name === 'SignatureCollection'
             ? [
                 uploadFeature({
                   componentLoader,

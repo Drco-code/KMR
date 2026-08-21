@@ -45,6 +45,7 @@ export interface SignatureCollection {
   type: SignatureCollectionType;
   description: string | null;
   heroImage: string | null;
+  images: string[];
   sizes: string[];
   colors: SignatureColorOption[];
   isActive: boolean;

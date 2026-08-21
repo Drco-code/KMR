@@ -43,7 +43,7 @@ export function SignatureCollectionDetail({ collection }: SignatureCollectionDet
       slug: collection.slug,
       href: `/signature-collections/${collection.slug}`,
       priceDescription: null,
-      coverImage: collection.heroImage,
+      coverImage: collection.images?.[0] || collection.heroImage,
       variantColorCode: selectedColor.code,
       variantColorName: selectedColor.name,
       variantSize: selectedSize,

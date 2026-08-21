@@ -164,10 +164,16 @@ model SignatureCollection {
   type        SignatureCollectionType @unique
   description String?                 @db.Text
   heroImage   String?
-  sizes       String[]                @default([])
-  colors      Json                    @default("[]")
-  isActive    Boolean                 @default(true)
-  sortOrder   Int                     @default(0)
+
+  images         String[] @default([])
+  imagesMimeType String[] @default([])
+  imagesFilename String[] @default([])
+  imagesSize     Json     @default("[]")
+
+  sizes     String[] @default([])
+  colors    Json     @default("[]")
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
