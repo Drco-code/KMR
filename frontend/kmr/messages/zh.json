@@ -97,7 +97,7 @@
     "intro": "我们完整的专业生态系统。从手工颜料到为建筑视觉家提供的精密五金。",
     "searchResults": "搜索结果",
     "fullRange": "全系列",
-    "noProductsSearch": "没有与"{query}"匹配的产品。请尝试不同的搜索。",
+    "noProductsSearch": "没有与\"{query}\"匹配的产品。请尝试不同的搜索。",
     "noProductsCategory": "未找到所选类别的产品。"
   },
   "sort": {
