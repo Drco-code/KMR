@@ -120,14 +120,14 @@ export function BrandStrip({ brands }: { brands: Brand[] }) {
         width={320}
         height={320}
         sizes="(min-width: 1024px) 25vw, 50vw"
-        className="size-32 object-contain md:size-40"
+        className="w-20 h-20 object-contain md:w-40 md:h-40"
       />
     );
 
     return (
       <div
         key={brand.id}
-        className="flex w-full max-w-[300px] flex-1 flex-col items-center text-center"
+        className="flex w-full max-w-[220px] sm:max-w-[300px] flex-1 flex-col items-center text-center"
       >
         {brand.websiteUrl ? (
           <a
@@ -146,7 +146,7 @@ export function BrandStrip({ brands }: { brands: Brand[] }) {
           {brand.name}
         </h3>
         {brand.description ? (
-          <p className="mt-3 max-w-[260px] text-sm leading-relaxed text-ink-muted">
+          <p className="mt-3 max-w-[260px] text-sm leading-relaxed text-ink-muted hidden md:block">
             {brand.description}
           </p>
         ) : null}
@@ -173,7 +173,7 @@ export function BrandStrip({ brands }: { brands: Brand[] }) {
           <div className="relative">
             <div
               ref={pageRef}
-              className="flex flex-wrap items-start justify-center gap-x-8 gap-y-14"
+              className="grid grid-cols-2 md:grid-cols-4 items-start justify-items-center gap-6"
             >
               {pages[currentPage].map(renderCard)}
             </div>
@@ -215,7 +215,7 @@ export function BrandStrip({ brands }: { brands: Brand[] }) {
         </div>
       ) : (
         <ScrollReveal
-          className="mx-auto mt-16 flex w-full max-w-[1200px] flex-wrap items-start justify-center gap-x-8 gap-y-14"
+          className="mx-auto mt-16 grid w-full max-w-[1200px] grid-cols-2 md:grid-cols-4 items-start justify-items-center gap-6"
           stagger={0.06}
           y={16}
           duration={0.6}

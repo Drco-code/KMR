@@ -19,11 +19,11 @@ export function ProductCard({
   const coverImage = getValidImages(product.images)[0] ?? null;
 
   return (
-    <div className="group flex w-full max-w-[300px] flex-col overflow-hidden rounded-md border border-gray-200 bg-white transition-all duration-300 hover:shadow-xl">
+    <div className="group flex w-full max-w-[240px] sm:max-w-[300px] flex-col overflow-hidden rounded-md border border-gray-200 bg-white transition-all duration-300 hover:shadow-xl">
       {/* Image Section - White background with padding */}
       <Link
         href={`/product/${product.slug}`}
-        className="relative block aspect-square w-full bg-gray-50 p-8"
+        className="relative block aspect-square w-full bg-gray-50 p-6 sm:p-8"
       >
         {coverImage ? (
           <RevealImage
@@ -79,7 +79,7 @@ export function ProductCard({
               coverImage,
             })
           }
-          className="w-full rounded-md bg-[#1a2744] py-4 text-sm font-semibold tracking-[0.02em] text-white transition-all duration-300 hover:bg-[#1a2744]/90 hover:shadow-md"
+          className="w-full rounded-md bg-[#1a2744] py-3 sm:py-4 text-sm font-semibold tracking-[0.02em] text-white transition-all duration-300 hover:bg-[#1a2744]/90 hover:shadow-md"
         >
           Add to cart
         </Button>
