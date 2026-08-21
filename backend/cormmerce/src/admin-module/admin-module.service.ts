@@ -1186,6 +1186,15 @@ export class AdminModuleService {
                         // this form.
                         isVisible: { list: true, show: true, edit: false, filter: false },
                       },
+                      // The `parent` field is the Prisma relation object that
+                      // AdminJS auto-detects from the Category self-relation.
+                      // It duplicates `parentId` (the scalar FK) and shows a
+                      // confusing second "Parent" dropdown below the custom
+                      // CategoryParentSelect component — hide it everywhere.
+                      parent: { isVisible: false },
+                      // Likewise `children` is the reverse side of the same
+                      // self-relation — never useful in a form or list view.
+                      children: { isVisible: false },
                       createdAt: { isVisible: { list: true, show: true, edit: false, filter: false } },
                       updatedAt: { isVisible: { list: true, show: true, edit: false, filter: false } },
                     },
