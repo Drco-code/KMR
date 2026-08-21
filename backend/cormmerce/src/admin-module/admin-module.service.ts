@@ -366,8 +366,16 @@ export class AdminModuleService {
         }
       }
 
-      if (!Array.isArray(payload.colors)) {
-        const colorMap = new Map<string, { name?: string; code?: string }>();
+      if (Array.isArray(payload.colors)) {
+        payload.colors = payload.colors
+          .filter((item: any) => Boolean(item && typeof item === 'object' && item.name && item.code))
+          .map((item: any) => ({
+            name: String(item.name).trim(),
+            code: String(item.code).trim().toUpperCase(),
+            image: typeof item.image === 'string' && item.image.trim() ? item.image.trim() : undefined,
+          }));
+      } else {
+        const colorMap = new Map<string, { name?: string; code?: string; image?: string }>();
         for (const k of colorKeys) {
           const val = payload[k];
           const match = k.match(/^colors(?:\.|\[)(\d+)\]?(?:\.([a-zA-Z]+))?$/);
@@ -377,13 +385,18 @@ export class AdminModuleService {
             const existing = colorMap.get(idx) || {};
             if (field === 'name') existing.name = String(val);
             if (field === 'code') existing.code = String(val);
+            if (field === 'image') existing.image = String(val);
             colorMap.set(idx, existing);
           }
         }
-        const collected: Array<{ name: string; code: string }> = [];
+        const collected: Array<{ name: string; code: string; image?: string }> = [];
         for (const entry of colorMap.values()) {
           if (entry.name && entry.code) {
-            collected.push({ name: entry.name.trim(), code: entry.code.trim().toUpperCase() });
+            collected.push({
+              name: entry.name.trim(),
+              code: entry.code.trim().toUpperCase(),
+              image: entry.image && entry.image.trim() ? entry.image.trim() : undefined,
+            });
           }
         }
         if (collected.length > 0) {

@@ -36,6 +36,7 @@ export type SignatureCollectionType = "EMULSION" | "OIL" | "POP" | "GRAFFIATE";
 export interface SignatureColorOption {
   name: string;
   code: string;
+  image?: string | null;
 }
 
 export interface SignatureCollection {

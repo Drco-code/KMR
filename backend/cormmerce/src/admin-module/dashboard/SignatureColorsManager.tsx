@@ -5,6 +5,7 @@ import { Box, Button, FormGroup, Input, Label, Text, Icon } from '@adminjs/desig
 export interface SignatureColorItem {
   name: string;
   code: string;
+  image?: string;
 }
 
 function parseColors(raw: unknown): SignatureColorItem[] {
@@ -15,6 +16,7 @@ function parseColors(raw: unknown): SignatureColorItem[] {
       .map((item) => ({
         name: String(item.name).trim(),
         code: String(item.code).trim().toUpperCase(),
+        image: typeof item.image === 'string' && item.image.trim() ? item.image.trim() : undefined,
       }))
       .filter((item) => item.name && item.code);
   }
@@ -38,8 +40,8 @@ function extractColorsFromParams(params: Record<string, unknown> = {}, path: str
   const directParsed = parseColors(direct);
   if (directParsed.length > 0) return directParsed;
 
-  // 2. Scan flattened keys: e.g. "colors.0.name", "colors.0.code" or "colors[0].name"
-  const colorMap = new Map<string, { name?: string; code?: string }>();
+  // 2. Scan flattened keys: e.g. "colors.0.name", "colors.0.code", "colors.0.image"
+  const colorMap = new Map<string, { name?: string; code?: string; image?: string }>();
   for (const [key, value] of Object.entries(params)) {
     if (!key.startsWith(`${path}.`) && !key.startsWith(`${path}[`)) continue;
     const match = key.match(/^colors(?:\.|\[)(\d+)\]?(?:\.([a-zA-Z]+))?$/);
@@ -49,6 +51,7 @@ function extractColorsFromParams(params: Record<string, unknown> = {}, path: str
       const existing = colorMap.get(index) || {};
       if (field === 'name') existing.name = String(value);
       if (field === 'code') existing.code = String(value);
+      if (field === 'image') existing.image = String(value);
       colorMap.set(index, existing);
     }
   }
@@ -61,6 +64,7 @@ function extractColorsFromParams(params: Record<string, unknown> = {}, path: str
       result.push({
         name: entry.name.trim(),
         code: entry.code.trim().toUpperCase(),
+        image: entry.image && entry.image.trim() ? entry.image.trim() : undefined,
       });
     }
   }
@@ -87,8 +91,11 @@ const SignatureColorsManager: React.FC<EditPropertyProps> = ({ property, record,
   const [colors, setColors] = useState<SignatureColorItem[]>(initialColors);
   const [newColorName, setNewColorName] = useState('');
   const [newColorCode, setNewColorCode] = useState('#D4AF37');
+  const [newColorImage, setNewColorImage] = useState('');
   const [filterQuery, setFilterQuery] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [editingImageIdx, setEditingImageIdx] = useState<number | null>(null);
+  const [editingImageUrl, setEditingImageUrl] = useState('');
 
   // Sync with AdminJS form state on mount or change
   useEffect(() => {
@@ -105,6 +112,7 @@ const SignatureColorsManager: React.FC<EditPropertyProps> = ({ property, record,
   const handleAddColor = () => {
     const name = newColorName.trim();
     const code = normalizeHex(newColorCode);
+    const image = newColorImage.trim() || undefined;
 
     if (!name) {
       setErrorMessage('Please enter a color name (e.g. Royal Blue, Pure White)');
@@ -124,14 +132,27 @@ const SignatureColorsManager: React.FC<EditPropertyProps> = ({ property, record,
     }
 
     setErrorMessage(null);
-    const updated = [...colors, { name, code }];
+    const updated = [...colors, { name, code, image }];
     updateColors(updated);
     setNewColorName('');
+    setNewColorImage('');
   };
 
   const handleRemoveColor = (indexToRemove: number) => {
     const updated = colors.filter((_, idx) => idx !== indexToRemove);
     updateColors(updated);
+  };
+
+  const handleSaveColorImage = (index: number) => {
+    const updated = [...colors];
+    const url = editingImageUrl.trim();
+    updated[index] = {
+      ...updated[index],
+      image: url || undefined,
+    };
+    updateColors(updated);
+    setEditingImageIdx(null);
+    setEditingImageUrl('');
   };
 
   const filteredColors = useMemo(() => {
@@ -146,7 +167,7 @@ const SignatureColorsManager: React.FC<EditPropertyProps> = ({ property, record,
     <FormGroup style={{ marginBottom: '32px' }}>
       <Label>{property.label ?? 'Available Colors'}</Label>
       <Text variant="grey" style={{ fontSize: '12px', marginBottom: '12px' }}>
-        Add as many colors as needed. Customers will pick from these color swatches on the product page.
+        Add as many colors as needed. You can also assign an optional product photo URL to each color so the storefront image changes when that color swatch is clicked.
       </Text>
 
       {/* Add Color Card */}
@@ -162,13 +183,13 @@ const SignatureColorsManager: React.FC<EditPropertyProps> = ({ property, record,
         <Text style={{ fontWeight: 600, fontSize: '13px', marginBottom: '8px' }}>
           Add New Color
         </Text>
-        <Box flex style={{ gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
+        <Box flex style={{ gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
           {/* Native Picker */}
           <Input
             type="color"
             value={newColorCode.startsWith('#') && newColorCode.length === 7 ? newColorCode : '#D4AF37'}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewColorCode(e.target.value.toUpperCase())}
-            style={{ width: '48px', height: '38px', padding: '2px', cursor: 'pointer', borderRadius: '4px' }}
+            style={{ width: '44px', height: '36px', padding: '2px', cursor: 'pointer', borderRadius: '4px' }}
           />
 
           {/* Hex Input */}
@@ -176,7 +197,7 @@ const SignatureColorsManager: React.FC<EditPropertyProps> = ({ property, record,
             value={newColorCode}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewColorCode(e.target.value)}
             placeholder="#HEX Code"
-            style={{ width: '110px', textTransform: 'uppercase' }}
+            style={{ width: '100px', height: '36px', textTransform: 'uppercase', fontSize: '12px' }}
           />
 
           {/* Name Input */}
@@ -192,11 +213,19 @@ const SignatureColorsManager: React.FC<EditPropertyProps> = ({ property, record,
                 handleAddColor();
               }
             }}
-            placeholder="Color Name (e.g. Charcoal Grey, Brilliant White)"
-            style={{ flex: 1, minWidth: '220px' }}
+            placeholder="Color Name (e.g. Royal Blue)"
+            style={{ flex: 1, minWidth: '160px', height: '36px', fontSize: '12px' }}
           />
 
-          <Button type="button" variant="primary" size="sm" onClick={handleAddColor}>
+          {/* Optional Image URL Input */}
+          <Input
+            value={newColorImage}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewColorImage(e.target.value)}
+            placeholder="Matching Image URL (optional)"
+            style={{ flex: 1, minWidth: '200px', height: '36px', fontSize: '12px' }}
+          />
+
+          <Button type="button" variant="primary" size="sm" onClick={handleAddColor} style={{ height: '36px' }}>
             <Icon icon="Plus" mr="sm" />
             Add Color
           </Button>
@@ -244,70 +273,140 @@ const SignatureColorsManager: React.FC<EditPropertyProps> = ({ property, record,
         <Box
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
             gap: '10px',
-            maxHeight: '360px',
+            maxHeight: '420px',
             overflowY: 'auto',
             padding: '4px',
           }}
         >
-          {filteredColors.map((color) => (
-            <Box
-              key={`${color.originalIndex}-${color.code}-${color.name}`}
-              flex
-              style={{
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '8px 12px',
-                backgroundColor: '#FFFFFF',
-                border: '1px solid #E2E8F0',
-                borderRadius: '6px',
-                boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-              }}
-            >
-              <Box flex style={{ alignItems: 'center', gap: '10px', overflow: 'hidden' }}>
-                <span
-                  style={{
-                    width: '24px',
-                    height: '24px',
-                    borderRadius: '50%',
-                    backgroundColor: color.code,
-                    border: '1px solid rgba(0,0,0,0.15)',
-                    flexShrink: 0,
-                    boxShadow: 'inset 0 0 2px rgba(0,0,0,0.1)',
-                  }}
-                  title={color.code}
-                />
-                <Box style={{ overflow: 'hidden' }}>
-                  <Text
+          {filteredColors.map((color) => {
+            const isEditingImg = editingImageIdx === color.originalIndex;
+            return (
+              <Box
+                key={`${color.originalIndex}-${color.code}-${color.name}`}
+                style={{
+                  padding: '10px 12px',
+                  backgroundColor: '#FFFFFF',
+                  border: '1px solid #E2E8F0',
+                  borderRadius: '6px',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+                }}
+              >
+                <Box flex style={{ alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Box flex style={{ alignItems: 'center', gap: '10px', overflow: 'hidden' }}>
+                    <span
+                      style={{
+                        width: '26px',
+                        height: '26px',
+                        borderRadius: '50%',
+                        backgroundColor: color.code,
+                        border: '1px solid rgba(0,0,0,0.15)',
+                        flexShrink: 0,
+                        boxShadow: 'inset 0 0 2px rgba(0,0,0,0.1)',
+                      }}
+                      title={color.code}
+                    />
+
+                    {color.image && (
+                      <img
+                        src={color.image}
+                        alt={color.name}
+                        style={{
+                          width: '26px',
+                          height: '26px',
+                          borderRadius: '4px',
+                          objectFit: 'cover',
+                          border: '1px solid #E2E8F0',
+                          flexShrink: 0,
+                        }}
+                        title="Associated color image"
+                      />
+                    )}
+
+                    <Box style={{ overflow: 'hidden' }}>
+                      <Text
+                        style={{
+                          fontWeight: 600,
+                          fontSize: '13px',
+                          whiteSpace: 'nowrap',
+                          textOverflow: 'ellipsis',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        {color.name}
+                      </Text>
+                      <Text variant="grey" style={{ fontSize: '11px', fontFamily: 'monospace' }}>
+                        {color.code}
+                      </Text>
+                    </Box>
+                  </Box>
+
+                  <Box flex style={{ gap: '4px', alignItems: 'center' }}>
+                    <Button
+                      type="button"
+                      variant="text"
+                      size="sm"
+                      onClick={() => {
+                        if (isEditingImg) {
+                          setEditingImageIdx(null);
+                        } else {
+                          setEditingImageIdx(color.originalIndex);
+                          setEditingImageUrl(color.image || '');
+                        }
+                      }}
+                      style={{ color: color.image ? '#0F172A' : '#64748B', padding: '4px 6px', fontSize: '11px' }}
+                      title={color.image ? 'Change image' : 'Attach image'}
+                    >
+                      <Icon icon="Image" mr="xs" />
+                      {color.image ? 'Img' : '+Img'}
+                    </Button>
+
+                    <Button
+                      type="button"
+                      variant="text"
+                      size="sm"
+                      onClick={() => handleRemoveColor(color.originalIndex)}
+                      style={{ color: '#EF4444', padding: '4px' }}
+                      title="Remove color"
+                    >
+                      <Icon icon="Trash2" />
+                    </Button>
+                  </Box>
+                </Box>
+
+                {/* Inline Image URL Editor */}
+                {isEditingImg && (
+                  <Box
+                    mt="sm"
+                    pt="sm"
                     style={{
-                      fontWeight: 600,
-                      fontSize: '13px',
-                      whiteSpace: 'nowrap',
-                      textOverflow: 'ellipsis',
-                      overflow: 'hidden',
+                      borderTop: '1px dashed #E2E8F0',
+                      display: 'flex',
+                      gap: '6px',
+                      alignItems: 'center',
                     }}
                   >
-                    {color.name}
-                  </Text>
-                  <Text variant="grey" style={{ fontSize: '11px', fontFamily: 'monospace' }}>
-                    {color.code}
-                  </Text>
-                </Box>
+                    <Input
+                      value={editingImageUrl}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditingImageUrl(e.target.value)}
+                      placeholder="Paste image URL (https://...)"
+                      style={{ fontSize: '11px', height: '28px', flex: 1 }}
+                    />
+                    <Button
+                      type="button"
+                      variant="primary"
+                      size="sm"
+                      onClick={() => handleSaveColorImage(color.originalIndex)}
+                      style={{ height: '28px', padding: '2px 8px', fontSize: '11px' }}
+                    >
+                      Save
+                    </Button>
+                  </Box>
+                )}
               </Box>
-
-              <Button
-                type="button"
-                variant="text"
-                size="sm"
-                onClick={() => handleRemoveColor(color.originalIndex)}
-                style={{ color: '#EF4444', padding: '4px' }}
-                title="Remove color"
-              >
-                <Icon icon="Trash2" />
-              </Button>
-            </Box>
-          ))}
+            );
+          })}
         </Box>
       )}
     </FormGroup>

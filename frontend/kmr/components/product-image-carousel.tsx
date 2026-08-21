@@ -16,20 +16,30 @@ export function ProductImageCarousel({
   images,
   youtubeUrls,
   alt,
+  activeImage,
 }: {
   images: string[];
   youtubeUrls: string[];
   alt: string;
+  activeImage?: string | null;
 }) {
+  const allImages = useMemo(() => {
+    if (activeImage && !images.includes(activeImage)) {
+      return [activeImage, ...images];
+    }
+    return images;
+  }, [images, activeImage]);
+
   const slides = useMemo(
     () => [
-      ...images.map((src) => ({ type: "image" as const, src })),
+      ...allImages.map((src) => ({ type: "image" as const, src })),
       ...youtubeUrls
         .map((url) => ({ type: "video" as const, src: getYouTubeEmbedUrl(url) }))
         .filter((slide): slide is { type: "video"; src: string } => slide.src !== null),
     ],
-    [images, youtubeUrls]
+    [allImages, youtubeUrls]
   );
+
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -37,8 +47,19 @@ export function ProductImageCarousel({
   const touchEndX = useRef(0);
 
   const goTo = useCallback((next: number) => {
+    if (slides.length === 0) return;
     setIndex((next + slides.length) % slides.length);
   }, [slides.length]);
+
+  // If activeImage changes externally (e.g. from color selection), jump to it
+  useEffect(() => {
+    if (activeImage) {
+      const targetIdx = slides.findIndex((s) => s.src === activeImage);
+      if (targetIdx !== -1) {
+        setIndex(targetIdx);
+      }
+    }
+  }, [activeImage, slides]);
 
   // Auto-advances one slide at a time; pausing on hover/focus so a visitor
   // who's actually looking at the gallery isn't fighting the timer, and
@@ -59,7 +80,7 @@ export function ProductImageCarousel({
       if (!el) return;
       gsap.to(el, {
         opacity: i === index ? 1 : 0,
-        duration: 0.9,
+        duration: 0.7,
         ease: "power2.inOut",
       });
     });
@@ -67,7 +88,6 @@ export function ProductImageCarousel({
 
   // Touch/swipe handlers for mobile
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    // Don't track touch if starting on a button
     if ((e.target as HTMLElement).closest('button')) return;
     touchStartX.current = e.touches[0].clientX;
   }, []);
@@ -77,16 +97,13 @@ export function ProductImageCarousel({
   }, []);
 
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    // Don't process swipe if touch started on a button
     if ((e.target as HTMLElement).closest('button')) return;
     
     const diff = touchStartX.current - touchEndX.current;
     if (Math.abs(diff) > SWIPE_THRESHOLD) {
       if (diff > 0) {
-        // Swiped left - go to next
         goTo(index + 1);
       } else {
-        // Swiped right - go to previous
         goTo(index - 1);
       }
     }
@@ -112,7 +129,7 @@ export function ProductImageCarousel({
       >
         {slides.map((slide, i) => (
           <div
-            key={slide.src}
+            key={`${slide.src}-${i}`}
             ref={(el) => {
               slideRefs.current[i] = el;
             }}
@@ -133,7 +150,7 @@ export function ProductImageCarousel({
             ) : (
               <iframe
                 src={slide.src}
-                title={`${alt} video ${i - images.length + 1}`}
+                title={`${alt} video ${i - allImages.length + 1}`}
                 className="size-full"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 allowFullScreen
@@ -147,7 +164,7 @@ export function ProductImageCarousel({
             <button
               type="button"
               onClick={() => goTo(index - 1)}
-              className="absolute top-1/2 left-3 z-10 flex size-9 -translate-y-1/2 items-center justify-center bg-white/90 text-ink opacity-0 transition-opacity group-hover:opacity-100 hover:bg-white"
+              className="absolute top-1/2 left-3 z-10 flex size-9 -translate-y-1/2 items-center justify-center bg-white/90 text-ink opacity-0 transition-opacity group-hover:opacity-100 hover:bg-white rounded-full shadow-md"
               aria-label="Previous image"
             >
               <ChevronLeft className="size-5" />
@@ -155,12 +172,12 @@ export function ProductImageCarousel({
             <button
               type="button"
               onClick={() => goTo(index + 1)}
-              className="absolute top-1/2 right-3 z-10 flex size-9 -translate-y-1/2 items-center justify-center bg-white/90 text-ink opacity-0 transition-opacity group-hover:opacity-100 hover:bg-white"
+              className="absolute top-1/2 right-3 z-10 flex size-9 -translate-y-1/2 items-center justify-center bg-white/90 text-ink opacity-0 transition-opacity group-hover:opacity-100 hover:bg-white rounded-full shadow-md"
               aria-label="Next image"
             >
               <ChevronRight className="size-5" />
             </button>
-            <span className="absolute right-3 bottom-3 z-10 bg-black/70 px-2 py-1 text-xs text-white">
+            <span className="absolute right-3 bottom-3 z-10 bg-black/70 px-2 py-1 text-xs text-white rounded-sm">
               {index + 1} / {slides.length}
             </span>
           </>
@@ -168,17 +185,17 @@ export function ProductImageCarousel({
       </div>
 
       {slides.length > 1 && (
-        <div className="mx-auto flex max-w-md gap-2 md:max-w-lg">
+        <div className="mx-auto flex max-w-md gap-2 md:max-w-lg overflow-x-auto py-1">
           {slides.map((slide, i) => (
             <button
-              key={slide.src}
+              key={`${slide.src}-${i}`}
               type="button"
               onClick={() => goTo(i)}
               className={cn(
-                "relative size-16 shrink-0 overflow-hidden bg-secondary ring-1 ring-transparent",
-                i === index && "ring-ink"
+                "relative size-16 shrink-0 overflow-hidden rounded bg-secondary ring-2 ring-transparent transition-all",
+                i === index ? "ring-gold shadow-sm scale-105" : "opacity-70 hover:opacity-100"
               )}
-              aria-label={slide.type === "image" ? `View image ${i + 1}` : `Play video ${i - images.length + 1}`}
+              aria-label={slide.type === "image" ? `View image ${i + 1}` : `Play video ${i - allImages.length + 1}`}
               aria-current={i === index}
             >
               {slide.type === "image" ? (
