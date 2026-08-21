@@ -6,7 +6,6 @@ import {
   H2,
   Icon,
   Input,
-  Label,
   Loader,
   MessageBox,
   Text,
@@ -16,6 +15,9 @@ const api = new ApiClient();
 
 interface SearchHit {
   id: string;
+  images?: string[];
+  heroImage?: string;
+  logo?: string;
   [key: string]: unknown;
 }
 
@@ -28,6 +30,7 @@ interface SearchResponse {
 // Display order and labels for each model that searchData() queries.
 const RESOURCES: { key: string; label: string }[] = [
   { key: 'Product', label: 'Products' },
+  { key: 'SignatureCollection', label: 'KMR Paint Collections' },
   { key: 'Category', label: 'Categories' },
   { key: 'Brand', label: 'Brands' },
   { key: 'QuoteRequest', label: 'Quote Requests' },
@@ -35,11 +38,70 @@ const RESOURCES: { key: string; label: string }[] = [
   { key: 'PromoBanner', label: 'Promo Banner' },
 ];
 
+function getThumbnail(resource: string, hit: SearchHit): string | null {
+  switch (resource) {
+    case 'Product':
+      if (Array.isArray(hit.images) && hit.images.length > 0 && typeof hit.images[0] === 'string') {
+        return hit.images[0];
+      }
+      return null;
+    case 'SignatureCollection':
+      if (Array.isArray(hit.images) && hit.images.length > 0 && typeof hit.images[0] === 'string') {
+        return hit.images[0];
+      }
+      if (typeof hit.heroImage === 'string' && hit.heroImage.trim()) {
+        return hit.heroImage.trim();
+      }
+      return null;
+    case 'Brand':
+      if (typeof hit.logo === 'string' && hit.logo.trim()) {
+        return hit.logo.trim();
+      }
+      return null;
+    default:
+      return null;
+  }
+}
+
+function getIconName(resource: string): string {
+  switch (resource) {
+    case 'Product':
+      return 'Package';
+    case 'SignatureCollection':
+      return 'PaintBucket';
+    case 'Category':
+      return 'Folder';
+    case 'Brand':
+      return 'Tag';
+    case 'QuoteRequest':
+      return 'FileText';
+    case 'QuoteRequestItem':
+      return 'ShoppingCart';
+    case 'PromoBanner':
+      return 'Megaphone';
+    default:
+      return 'Layers';
+  }
+}
+
 // Human-readable second line for each hit, model-specific.
 function describe(resource: string, hit: SearchHit): string {
   switch (resource) {
     case 'Product':
-      return [hit.slug, hit.isFeatured ? 'Featured' : null, hit.isActive === false ? 'Inactive' : null]
+      return [
+        hit.slug,
+        hit.priceDescription ? `GH₵${hit.priceDescription}` : null,
+        hit.isFeatured ? 'Featured' : null,
+        hit.isActive === false ? 'Inactive' : null,
+      ]
+        .filter(Boolean)
+        .join(' · ');
+    case 'SignatureCollection':
+      return [
+        hit.slug,
+        hit.type ? `Type: ${hit.type}` : null,
+        hit.isActive === false ? 'Inactive' : null,
+      ]
         .filter(Boolean)
         .join(' · ');
     case 'Category':
@@ -64,6 +126,7 @@ function describe(resource: string, hit: SearchHit): string {
 function title(resource: string, hit: SearchHit): string {
   switch (resource) {
     case 'Product':
+    case 'SignatureCollection':
     case 'Category':
     case 'Brand':
       return String(hit.name ?? hit.id);
@@ -112,8 +175,7 @@ const GlobalSearch: React.FC = () => {
           Global Search
         </H2>
         <Text color="grey60">
-          Search every model at once — products, categories, brands, quote requests and more.
-          Results link straight to the matching record.
+          Search products, KMR paint collections, brands, categories, and quote requests with live photo previews.
         </Text>
       </Box>
 
@@ -124,7 +186,7 @@ const GlobalSearch: React.FC = () => {
           onKeyDown={(e) => {
             if (e.key === 'Enter') runSearch(input);
           }}
-          placeholder="Search by name, slug, customer, phone, location…"
+          placeholder="Search by name, slug, color, customer, phone, location…"
           style={{ flex: 1 }}
         />
         <Button variant="primary" onClick={() => runSearch(input)} disabled={searching}>
@@ -146,7 +208,7 @@ const GlobalSearch: React.FC = () => {
 
       {!searching && submitted && !error && response && response.total === 0 && (
         <MessageBox
-          message={`No matches for "${response.query}". Try a different word.`}
+          message={`No matches for "${response.query}". Try a different search word.`}
           variant="info"
         />
       )}
@@ -161,49 +223,110 @@ const GlobalSearch: React.FC = () => {
             if (hits.length === 0) return null;
             return (
               <Box key={key} mb="xl">
-                <H2 mb="sm">
+                <H2 mb="sm" fontSize="md" fontWeight="bold">
                   {label} ({hits.length})
                 </H2>
-                {hits.map((hit) => (
-                  <Box
-                    key={hit.id}
-                    flex
-                    alignItems="center"
-                    justifyContent="space-between"
-                    py="sm"
-                    mb="sm"
-                    px="md"
-                    borderLeft="4px solid"
-                    borderColor="primary60"
-                    backgroundColor="white"
-                    style={{ gap: '16px' }}
-                  >
-                    <Box>
-                      <Text fontWeight="bold">{title(key, hit)}</Text>
-                      <Text color="grey60" fontSize="sm">
-                        {describe(key, hit) || '—'}
-                      </Text>
+                {hits.map((hit) => {
+                  const thumbnail = getThumbnail(key, hit);
+                  return (
+                    <Box
+                      key={hit.id}
+                      flex
+                      alignItems="center"
+                      justifyContent="space-between"
+                      py="sm"
+                      mb="sm"
+                      px="md"
+                      borderLeft="4px solid"
+                      borderColor="primary60"
+                      backgroundColor="white"
+                      style={{
+                        gap: '16px',
+                        borderRadius: '0 6px 6px 0',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                      }}
+                    >
+                      <Box flex alignItems="center" style={{ gap: '14px', flex: 1, minWidth: 0 }}>
+                        {thumbnail ? (
+                          <img
+                            src={thumbnail}
+                            alt={title(key, hit)}
+                            style={{
+                              width: '46px',
+                              height: '46px',
+                              borderRadius: '6px',
+                              objectFit: 'cover',
+                              border: '1px solid #E2E8F0',
+                              flexShrink: 0,
+                              backgroundColor: '#F8FAFC',
+                            }}
+                          />
+                        ) : (
+                          <Box
+                            style={{
+                              width: '46px',
+                              height: '46px',
+                              borderRadius: '6px',
+                              backgroundColor: '#F1F5F9',
+                              border: '1px solid #E2E8F0',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              flexShrink: 0,
+                              color: '#64748B',
+                            }}
+                          >
+                            <Icon icon={getIconName(key)} />
+                          </Box>
+                        )}
+                        <Box style={{ minWidth: 0, flex: 1 }}>
+                          <Text
+                            fontWeight="bold"
+                            style={{
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              fontSize: '14px',
+                            }}
+                          >
+                            {title(key, hit)}
+                          </Text>
+                          <Text
+                            color="grey60"
+                            fontSize="sm"
+                            style={{
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              marginTop: '2px',
+                            }}
+                          >
+                            {describe(key, hit) || '—'}
+                          </Text>
+                        </Box>
+                      </Box>
+
+                      <Box flex style={{ gap: '8px', flexShrink: 0 }}>
+                        <Button
+                          as="a"
+                          href={`/admin/resources/${key}/records/${hit.id}/show`}
+                          variant="outline"
+                          size="sm"
+                        >
+                          View
+                        </Button>
+                        <Button
+                          as="a"
+                          href={`/admin/resources/${key}/records/${hit.id}/edit`}
+                          size="sm"
+                        >
+                          <Icon icon="Edit" mr="default" />
+                          Edit
+                        </Button>
+                      </Box>
                     </Box>
-                    <Box flex style={{ gap: '8px' }}>
-                      <Button
-                        as="a"
-                        href={`/admin/resources/${key}/records/${hit.id}/show`}
-                        variant="outline"
-                        size="sm"
-                      >
-                        View
-                      </Button>
-                      <Button
-                        as="a"
-                        href={`/admin/resources/${key}/records/${hit.id}/edit`}
-                        size="sm"
-                      >
-                        <Icon icon="Edit" mr="default" />
-                        Edit
-                      </Button>
-                    </Box>
-                  </Box>
-                ))}
+                  );
+                })}
               </Box>
             );
           })}

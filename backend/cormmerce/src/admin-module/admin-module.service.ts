@@ -672,7 +672,7 @@ export class AdminModuleService {
     const contains = { contains: query, mode: 'insensitive' as const };
     const take = 8;
 
-    const [products, categories, brands, promos, quoteRequests, items] =
+    const [products, collections, categories, brands, promos, quoteRequests, items] =
       await Promise.all([
         this.prisma.product.findMany({
           where: {
@@ -685,7 +685,35 @@ export class AdminModuleService {
           },
           take,
           orderBy: { createdAt: 'desc' },
-          select: { id: true, name: true, slug: true, isActive: true, isFeatured: true },
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            isActive: true,
+            isFeatured: true,
+            images: true,
+            priceDescription: true,
+          },
+        }),
+        this.prisma.signatureCollection.findMany({
+          where: {
+            OR: [
+              { name: contains },
+              { slug: contains },
+              { description: contains },
+            ],
+          },
+          take,
+          orderBy: { sortOrder: 'asc' },
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            type: true,
+            heroImage: true,
+            images: true,
+            isActive: true,
+          },
         }),
         this.prisma.category.findMany({
           where: { OR: [{ name: contains }, { slug: contains }] },
@@ -697,7 +725,7 @@ export class AdminModuleService {
           where: { OR: [{ name: contains }, { websiteUrl: contains }] },
           take,
           orderBy: { createdAt: 'desc' },
-          select: { id: true, name: true, websiteUrl: true, isActive: true },
+          select: { id: true, name: true, websiteUrl: true, isActive: true, logo: true },
         }),
         this.prisma.promoBanner.findMany({
           where: { OR: [{ message: contains }, { link: contains }] },
@@ -736,6 +764,7 @@ export class AdminModuleService {
 
     const results = {
       Product: products,
+      SignatureCollection: collections,
       Category: categories,
       Brand: brands,
       PromoBanner: promos,
@@ -824,6 +853,10 @@ export class AdminModuleService {
       'SignatureSizesManager',
       path.join(__dirname, 'dashboard', 'SignatureSizesManager'),
     );
+    const productThumbnailCellComponent = componentLoader.add(
+      'ProductThumbnailCell',
+      path.join(__dirname, 'dashboard', 'ProductThumbnailCell'),
+    );
 
     // AdminJS's built-in logout button only renders when it manages its own
     // session (buildAuthenticatedRouter); this app shares Better Auth's
@@ -907,7 +940,10 @@ export class AdminModuleService {
           name === 'Product'
             ? {
                 properties: {
-                  images: { isVisible: { list: true, show: true, edit: false, filter: false } },
+                  images: {
+                    isVisible: { list: true, show: true, edit: false, filter: false },
+                    components: { list: productThumbnailCellComponent },
+                  },
                   imagesMimeType: { isVisible: false },
                   imagesFilename: { isVisible: false },
                   imagesSize: { isVisible: false },
@@ -1048,7 +1084,10 @@ export class AdminModuleService {
                   // @adminjs/upload's preview component doesn't crash, and
                   // are only ever written by its own after-hook.
                   properties: {
-                    logo: { isVisible: { list: true, show: true, edit: false, filter: false } },
+                    logo: {
+                      isVisible: { list: true, show: true, edit: false, filter: false },
+                      components: { list: productThumbnailCellComponent },
+                    },
                     logoMimeType: { isVisible: false },
                     logoFilename: { isVisible: false },
                     logoSize: { isVisible: false },
@@ -1172,7 +1211,10 @@ export class AdminModuleService {
                         icon: 'PaintBucket',
                       },
                       properties: {
-                        images: { isVisible: { list: true, show: true, edit: false, filter: false } },
+                        images: {
+                          isVisible: { list: true, show: true, edit: false, filter: false },
+                          components: { list: productThumbnailCellComponent },
+                        },
                         imagesMimeType: { isVisible: false },
                         imagesFilename: { isVisible: false },
                         imagesSize: { isVisible: false },
