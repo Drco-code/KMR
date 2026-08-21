@@ -1159,14 +1159,15 @@ export class AdminModuleService {
                         icon: 'PaintBucket',
                       },
                       properties: {
+                        images: { isVisible: { list: true, show: true, edit: false, filter: false } },
+                        imagesMimeType: { isVisible: false },
+                        imagesFilename: { isVisible: false },
+                        imagesSize: { isVisible: false },
                         description: { type: 'textarea' },
                         heroImage: {
                           description:
                             'Optional legacy cover image URL (fallback if no images are uploaded below).',
                         },
-                        imagesMimeType: { isVisible: false },
-                        imagesFilename: { isVisible: false },
-                        imagesSize: { isVisible: false },
                         sortOrder: {
                           description:
                             'Lower values show first on the storefront collection menu.',
@@ -1185,20 +1186,30 @@ export class AdminModuleService {
                       actions: {
                         new: {
                           before: (request: any) => {
-                            if (request.payload) {
-                              this.normalizeSignatureCollectionPayload(request.payload);
-                              delete request.payload.imagesSize;
+                            try {
+                              if (request.payload) {
+                                this.normalizeSignatureCollectionPayload(request.payload);
+                                delete request.payload.imagesSize;
+                              }
+                              return request;
+                            } catch (err) {
+                              console.error('[AdminJS SignatureCollection:new error]:', err);
+                              throw err;
                             }
-                            return request;
                           },
                         },
                         edit: {
                           before: (request: any) => {
-                            if (request.payload) {
-                              this.normalizeSignatureCollectionPayload(request.payload);
-                              delete request.payload.imagesSize;
+                            try {
+                              if (request.payload) {
+                                this.normalizeSignatureCollectionPayload(request.payload);
+                                delete request.payload.imagesSize;
+                              }
+                              return request;
+                            } catch (err) {
+                              console.error('[AdminJS SignatureCollection:edit error]:', err);
+                              throw err;
                             }
-                            return request;
                           },
                         },
                       },
@@ -1424,6 +1435,26 @@ export class AdminModuleService {
         res.set('Content-Disposition', `attachment; filename="${product.slug}-qr.png"`);
         res.type('png').send(png);
         return;
+      }
+
+      // Log AdminJS error responses to server console so issues are immediately visible in logs
+      if (req.method === 'POST' || req.method === 'PATCH' || req.method === 'PUT' || req.method === 'DELETE') {
+        const originalJson = res.json;
+        const originalSend = res.send;
+
+        res.json = function (data: any) {
+          if (res.statusCode >= 400 || (data && typeof data === 'object' && data.notice?.type === 'error')) {
+            console.error(`[AdminJS Error ${res.statusCode} on ${req.method} ${req.originalUrl || req.url}]:`, JSON.stringify(data, null, 2));
+          }
+          return originalJson.apply(this, arguments as any);
+        };
+
+        res.send = function (body: any) {
+          if (res.statusCode >= 400) {
+            console.error(`[AdminJS Error ${res.statusCode} on ${req.method} ${req.originalUrl || req.url}]:`, typeof body === 'string' ? body.slice(0, 1000) : body);
+          }
+          return originalSend.apply(this, arguments as any);
+        };
       }
 
       adminRouter(req, res, next);
