@@ -1,4 +1,5 @@
 import "dotenv/config";
+import { execSync } from "child_process";
 import { defineConfig } from "prisma/config";
 
 // Migrations use MIGRATE_DATABASE_URL when set, otherwise a direct
@@ -23,9 +24,27 @@ const directDatabaseUrl =
   toDirectDatabaseUrl(rawUrl);
 
 if (directDatabaseUrl) {
-  // Overwrite process.env.DATABASE_URL so schema.prisma's env("DATABASE_URL")
-  // connects directly to Neon without going through the advisory-lock blocking pooler.
   process.env["DATABASE_URL"] = directDatabaseUrl;
+
+  // Release any stale postgres advisory locks or idle connections left behind from aborted deploys
+  try {
+    const inlineScript = `
+      const { Client } = require('pg');
+      const client = new Client({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
+      client.connect()
+        .then(() => client.query("SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE pid <> pg_backend_pid() AND datname = current_database() AND state = 'idle';"))
+        .then(() => client.query("SELECT pg_advisory_unlock_all();"))
+        .then(() => client.end())
+        .catch(() => process.exit(0));
+    `;
+    execSync(`node -e "${inlineScript.replace(/\n\s+/g, ' ')}"`, {
+      env: { ...process.env, DATABASE_URL: directDatabaseUrl },
+      stdio: 'ignore',
+      timeout: 4000,
+    });
+  } catch {
+    // Non-blocking cleanup
+  }
 }
 
 export default defineConfig({
