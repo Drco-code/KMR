@@ -349,37 +349,106 @@ export class AdminModuleService {
       }
     }
 
-    if (typeof payload.colors === 'string') {
-      try {
-        const parsed = JSON.parse(payload.colors);
-        if (Array.isArray(parsed)) {
-          payload.colors = parsed;
+    // 1. Colors
+    const colorKeys = Object.keys(payload).filter(
+      (k) => k === 'colors' || k.startsWith('colors.') || k.startsWith('colors['),
+    );
+
+    if (colorKeys.length > 0) {
+      if (typeof payload.colors === 'string') {
+        try {
+          const parsed = JSON.parse(payload.colors);
+          if (Array.isArray(parsed)) {
+            payload.colors = parsed;
+          }
+        } catch {
+          // not valid JSON string
         }
-      } catch {
-        payload.colors = [];
+      }
+
+      if (!Array.isArray(payload.colors)) {
+        const colorMap = new Map<string, { name?: string; code?: string }>();
+        for (const k of colorKeys) {
+          const val = payload[k];
+          const match = k.match(/^colors(?:\.|\[)(\d+)\]?(?:\.([a-zA-Z]+))?$/);
+          if (match && val) {
+            const idx = match[1];
+            const field = match[2] || 'name';
+            const existing = colorMap.get(idx) || {};
+            if (field === 'name') existing.name = String(val);
+            if (field === 'code') existing.code = String(val);
+            colorMap.set(idx, existing);
+          }
+        }
+        const collected: Array<{ name: string; code: string }> = [];
+        for (const entry of colorMap.values()) {
+          if (entry.name && entry.code) {
+            collected.push({ name: entry.name.trim(), code: entry.code.trim().toUpperCase() });
+          }
+        }
+        if (collected.length > 0) {
+          payload.colors = collected;
+        } else if (payload.colors === undefined || payload.colors === '') {
+          delete payload.colors;
+        } else {
+          payload.colors = [];
+        }
+      }
+
+      for (const k of colorKeys) {
+        if (k !== 'colors') delete payload[k];
       }
     }
 
-    if (typeof payload.sizes === 'string') {
-      const rawSizes = payload.sizes;
-      try {
-        const parsed = JSON.parse(rawSizes);
-        if (Array.isArray(parsed)) {
-          payload.sizes = parsed.map((s) => String(s).trim()).filter(Boolean);
-        } else {
+    // 2. Sizes
+    const sizeKeys = Object.keys(payload).filter(
+      (k) => k === 'sizes' || k.startsWith('sizes.') || k.startsWith('sizes['),
+    );
+
+    if (sizeKeys.length > 0) {
+      if (typeof payload.sizes === 'string') {
+        const rawSizes = payload.sizes;
+        try {
+          const parsed = JSON.parse(rawSizes);
+          if (Array.isArray(parsed)) {
+            payload.sizes = parsed.map((s) => String(s).trim()).filter(Boolean);
+          } else {
+            payload.sizes = rawSizes
+              .split(',')
+              .map((s) => s.trim())
+              .filter(Boolean);
+          }
+        } catch {
           payload.sizes = rawSizes
             .split(',')
             .map((s) => s.trim())
             .filter(Boolean);
         }
-      } catch {
-        payload.sizes = rawSizes
-          .split(',')
-          .map((s) => s.trim())
-          .filter(Boolean);
+      } else if (!Array.isArray(payload.sizes)) {
+        const sizeMap = new Map<number, string>();
+        for (const k of sizeKeys) {
+          const val = payload[k];
+          const match = k.match(/^sizes(?:\.|\[)(\d+)\]?$/);
+          if (match && val) {
+            sizeMap.set(Number(match[1]), String(val).trim());
+          }
+        }
+        const sorted = Array.from(sizeMap.keys()).sort((a, b) => a - b);
+        const collected = sorted.map((i) => sizeMap.get(i)!).filter(Boolean);
+        if (collected.length > 0) {
+          payload.sizes = collected;
+        } else if (payload.sizes === undefined || payload.sizes === '') {
+          delete payload.sizes;
+        } else {
+          payload.sizes = [];
+        }
+      } else {
+        payload.sizes = payload.sizes.map((s) => String(s).trim()).filter(Boolean);
       }
-    } else if (Array.isArray(payload.sizes)) {
-      payload.sizes = payload.sizes.map((s) => String(s).trim()).filter(Boolean);
+
+      for (const k of sizeKeys) {
+        if (k !== 'sizes') delete payload[k];
+      }
     }
   }
 

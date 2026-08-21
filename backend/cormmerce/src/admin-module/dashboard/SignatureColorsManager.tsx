@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import type { EditPropertyProps } from 'adminjs';
 import { Box, Button, FormGroup, Input, Label, Text, Icon } from '@adminjs/design-system';
 
@@ -26,7 +26,45 @@ function parseColors(raw: unknown): SignatureColorItem[] {
       return [];
     }
   }
+  if (typeof raw === 'object' && raw !== null) {
+    return parseColors(Object.values(raw));
+  }
   return [];
+}
+
+function extractColorsFromParams(params: Record<string, unknown> = {}, path: string = 'colors'): SignatureColorItem[] {
+  // 1. Direct property
+  const direct = params[path];
+  const directParsed = parseColors(direct);
+  if (directParsed.length > 0) return directParsed;
+
+  // 2. Scan flattened keys: e.g. "colors.0.name", "colors.0.code" or "colors[0].name"
+  const colorMap = new Map<string, { name?: string; code?: string }>();
+  for (const [key, value] of Object.entries(params)) {
+    if (!key.startsWith(`${path}.`) && !key.startsWith(`${path}[`)) continue;
+    const match = key.match(/^colors(?:\.|\[)(\d+)\]?(?:\.([a-zA-Z]+))?$/);
+    if (match) {
+      const index = match[1];
+      const field = match[2] || 'name';
+      const existing = colorMap.get(index) || {};
+      if (field === 'name') existing.name = String(value);
+      if (field === 'code') existing.code = String(value);
+      colorMap.set(index, existing);
+    }
+  }
+
+  const result: SignatureColorItem[] = [];
+  const sortedKeys = Array.from(colorMap.keys()).sort((a, b) => Number(a) - Number(b));
+  for (const k of sortedKeys) {
+    const entry = colorMap.get(k);
+    if (entry?.name && entry?.code) {
+      result.push({
+        name: entry.name.trim(),
+        code: entry.code.trim().toUpperCase(),
+      });
+    }
+  }
+  return result;
 }
 
 function normalizeHex(hex: string): string {
@@ -43,15 +81,21 @@ function normalizeHex(hex: string): string {
 
 const SignatureColorsManager: React.FC<EditPropertyProps> = ({ property, record, onChange }) => {
   const initialColors = useMemo(() => {
-    const raw = record.params[property.path];
-    return parseColors(raw);
-  }, [record.params[property.path]]);
+    return extractColorsFromParams(record?.params, property.path);
+  }, [record?.params, property.path]);
 
   const [colors, setColors] = useState<SignatureColorItem[]>(initialColors);
   const [newColorName, setNewColorName] = useState('');
   const [newColorCode, setNewColorCode] = useState('#D4AF37');
   const [filterQuery, setFilterQuery] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Sync with AdminJS form state on mount or change
+  useEffect(() => {
+    if (initialColors.length > 0 && (!record.params[property.path] || typeof record.params[property.path] !== 'string')) {
+      onChange(property.path, JSON.stringify(initialColors));
+    }
+  }, []);
 
   const updateColors = (updated: SignatureColorItem[]) => {
     setColors(updated);

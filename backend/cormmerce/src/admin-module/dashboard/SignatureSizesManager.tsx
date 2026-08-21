@@ -1,40 +1,66 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import type { EditPropertyProps } from 'adminjs';
 import { Box, Button, FormGroup, Input, Label, Text, Icon } from '@adminjs/design-system';
 
-function parseSizes(raw: unknown): string[] {
-  if (!raw) return [];
-  if (Array.isArray(raw)) {
-    return raw.map((item) => String(item).trim()).filter(Boolean);
+function extractSizesFromParams(params: Record<string, unknown> = {}, path: string = 'sizes'): string[] {
+  // 1. Direct property
+  const direct = params[path];
+  if (Array.isArray(direct)) {
+    const list = direct.map((item) => String(item).trim()).filter(Boolean);
+    if (list.length > 0) return list;
   }
-  if (typeof raw === 'string') {
+  if (typeof direct === 'string') {
     try {
-      const parsed = JSON.parse(raw);
+      const parsed = JSON.parse(direct);
       if (Array.isArray(parsed)) {
-        return parsed.map((item) => String(item).trim()).filter(Boolean);
+        const list = parsed.map((item) => String(item).trim()).filter(Boolean);
+        if (list.length > 0) return list;
       }
     } catch {
-      // split by comma if raw string
-      return raw
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean);
+      if (direct.includes(',')) {
+        return direct.split(',').map((s) => s.trim()).filter(Boolean);
+      } else if (direct.trim()) {
+        return [direct.trim()];
+      }
     }
   }
-  return [];
+  if (typeof direct === 'object' && direct !== null) {
+    const list = Object.values(direct).map((item) => String(item).trim()).filter(Boolean);
+    if (list.length > 0) return list;
+  }
+
+  // 2. Scan flattened keys: e.g. "sizes.0", "sizes.1" or "sizes[0]"
+  const sizeMap = new Map<number, string>();
+  for (const [key, value] of Object.entries(params)) {
+    if (!key.startsWith(`${path}.` && !key.startsWith(`${path}[`))) continue;
+    const match = key.match(/^sizes(?:\.|\[)(\d+)\]?$/);
+    if (match) {
+      const index = Number(match[1]);
+      if (value) sizeMap.set(index, String(value).trim());
+    }
+  }
+
+  const sortedIndices = Array.from(sizeMap.keys()).sort((a, b) => a - b);
+  return sortedIndices.map((i) => sizeMap.get(i)!).filter(Boolean);
 }
 
 const COMMON_PRESETS = ['1L', '4L', '5L', '20L', 'Bucket', 'Drum'];
 
 const SignatureSizesManager: React.FC<EditPropertyProps> = ({ property, record, onChange }) => {
   const initialSizes = useMemo(() => {
-    const raw = record.params[property.path];
-    return parseSizes(raw);
-  }, [record.params[property.path]]);
+    return extractSizesFromParams(record?.params, property.path);
+  }, [record?.params, property.path]);
 
   const [sizes, setSizes] = useState<string[]>(initialSizes);
   const [newSize, setNewSize] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Sync with AdminJS form state on mount or change
+  useEffect(() => {
+    if (initialSizes.length > 0 && (!record.params[property.path] || !Array.isArray(record.params[property.path]))) {
+      onChange(property.path, initialSizes);
+    }
+  }, []);
 
   const updateSizes = (updated: string[]) => {
     setSizes(updated);
