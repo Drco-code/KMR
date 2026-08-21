@@ -1,8 +1,12 @@
 -- CreateEnum
-CREATE TYPE "SignatureCollectionType" AS ENUM ('EMULSION', 'OIL', 'POP', 'GRAFFIATE');
+DO $$ BEGIN
+    CREATE TYPE "SignatureCollectionType" AS ENUM ('EMULSION', 'OIL', 'POP', 'GRAFFIATE');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- CreateTable
-CREATE TABLE "SignatureCollection" (
+CREATE TABLE IF NOT EXISTS "SignatureCollection" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
@@ -18,7 +22,7 @@ CREATE TABLE "SignatureCollection" (
 );
 
 -- CreateTable
-CREATE TABLE "SignatureCollectionVariant" (
+CREATE TABLE IF NOT EXISTS "SignatureCollectionVariant" (
     "id" TEXT NOT NULL,
     "collectionId" TEXT NOT NULL,
     "colorName" TEXT NOT NULL,
@@ -32,19 +36,23 @@ CREATE TABLE "SignatureCollectionVariant" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "SignatureCollection_slug_key" ON "SignatureCollection"("slug");
+CREATE UNIQUE INDEX IF NOT EXISTS "SignatureCollection_slug_key" ON "SignatureCollection"("slug");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "SignatureCollection_type_key" ON "SignatureCollection"("type");
+CREATE UNIQUE INDEX IF NOT EXISTS "SignatureCollection_type_key" ON "SignatureCollection"("type");
 
 -- CreateIndex
-CREATE INDEX "SignatureCollectionVariant_collectionId_idx" ON "SignatureCollectionVariant"("collectionId");
+CREATE INDEX IF NOT EXISTS "SignatureCollectionVariant_collectionId_idx" ON "SignatureCollectionVariant"("collectionId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "SignatureCollectionVariant_collectionId_colorCode_sizeLabel_key" ON "SignatureCollectionVariant"("collectionId", "colorCode", "sizeLabel");
+CREATE UNIQUE INDEX IF NOT EXISTS "SignatureCollectionVariant_collectionId_colorCode_sizeLabel_key" ON "SignatureCollectionVariant"("collectionId", "colorCode", "sizeLabel");
 
 -- AddForeignKey
-ALTER TABLE "SignatureCollectionVariant" ADD CONSTRAINT "SignatureCollectionVariant_collectionId_fkey" FOREIGN KEY ("collectionId") REFERENCES "SignatureCollection"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+    ALTER TABLE "SignatureCollectionVariant" ADD CONSTRAINT "SignatureCollectionVariant_collectionId_fkey" FOREIGN KEY ("collectionId") REFERENCES "SignatureCollection"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- Seed starter Signature Collections rows (admins can edit/remove/create later).
 INSERT INTO "SignatureCollection" ("id", "name", "slug", "type", "description", "sortOrder", "updatedAt")
@@ -52,4 +60,5 @@ VALUES
     ('00000000-0000-4000-8000-00000000a001', 'KMR Emulsion Paint', 'kmr-emulsion-paint', 'EMULSION', 'Premium emulsion paint for smooth, durable interior finishes.', 1, CURRENT_TIMESTAMP),
     ('00000000-0000-4000-8000-00000000a002', 'KMR Oil Paint', 'kmr-oil-paint', 'OIL', 'High-performance oil-based paint built for rich color depth and durability.', 2, CURRENT_TIMESTAMP),
     ('00000000-0000-4000-8000-00000000a003', 'KMR POP Paint', 'kmr-pop-paint', 'POP', 'Bright white POP finish paint with multiple bucket sizes available.', 3, CURRENT_TIMESTAMP),
-    ('00000000-0000-4000-8000-00000000a004', 'KMR Graffiate Paint', 'kmr-graffiate-paint', 'GRAFFIATE', 'Decorative graffiate coating for textured architectural surfaces.', 4, CURRENT_TIMESTAMP);
+    ('00000000-0000-4000-8000-00000000a004', 'KMR Graffiate Paint', 'kmr-graffiate-paint', 'GRAFFIATE', 'Decorative graffiate coating for textured architectural surfaces.', 4, CURRENT_TIMESTAMP)
+ON CONFLICT ("type") DO NOTHING;
