@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useQuoteCart } from "@/lib/store/quote-cart";
+import { useQuoteCart, type QuoteCartItem } from "@/lib/store/quote-cart";
 import { submitQuoteRequest } from "@/lib/api/client";
 import { formatPrice } from "@/lib/price";
 import { Button } from "@/components/ui/button";
@@ -11,11 +11,30 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 
+function getItemDisplayName(item: QuoteCartItem) {
+  if (item.variantColorName && item.name.includes(" — ")) {
+    return item.name.split(" — ")[0];
+  }
+  return item.name;
+}
+
+function formatItemLine(item: QuoteCartItem) {
+  const baseName = getItemDisplayName(item);
+  const details = [
+    item.variantColorName ? `Color: ${item.variantColorName}` : "",
+    item.variantSize ? `Size: ${item.variantSize}` : "",
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+  return details ? `${baseName} (${details})` : baseName;
+}
+
 function buildWhatsAppMessage(
   name: string,
   company: string,
   location: string,
-  items: { name: string; quantity: number; priceDescription: string | null }[]
+  items: QuoteCartItem[]
 ) {
   const lines = [
     `Hi KMR, I'd like to request a quote.`,
@@ -26,8 +45,9 @@ function buildWhatsAppMessage(
     ``,
     `Items:`,
     ...items.map((item) => {
+      const lineName = formatItemLine(item);
       const price = formatPrice(item.priceDescription);
-      return `- ${item.name} (Qty: ${item.quantity})${price ? `: ${price}` : ""}`;
+      return `- ${lineName} (Qty: ${item.quantity})${price ? `: ${price}` : ""}`;
     }),
   ];
   return lines.join("\n");
@@ -68,7 +88,7 @@ export default function QuoteReviewPage() {
         customerPhone: phone || undefined,
         customerLocation: location || undefined,
         items: items.map((item) => ({
-          productName: item.name,
+          productName: formatItemLine(item),
           quantity: item.quantity,
         })),
       });
@@ -149,17 +169,44 @@ export default function QuoteReviewPage() {
         <div className="flex flex-col gap-4">
           <h2 className="font-display text-2xl text-ink">Itemized Summary</h2>
           <Separator />
-          {items.map((item) => (
-            <div key={item.itemKey} className="flex items-center justify-between gap-6 text-sm">
-              <div className="flex min-w-0 flex-col">
-                <span className="text-ink">{item.name}</span>
-                <span className="text-xs text-ink-muted">Qty: {item.quantity}</span>
+          {items.map((item) => {
+            const displayName = getItemDisplayName(item);
+            return (
+              <div key={item.itemKey} className="flex items-start justify-between gap-6 text-sm">
+                <div className="flex min-w-0 flex-col gap-1">
+                  <span className="font-medium text-ink">{displayName}</span>
+                  {(item.variantColorName || item.variantSize) && (
+                    <div className="flex flex-wrap items-center gap-2.5 text-xs text-ink-muted">
+                      {item.variantColorName && (
+                        <div className="flex items-center gap-1.5 bg-zinc-100 px-2 py-0.5 rounded text-ink">
+                          <span className="text-ink-muted">Color:</span>
+                          {item.variantColorCode && (
+                            <span
+                              className="size-2.5 rounded-full border border-black/20 shrink-0"
+                              style={{ backgroundColor: item.variantColorCode }}
+                              aria-hidden
+                            />
+                          )}
+                          <span className="font-medium">{item.variantColorName}</span>
+                        </div>
+                      )}
+
+                      {item.variantSize && (
+                        <div className="flex items-center gap-1 bg-zinc-100 px-2 py-0.5 rounded text-ink">
+                          <span className="text-ink-muted">Size:</span>
+                          <span className="font-medium">{item.variantSize}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  <span className="text-xs text-ink-muted">Qty: {item.quantity}</span>
+                </div>
+                {formatPrice(item.priceDescription) && (
+                  <span className="text-ink-muted shrink-0">{formatPrice(item.priceDescription)}</span>
+                )}
               </div>
-              {formatPrice(item.priceDescription) && (
-                <span className="text-ink-muted">{formatPrice(item.priceDescription)}</span>
-              )}
-            </div>
-          ))}
+            );
+          })}
           <Separator />
           <p className="text-sm text-ink-muted">
             {items.reduce((sum, i) => sum + i.quantity, 0)} item(s)

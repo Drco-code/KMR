@@ -35,11 +35,10 @@ export function SignatureCollectionDetail({ collection }: SignatureCollectionDet
 
   function handleAddToCart() {
     if (!selectedColor || !selectedSize) return;
-    const variantLabel = `${selectedColor.name} / ${selectedSize}`;
     addItem({
       itemKey: `${collection.id}:${selectedColor.code}:${selectedSize}`,
       productId: collection.id,
-      name: `${collection.name} — ${variantLabel}`,
+      name: collection.name,
       slug: collection.slug,
       href: `/signature-collections/${collection.slug}`,
       priceDescription: null,
