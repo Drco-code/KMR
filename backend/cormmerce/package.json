@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "postinstall": "prisma generate",
+    "postinstall": "node prisma/run-migrations.js && prisma generate",
     "migrate:deploy": "node prisma/run-migrations.js",
     "build": "nest build",
     "bundle:admin": "node dist/src/admin-module/bundle-admin.js",
