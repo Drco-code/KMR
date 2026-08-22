@@ -1242,15 +1242,17 @@ export class AdminModuleService {
                               ValidationError,
                               context?.record?.params?.id,
                             );
-                            // Normalise null-ish or empty string values sent by the parent select
-                            // or CategoryTree so Prisma correctly saves null for top-level categories.
-                            if (
-                              request.payload.parentId === '' ||
-                              request.payload.parentId === 'null' ||
-                              request.payload.parentId === undefined ||
-                              request.payload.parentId === null
-                            ) {
-                              request.payload.parentId = null;
+                            // Only normalise parentId when it is explicitly provided in the payload.
+                            // If parentId is not in payload (partial updates for navOrder/showInNav),
+                            // leave it untouched so Prisma does not overwrite parentId to null.
+                            if ('parentId' in request.payload) {
+                              if (
+                                request.payload.parentId === '' ||
+                                request.payload.parentId === 'null' ||
+                                request.payload.parentId === null
+                              ) {
+                                request.payload.parentId = null;
+                              }
                             }
                           }
                           return request;

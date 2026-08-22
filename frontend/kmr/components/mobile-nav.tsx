@@ -153,13 +153,20 @@ function CategoryAccordion({
 export function MobileNav({ categories }: { categories: Category[] }) {
   const t = useTranslations("nav");
 
-  const MEGA_MENU_ITEMS = [
-    { label: t("tools"), slug: "tools" },
-    { label: t("outdoorEquipment"), slug: "outdoor-equipment" },
-    { label: t("buildingMaterials"), slug: "building-materials" },
-    { label: t("homeEssentials"), slug: "home-essentials" },
-    { label: t("autoEssentials"), slug: "auto-essentials" },
-  ];
+  const topLevelCategories = categories
+    .filter((c) => !c.parentId && c.showInNav)
+    .sort((a, b) => a.navOrder - b.navOrder || a.name.localeCompare(b.name));
+
+  const navItems =
+    topLevelCategories.length > 0
+      ? topLevelCategories.map((c) => ({ label: c.name, slug: c.slug }))
+      : [
+          { label: t("tools"), slug: "tools" },
+          { label: t("outdoorEquipment"), slug: "outdoor-equipment" },
+          { label: t("buildingMaterials"), slug: "building-materials" },
+          { label: t("homeEssentials"), slug: "home-essentials" },
+          { label: t("autoEssentials"), slug: "auto-essentials" },
+        ];
 
   return (
     <Sheet>
@@ -211,7 +218,7 @@ export function MobileNav({ categories }: { categories: Category[] }) {
             <span className="px-1 text-xs font-semibold tracking-[0.15em] text-ink-muted uppercase">
               {t("browseByCategory")}
             </span>
-            {MEGA_MENU_ITEMS.map((item) => (
+            {navItems.map((item) => (
               <CategoryAccordion
                 key={item.slug}
                 label={item.label}

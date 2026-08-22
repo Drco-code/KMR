@@ -183,7 +183,11 @@ const CategoryTree: React.FC = () => {
         recordId: id,
         actionName: 'edit',
         method: 'post',
-        data: { parentId: newParentId },
+        data: {
+          parentId: newParentId,
+          navOrder: cat.navOrder,
+          showInNav: cat.showInNav,
+        },
       });
       setSavedBaseline((prev) => (prev ?? []).map((c) => (c.id === id ? { ...c, parentId: newParentId } : c)));
       setSuccessMessage(`Level updated and saved for "${cat.name}".`);
@@ -212,7 +216,11 @@ const CategoryTree: React.FC = () => {
         recordId: id,
         actionName: 'edit',
         method: 'post',
-        data: { parentId: newParentId },
+        data: {
+          parentId: newParentId,
+          navOrder: cat.navOrder,
+          showInNav: cat.showInNav,
+        },
       });
       setSavedBaseline((prev) => (prev ?? []).map((c) => (c.id === id ? { ...c, parentId: newParentId } : c)));
       setSuccessMessage(`Promoted and saved "${cat.name}".`);
@@ -275,7 +283,11 @@ const CategoryTree: React.FC = () => {
         recordId: sourceCat.id,
         actionName: 'edit',
         method: 'post',
-        data: { navOrder: newOrder },
+        data: {
+          parentId: sourceCat.parentId,
+          navOrder: newOrder,
+          showInNav: sourceCat.showInNav,
+        },
       });
       setSavedBaseline((prev) => (prev ?? []).map((c) => (c.id === sourceCat.id ? { ...c, navOrder: newOrder } : c)));
     } catch {
@@ -309,7 +321,11 @@ const CategoryTree: React.FC = () => {
         recordId: id,
         actionName: 'edit',
         method: 'post',
-        data: { navOrder: newOrder },
+        data: {
+          parentId: cat.parentId,
+          navOrder: newOrder,
+          showInNav: cat.showInNav,
+        },
       });
       setSavedBaseline((prev) => (prev ?? []).map((c) => (c.id === id ? { ...c, navOrder: newOrder } : c)));
     } catch {
@@ -343,11 +359,44 @@ const CategoryTree: React.FC = () => {
         recordId: id,
         actionName: 'edit',
         method: 'post',
-        data: { navOrder: newOrder },
+        data: {
+          parentId: cat.parentId,
+          navOrder: newOrder,
+          showInNav: cat.showInNav,
+        },
       });
       setSavedBaseline((prev) => (prev ?? []).map((c) => (c.id === id ? { ...c, navOrder: newOrder } : c)));
     } catch {
       setSaveError('Reorder queued — click "Save Changes" to commit.');
+    }
+  }
+
+  // Toggle show in nav
+  async function handleToggleShowInNav(id: string) {
+    if (!categories) return;
+    const cat = categories.find((c) => c.id === id);
+    if (!cat) return;
+
+    const newShowInNav = !cat.showInNav;
+    const updated = categories.map((c) => (c.id === id ? { ...c, showInNav: newShowInNav } : c));
+    setCategories(updated);
+    pushHistory(updated);
+
+    try {
+      await api.recordAction({
+        resourceId: 'Category',
+        recordId: id,
+        actionName: 'edit',
+        method: 'post',
+        data: {
+          parentId: cat.parentId,
+          navOrder: cat.navOrder,
+          showInNav: newShowInNav,
+        },
+      });
+      setSavedBaseline((prev) => (prev ?? []).map((c) => (c.id === id ? { ...c, showInNav: newShowInNav } : c)));
+    } catch {
+      setSaveError('Show in nav updated — click "Save Changes" to commit if not synced.');
     }
   }
 
@@ -622,11 +671,7 @@ const CategoryTree: React.FC = () => {
                     <CheckBox
                       id={`nav-${row.id}`}
                       checked={row.showInNav}
-                      onChange={() => {
-                        const updated = categories.map((c) => (c.id === row.id ? { ...c, showInNav: !row.showInNav } : c));
-                        setCategories(updated);
-                        pushHistory(updated);
-                      }}
+                      onChange={() => handleToggleShowInNav(row.id)}
                     />
                     <Label htmlFor={`nav-${row.id}`} style={{ margin: 0, fontSize: '12px' }}>
                       Show in nav

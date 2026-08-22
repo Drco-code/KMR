@@ -63,7 +63,7 @@ export class CategoryModuleService {
 
   findAll() {
     return this.prisma.category.findMany({
-      orderBy: { createdAt: 'desc' },
+      orderBy: [{ navOrder: 'asc' }, { createdAt: 'asc' }],
     });
   }
 
