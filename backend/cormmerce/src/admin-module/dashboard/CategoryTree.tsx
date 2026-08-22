@@ -284,7 +284,7 @@ const CategoryTree: React.FC = () => {
   }
 
   // Move up within sibling group
-  function moveUp(id: string) {
+  async function moveUp(id: string) {
     if (!categories) return;
     const cat = categories.find((c) => c.id === id);
     if (!cat) return;
@@ -302,10 +302,23 @@ const CategoryTree: React.FC = () => {
     const updated = categories.map((c) => (c.id === id ? { ...c, navOrder: newOrder } : c));
     setCategories(updated);
     pushHistory(updated);
+
+    try {
+      await api.recordAction({
+        resourceId: 'Category',
+        recordId: id,
+        actionName: 'edit',
+        method: 'post',
+        data: { navOrder: newOrder },
+      });
+      setSavedBaseline((prev) => (prev ?? []).map((c) => (c.id === id ? { ...c, navOrder: newOrder } : c)));
+    } catch {
+      setSaveError('Reorder queued — click "Save Changes" to commit.');
+    }
   }
 
   // Move down within sibling group
-  function moveDown(id: string) {
+  async function moveDown(id: string) {
     if (!categories) return;
     const cat = categories.find((c) => c.id === id);
     if (!cat) return;
@@ -323,6 +336,19 @@ const CategoryTree: React.FC = () => {
     const updated = categories.map((c) => (c.id === id ? { ...c, navOrder: newOrder } : c));
     setCategories(updated);
     pushHistory(updated);
+
+    try {
+      await api.recordAction({
+        resourceId: 'Category',
+        recordId: id,
+        actionName: 'edit',
+        method: 'post',
+        data: { navOrder: newOrder },
+      });
+      setSavedBaseline((prev) => (prev ?? []).map((c) => (c.id === id ? { ...c, navOrder: newOrder } : c)));
+    } catch {
+      setSaveError('Reorder queued — click "Save Changes" to commit.');
+    }
   }
 
   // Undo
