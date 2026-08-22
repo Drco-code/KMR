@@ -58,7 +58,6 @@ export async function SiteHeader() {
           {MEGA_MENU_ITEMS.map((item) => (
             <MegaMenu key={item.slug} label={item.label} slug={item.slug} categories={categories} />
           ))}
-          <NavLink href="/consultancy">{t("b2bSolutions")}</NavLink>
           <NavLink href="/catalog">{t("topSellers")}</NavLink>
           <NavLink href="/consultancy">{t("consultancy")}</NavLink>
         </nav>

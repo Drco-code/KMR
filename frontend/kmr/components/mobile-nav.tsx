@@ -224,17 +224,6 @@ export function MobileNav({ categories }: { categories: Category[] }) {
           <SheetClose
             render={
               <Link
-                href="/consultancy"
-                className="py-3 text-sm font-semibold tracking-wide uppercase text-ink"
-              />
-            }
-          >
-            {t("b2bSolutions")}
-          </SheetClose>
-
-          <SheetClose
-            render={
-              <Link
                 href="/catalog"
                 className="py-3 text-sm font-semibold tracking-wide uppercase text-ink"
               />
