@@ -38,11 +38,9 @@ function flattenTree(categories: CategoryRow[]): TreeNode[] {
   return result;
 }
 
-// Build human-friendly parent options with breadcrumbs
 function buildParentOptions(categories: CategoryRow[], currentId: string) {
   const catMap = new Map<string, CategoryRow>(categories.map((c) => [c.id, c]));
 
-  // Find all descendants to prevent cyclic parenting
   const descendantIds = new Set<string>();
   function findDescendants(id: string) {
     descendantIds.add(id);
@@ -83,13 +81,14 @@ function buildParentOptions(categories: CategoryRow[], currentId: string) {
 
 const CategoryTree: React.FC = () => {
   const [categories, setCategories] = useState<CategoryRow[] | null>(null);
+  const [savedBaseline, setSavedBaseline] = useState<CategoryRow[] | null>(null);
   const [history, setHistory] = useState<CategoryRow[][]>([]);
   const [historyIndex, setHistoryIndex] = useState<number>(-1);
 
   const [loadError, setLoadError] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [savingId, setSavingId] = useState<string | null>(null);
+  const [isSavingAll, setIsSavingAll] = useState<boolean>(false);
   const [editingParentId, setEditingParentId] = useState<string | null>(null);
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dragOverId, setDragOverId] = useState<string | null>(null);
@@ -99,6 +98,7 @@ const CategoryTree: React.FC = () => {
       .getPage<CategoryRow[]>({ pageName: 'categoryTree' })
       .then((response) => {
         setCategories(response.data);
+        setSavedBaseline(response.data);
         setHistory([response.data]);
         setHistoryIndex(0);
       })
@@ -107,27 +107,58 @@ const CategoryTree: React.FC = () => {
 
   useEffect(load, []);
 
+  // Compute how many items have pending changes compared to saved baseline
+  const dirtyCount = React.useMemo(() => {
+    if (!categories || !savedBaseline) return 0;
+    let count = 0;
+    for (const c of categories) {
+      const orig = savedBaseline.find((b) => b.id === c.id);
+      if (!orig || orig.parentId !== c.parentId || orig.navOrder !== c.navOrder || orig.showInNav !== c.showInNav) {
+        count++;
+      }
+    }
+    return count;
+  }, [categories, savedBaseline]);
+
   function pushHistory(newCats: CategoryRow[]) {
     const updatedHistory = history.slice(0, historyIndex + 1);
     setHistory([...updatedHistory, newCats]);
     setHistoryIndex(updatedHistory.length);
   }
 
-  async function saveField(id: string, data: Partial<Pick<CategoryRow, 'showInNav' | 'navOrder' | 'parentId'>>) {
-    setSavingId(id);
+  // Save all modified categories to the server
+  async function handleSaveAll() {
+    if (!categories || isSavingAll) return;
+    setIsSavingAll(true);
+    setSaveError(null);
+
     try {
-      await api.recordAction({
-        resourceId: 'Category',
-        recordId: id,
-        actionName: 'edit',
-        method: 'post',
-        data,
+      const toSave = categories.filter((c) => {
+        const orig = savedBaseline?.find((b) => b.id === c.id);
+        return !orig || orig.parentId !== c.parentId || orig.navOrder !== c.navOrder || orig.showInNav !== c.showInNav;
       });
-      setSaveError(null);
+
+      for (const cat of toSave) {
+        await api.recordAction({
+          resourceId: 'Category',
+          recordId: cat.id,
+          actionName: 'edit',
+          method: 'post',
+          data: {
+            parentId: cat.parentId,
+            navOrder: cat.navOrder,
+            showInNav: cat.showInNav,
+          },
+        });
+      }
+
+      setSavedBaseline(categories);
+      setSuccessMessage('All category tree changes saved successfully!');
+      setTimeout(() => setSuccessMessage(null), 4000);
     } catch {
-      setSaveError('Failed to save changes — please retry.');
+      setSaveError('Failed to save some changes. Please try clicking Save again.');
     } finally {
-      setSavingId(null);
+      setIsSavingAll(false);
     }
   }
 
@@ -145,16 +176,28 @@ const CategoryTree: React.FC = () => {
     pushHistory(updated);
     setEditingParentId(null);
 
-    await saveField(id, { parentId: newParentId });
-    setSuccessMessage(`Level updated for "${cat.name}".`);
-    setTimeout(() => setSuccessMessage(null), 3000);
+    // Auto-save immediately to guarantee persistence
+    try {
+      await api.recordAction({
+        resourceId: 'Category',
+        recordId: id,
+        actionName: 'edit',
+        method: 'post',
+        data: { parentId: newParentId },
+      });
+      setSavedBaseline((prev) => (prev ?? []).map((c) => (c.id === id ? { ...c, parentId: newParentId } : c)));
+      setSuccessMessage(`Level updated and saved for "${cat.name}".`);
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch {
+      setSaveError(`Failed to auto-save level for "${cat.name}". Please click "Save Changes".`);
+    }
   }
 
   // Promote level (Move up one level: Level 3 -> Level 2, Level 2 -> Level 1)
   async function promoteLevel(id: string) {
     if (!categories) return;
     const cat = categories.find((c) => c.id === id);
-    if (!cat || !cat.parentId) return; // Already Level 1
+    if (!cat || !cat.parentId) return;
 
     const parentCat = categories.find((c) => c.id === cat.parentId);
     const newParentId = parentCat ? parentCat.parentId : null;
@@ -163,9 +206,20 @@ const CategoryTree: React.FC = () => {
     setCategories(updated);
     pushHistory(updated);
 
-    await saveField(id, { parentId: newParentId });
-    setSuccessMessage(`Promoted "${cat.name}" up one level.`);
-    setTimeout(() => setSuccessMessage(null), 3000);
+    try {
+      await api.recordAction({
+        resourceId: 'Category',
+        recordId: id,
+        actionName: 'edit',
+        method: 'post',
+        data: { parentId: newParentId },
+      });
+      setSavedBaseline((prev) => (prev ?? []).map((c) => (c.id === id ? { ...c, parentId: newParentId } : c)));
+      setSuccessMessage(`Promoted and saved "${cat.name}".`);
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch {
+      setSaveError(`Failed to auto-save promotion for "${cat.name}". Please click "Save Changes".`);
+    }
   }
 
   // Sibling drag and drop
@@ -186,7 +240,7 @@ const CategoryTree: React.FC = () => {
     }
 
     if (sourceCat.parentId !== targetCat.parentId) {
-      setSaveError('Drag to reorder within the same section. To change levels, use the "Change Level" button.');
+      setSaveError('Drag to reorder within the same section. To change levels, use the "⚡ Change Level" button.');
       setDraggedId(null);
       setDragOverId(null);
       return;
@@ -215,11 +269,22 @@ const CategoryTree: React.FC = () => {
     setDragOverId(null);
 
     const newOrder = insertIndex * 10;
-    await saveField(sourceCat.id, { navOrder: newOrder });
+    try {
+      await api.recordAction({
+        resourceId: 'Category',
+        recordId: sourceCat.id,
+        actionName: 'edit',
+        method: 'post',
+        data: { navOrder: newOrder },
+      });
+      setSavedBaseline((prev) => (prev ?? []).map((c) => (c.id === sourceCat.id ? { ...c, navOrder: newOrder } : c)));
+    } catch {
+      setSaveError('Reorder queued — click "Save Changes" to commit.');
+    }
   }
 
   // Move up within sibling group
-  async function moveUp(id: string) {
+  function moveUp(id: string) {
     if (!categories) return;
     const cat = categories.find((c) => c.id === id);
     if (!cat) return;
@@ -237,12 +302,10 @@ const CategoryTree: React.FC = () => {
     const updated = categories.map((c) => (c.id === id ? { ...c, navOrder: newOrder } : c));
     setCategories(updated);
     pushHistory(updated);
-
-    await saveField(id, { navOrder: newOrder });
   }
 
   // Move down within sibling group
-  async function moveDown(id: string) {
+  function moveDown(id: string) {
     if (!categories) return;
     const cat = categories.find((c) => c.id === id);
     if (!cat) return;
@@ -260,40 +323,24 @@ const CategoryTree: React.FC = () => {
     const updated = categories.map((c) => (c.id === id ? { ...c, navOrder: newOrder } : c));
     setCategories(updated);
     pushHistory(updated);
-
-    await saveField(id, { navOrder: newOrder });
   }
 
   // Undo
-  async function handleUndo() {
+  function handleUndo() {
     if (historyIndex <= 0) return;
     const prevIndex = historyIndex - 1;
     const prevCats = history[prevIndex];
     setHistoryIndex(prevIndex);
     setCategories(prevCats);
-
-    for (const cat of prevCats) {
-      const curr = categories?.find((c) => c.id === cat.id);
-      if (curr && (curr.navOrder !== cat.navOrder || curr.parentId !== cat.parentId)) {
-        await saveField(cat.id, { navOrder: cat.navOrder, parentId: cat.parentId });
-      }
-    }
   }
 
   // Redo
-  async function handleRedo() {
+  function handleRedo() {
     if (historyIndex >= history.length - 1) return;
     const nextIndex = historyIndex + 1;
     const nextCats = history[nextIndex];
     setHistoryIndex(nextIndex);
     setCategories(nextCats);
-
-    for (const cat of nextCats) {
-      const curr = categories?.find((c) => c.id === cat.id);
-      if (curr && (curr.navOrder !== cat.navOrder || curr.parentId !== cat.parentId)) {
-        await saveField(cat.id, { navOrder: cat.navOrder, parentId: cat.parentId });
-      }
-    }
   }
 
   function handleReset() {
@@ -344,7 +391,7 @@ const CategoryTree: React.FC = () => {
             Interactive Category Level & Hierarchy Editor
           </H2>
           <Text color="grey60" mb="sm">
-            Easily turn any category into <strong>Level 1 (Top Navbar)</strong>, <strong>Level 2 (Column Header)</strong>, or <strong>Level 3 (Dropdown Item)</strong> using the <strong>Change Level</strong> button or <strong>Promote</strong> button.
+            Easily turn any category into <strong>Level 1 (Top Navbar)</strong>, <strong>Level 2 (Column Header)</strong>, or <strong>Level 3 (Dropdown Item)</strong>.
           </Text>
           <Box flex style={{ gap: '12px', marginTop: '8px' }}>
             <Badge variant="primary" style={{ backgroundColor: '#1a2744', color: '#ffffff' }}>
@@ -359,7 +406,24 @@ const CategoryTree: React.FC = () => {
           </Box>
         </Box>
 
-        <Box flex style={{ gap: '8px' }}>
+        {/* Action Toolbar */}
+        <Box flex style={{ gap: '8px', alignItems: 'center' }}>
+          {/* Main Save Button */}
+          <Button
+            size="sm"
+            variant="primary"
+            onClick={handleSaveAll}
+            disabled={isSavingAll}
+            style={{
+              backgroundColor: dirtyCount > 0 ? '#16a34a' : '#1a2744',
+              color: '#ffffff',
+              fontWeight: 'bold',
+              boxShadow: dirtyCount > 0 ? '0 0 10px rgba(22, 163, 74, 0.4)' : 'none',
+            }}
+          >
+            {isSavingAll ? '💾 Saving...' : dirtyCount > 0 ? `💾 Save Changes (${dirtyCount})` : '💾 Save Changes'}
+          </Button>
+
           <Button
             size="sm"
             onClick={handleUndo}
@@ -377,7 +441,7 @@ const CategoryTree: React.FC = () => {
             ↪ Redo
           </Button>
           <Button size="sm" variant="danger" onClick={handleReset}>
-            🔄 Refresh / Reset
+            🔄 Reset
           </Button>
         </Box>
       </Box>
@@ -445,12 +509,11 @@ const CategoryTree: React.FC = () => {
                 </Box>
 
                 <Box flex alignItems="center" style={{ gap: '12px' }}>
-                  {/* Promote Level Button (Move up a level) */}
+                  {/* Promote Level Button */}
                   {row.depth > 0 && (
                     <button
                       type="button"
                       onClick={() => promoteLevel(row.id)}
-                      disabled={savingId === row.id}
                       style={{
                         padding: '2px 8px',
                         borderRadius: '4px',
@@ -494,7 +557,6 @@ const CategoryTree: React.FC = () => {
                         e.stopPropagation();
                         moveUp(row.id);
                       }}
-                      disabled={savingId === row.id}
                       style={{
                         padding: '2px 8px',
                         borderRadius: '4px',
@@ -514,7 +576,6 @@ const CategoryTree: React.FC = () => {
                         e.stopPropagation();
                         moveDown(row.id);
                       }}
-                      disabled={savingId === row.id}
                       style={{
                         padding: '2px 8px',
                         borderRadius: '4px',
@@ -535,12 +596,10 @@ const CategoryTree: React.FC = () => {
                     <CheckBox
                       id={`nav-${row.id}`}
                       checked={row.showInNav}
-                      disabled={savingId === row.id}
                       onChange={() => {
                         const updated = categories.map((c) => (c.id === row.id ? { ...c, showInNav: !row.showInNav } : c));
                         setCategories(updated);
                         pushHistory(updated);
-                        saveField(row.id, { showInNav: !row.showInNav });
                       }}
                     />
                     <Label htmlFor={`nav-${row.id}`} style={{ margin: 0, fontSize: '12px' }}>
@@ -602,11 +661,29 @@ const CategoryTree: React.FC = () => {
         })}
       </Box>
 
+      {/* Bottom Actions Toolbar */}
       <Box mt="lg" flex justifyContent="space-between" alignItems="center">
-        <Button onClick={() => window.location.assign('/admin/resources/Category/actions/new')}>
-          <Icon icon="Add" mr="default" />
-          New Category
-        </Button>
+        <Box flex style={{ gap: '12px', alignItems: 'center' }}>
+          <Button onClick={() => window.location.assign('/admin/resources/Category/actions/new')}>
+            <Icon icon="Add" mr="default" />
+            New Category
+          </Button>
+
+          <Button
+            size="sm"
+            variant="primary"
+            onClick={handleSaveAll}
+            disabled={isSavingAll}
+            style={{
+              backgroundColor: dirtyCount > 0 ? '#16a34a' : '#1a2744',
+              color: '#ffffff',
+              fontWeight: 'bold',
+            }}
+          >
+            {isSavingAll ? '💾 Saving...' : dirtyCount > 0 ? `💾 Save Changes (${dirtyCount})` : '💾 Save Changes'}
+          </Button>
+        </Box>
+
         <Text color="grey60" style={{ fontSize: '12px' }}>
           Total Categories: {categories.length}
         </Text>
