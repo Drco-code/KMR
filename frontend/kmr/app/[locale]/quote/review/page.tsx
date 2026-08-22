@@ -1,10 +1,10 @@
-"use client";
-
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Download } from "lucide-react";
 import { useQuoteCart, type QuoteCartItem } from "@/lib/store/quote-cart";
 import { submitQuoteRequest } from "@/lib/api/client";
+import { generateQuoteReceiptPDF } from "@/lib/receipt-generator";
 import {
   formatPrice,
   formatAmount,
@@ -95,10 +95,42 @@ export default function QuoteReviewPage() {
 
   const { hasPricedItems, unpricedCount, formattedTotal } = calculateCartEstimatedTotal(items);
 
+  function handleDownloadReceipt() {
+    if (!name.trim()) {
+      alert("Please enter your name first.");
+      return;
+    }
+    generateQuoteReceiptPDF(
+      {
+        name,
+        company: company || undefined,
+        phone: phone || undefined,
+        location: location || undefined,
+      },
+      items
+    );
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setSubmitting(true);
 
+    // 1. Generate & download receipt PDF automatically
+    try {
+      generateQuoteReceiptPDF(
+        {
+          name,
+          company: company || undefined,
+          phone: phone || undefined,
+          location: location || undefined,
+        },
+        items
+      );
+    } catch {
+      // If PDF download fails in background, continue with WhatsApp submission
+    }
+
+    // 2. Submit quote request audit trail to backend
     try {
       await submitQuoteRequest({
         customerName: name,
@@ -119,13 +151,15 @@ export default function QuoteReviewPage() {
       ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`
       : null;
 
-    clear();
-
-    if (url) {
-      window.location.href = url;
-    } else {
-      router.push("/");
-    }
+    // Small timeout ensures browser starts the PDF download before navigating
+    setTimeout(() => {
+      clear();
+      if (url) {
+        window.location.href = url;
+      } else {
+        router.push("/");
+      }
+    }, 450);
   }
 
   return (
@@ -175,13 +209,25 @@ export default function QuoteReviewPage() {
               onChange={(e) => setLocation(e.target.value)}
             />
           </div>
-          <Button
-            type="submit"
-            disabled={submitting}
-            className="mt-4 rounded-sm bg-black px-10 py-6 text-sm font-semibold tracking-[0.1em] text-white uppercase hover:bg-black/90"
-          >
-            {submitting ? "Sending…" : "Send via WhatsApp"}
-          </Button>
+
+          <div className="mt-2 flex flex-col gap-3">
+            <Button
+              type="submit"
+              disabled={submitting}
+              className="w-full rounded-sm bg-black px-10 py-6 text-sm font-semibold tracking-[0.1em] text-white uppercase hover:bg-black/90"
+            >
+              {submitting ? "Preparing & Sending…" : "Send via WhatsApp & Download Receipt"}
+            </Button>
+
+            <button
+              type="button"
+              onClick={handleDownloadReceipt}
+              className="flex items-center justify-center gap-2 rounded-sm border border-border bg-white py-3 text-xs font-semibold tracking-[0.08em] text-ink uppercase transition-colors hover:border-gold hover:text-gold"
+            >
+              <Download className="size-4" />
+              Download Receipt PDF
+            </button>
+          </div>
         </form>
 
         <div className="flex flex-col gap-4">
