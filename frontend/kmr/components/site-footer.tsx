@@ -107,30 +107,35 @@ export async function SiteFooter() {
           ))}
 
           {showLocation ? (
-            // The location column gets double width on desktop (lg:col-span-2)
-            // so the mini map renders big enough to be useful.
-            <div className="flex flex-col gap-4 lg:col-span-2">
-              <h5 className="flex items-center gap-2 text-xs font-semibold tracking-[0.15em] text-ink uppercase">
-                <MapPin className="size-3.5 text-gold" />
-                {t("visitUs")}
-              </h5>
-              {contactInfo.address ? (
-                <p className="text-sm leading-relaxed text-ink/70">
-                  {contactInfo.address}
-                </p>
-              ) : null}
-              {contactInfo.mapEmbedUrl ? (
-                // Admin-supplied iframe src (Google Maps embed or OpenStreetMap
-                // embed). Muted grayscale by default; color on hover.
-                <iframe
-                  src={contactInfo.mapEmbedUrl}
-                  title="KMR location map"
-                  loading="lazy"
-                  allowFullScreen
-                  referrerPolicy="no-referrer-when-downgrade"
-                  className="h-52 w-full rounded-sm border border-ink/10 grayscale transition-all duration-500 hover:grayscale-0 md:h-56"
-                />
-              ) : null}
+            // On mobile/tablet, spans full width (sm:col-span-2 md:col-span-4) with
+            // address and map in a balanced 2-column layout on tablet.
+            // On desktop (lg:grid-cols-6), spans 2 columns (lg:col-span-2) in a single row.
+            <div className="flex flex-col gap-4 sm:col-span-2 md:col-span-4 lg:col-span-2">
+              <div className="flex flex-col gap-4 md:grid md:grid-cols-2 md:items-start md:gap-8 lg:flex lg:flex-col lg:gap-4">
+                <div className="flex flex-col gap-3">
+                  <h5 className="flex items-center gap-2 text-xs font-semibold tracking-[0.15em] text-ink uppercase">
+                    <MapPin className="size-3.5 text-gold" />
+                    {t("visitUs")}
+                  </h5>
+                  {contactInfo.address ? (
+                    <p className="text-sm leading-relaxed text-ink/70">
+                      {contactInfo.address}
+                    </p>
+                  ) : null}
+                </div>
+                {contactInfo.mapEmbedUrl ? (
+                  // Admin-supplied iframe src (Google Maps embed or OpenStreetMap
+                  // embed). Muted grayscale by default; color on hover.
+                  <iframe
+                    src={contactInfo.mapEmbedUrl}
+                    title="KMR location map"
+                    loading="lazy"
+                    allowFullScreen
+                    referrerPolicy="no-referrer-when-downgrade"
+                    className="h-48 w-full rounded-sm border border-ink/10 grayscale transition-all duration-500 hover:grayscale-0 md:h-52 lg:h-56"
+                  />
+                ) : null}
+              </div>
             </div>
           ) : null}
         </div>
