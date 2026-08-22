@@ -22,7 +22,6 @@ export async function SiteHeader() {
     { label: t("outdoorEquipment"), slug: "outdoor-equipment" },
     { label: t("buildingMaterials"), slug: "building-materials" },
     { label: t("homeEssentials"), slug: "home-essentials" },
-    { label: t("autoEssentials"), slug: "auto-essentials" },
   ];
 
   return (
