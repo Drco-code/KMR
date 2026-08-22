@@ -17,20 +17,13 @@ export async function SiteHeader() {
     getPromoBanner().catch(() => ({ message: null, link: null })),
   ]);
 
-  const topLevelCategories = categories
-    .filter((c) => !c.parentId && c.showInNav)
-    .sort((a, b) => a.navOrder - b.navOrder || a.name.localeCompare(b.name));
-
-  const navItems =
-    topLevelCategories.length > 0
-      ? topLevelCategories.map((c) => ({ label: c.name, slug: c.slug }))
-      : [
-          { label: t("tools"), slug: "tools" },
-          { label: t("outdoorEquipment"), slug: "outdoor-equipment" },
-          { label: t("buildingMaterials"), slug: "building-materials" },
-          { label: t("homeEssentials"), slug: "home-essentials" },
-          { label: t("autoEssentials"), slug: "auto-essentials" },
-        ];
+  const MEGA_MENU_ITEMS = [
+    { label: t("tools"), slug: "tools" },
+    { label: t("outdoorEquipment"), slug: "outdoor-equipment" },
+    { label: t("buildingMaterials"), slug: "building-materials" },
+    { label: t("homeEssentials"), slug: "home-essentials" },
+    { label: t("autoEssentials"), slug: "auto-essentials" },
+  ];
 
   return (
     <header className="sticky top-0 z-40">
@@ -63,7 +56,7 @@ export async function SiteHeader() {
         </Link>
 
         <nav className="hidden items-center gap-4 xl:gap-6 2xl:flex">
-          {navItems.map((item) => (
+          {MEGA_MENU_ITEMS.map((item) => (
             <MegaMenu key={item.slug} label={item.label} slug={item.slug} categories={categories} />
           ))}
         </nav>
