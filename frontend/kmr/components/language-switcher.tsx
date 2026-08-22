@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter } from "@/i18n/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { Globe } from "lucide-react";
 import { routing } from "@/i18n/routing";
@@ -45,18 +45,10 @@ export function LanguageSwitcher() {
     if (next === locale) return;
     setOpen(false);
     startTransition(() => {
-      // Strip existing locale prefix and navigate to the new one
-      // e.g. /ar/catalog → /zh/catalog  or  /catalog → /ar/catalog
-      const segments = pathname.split("/");
-      const isLocaleSegment = routing.locales.includes(segments[1] as "en" | "ar" | "zh" | "tr");
-      const pathWithoutLocale = isLocaleSegment ? "/" + segments.slice(2).join("/") : pathname;
-
-      const newPath =
-        next === routing.defaultLocale
-          ? pathWithoutLocale || "/"
-          : `/${next}${pathWithoutLocale}`;
-
-      router.push(newPath);
+      // router.replace from next-intl/navigation automatically updates the URL
+      // (e.g. /ar/catalog -> /catalog for 'en', or /catalog -> /zh/catalog for 'zh')
+      // and sets the NEXT_LOCALE cookie so the choice persists!
+      router.replace(pathname, { locale: next as "en" | "ar" | "zh" | "tr" });
     });
   }
 
