@@ -50,7 +50,7 @@ export async function SiteFooter() {
 
   // Address + mini map are staff-editable (ContactInfo singleton in the
   // admin dashboard), the block hides when either is unset.
-  const contactInfo = await getContactInfo();
+  const contactInfo = await getContactInfo().catch(() => ({ address: null, mapEmbedUrl: null }));
   const showLocation = Boolean(contactInfo?.address || contactInfo?.mapEmbedUrl);
 
   return (

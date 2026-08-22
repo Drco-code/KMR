@@ -45,8 +45,8 @@ export default async function Home() {
   const tProduct = useTranslations("product");
 
   const [brands, signatureCollections] = await Promise.all([
-    getBrands(),
-    getSignatureCollections(),
+    getBrands().catch(() => []),
+    getSignatureCollections().catch(() => []),
   ]);
 
   const byType = new Map(signatureCollections.map((collection) => [collection.type, collection]));

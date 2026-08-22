@@ -16,8 +16,8 @@ export async function SiteHeader() {
   // The promo bar is admin-managed (PromoBanner resource in the dashboard):
   // it only renders while a message is set and the banner is active.
   const [categories, promo] = await Promise.all([
-    getCategories(),
-    getPromoBanner(),
+    getCategories().catch(() => []),
+    getPromoBanner().catch(() => ({ message: null, link: null })),
   ]);
 
   // Build nav items dynamically from the API: any root-level category with

@@ -17,7 +17,7 @@ export default async function SignatureCollectionPage({
   params: Promise<{ locale: string; slug: string }>;
 }) {
   const { slug } = await params;
-  const collection = await getSignatureCollectionBySlug(slug);
+  const collection = await getSignatureCollectionBySlug(slug).catch(() => null);
   if (!collection) notFound();
 
   const fallbackImage =
