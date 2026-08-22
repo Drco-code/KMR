@@ -15,7 +15,8 @@ export default async function CategoryPage({
   searchParams: Promise<CatalogSearchParams>;
 }) {
   const { categorySlug } = await params;
-  const category = await getCategoryBySlug(categorySlug);
+  const decodedSlug = decodeURIComponent(categorySlug);
+  const category = await getCategoryBySlug(decodedSlug);
   if (!category) notFound();
 
   const resolvedSearchParams = await searchParams;

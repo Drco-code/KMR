@@ -1,8 +1,10 @@
-import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+"use client";
 
-export async function ConsultancyBanner() {
-  const t = await getTranslations("consultancy");
+import Link from "next/link";
+import { useTranslations } from "next-intl";
+
+export function ConsultancyBanner() {
+  const t = useTranslations("consultancy");
 
   return (
     <div className="flex flex-col items-center gap-6 bg-secondary px-6 py-20 text-center md:px-20">
