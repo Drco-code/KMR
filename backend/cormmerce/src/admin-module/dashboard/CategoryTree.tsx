@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ApiClient } from 'adminjs';
 import { Box, Button, CheckBox, H2, Icon, Label, Loader, MessageBox, Text, Badge } from '@adminjs/design-system';
 
@@ -38,6 +38,49 @@ function flattenTree(categories: CategoryRow[]): TreeNode[] {
   return result;
 }
 
+// Build human-friendly parent options with breadcrumbs
+function buildParentOptions(categories: CategoryRow[], currentId: string) {
+  const catMap = new Map<string, CategoryRow>(categories.map((c) => [c.id, c]));
+
+  // Find all descendants to prevent cyclic parenting
+  const descendantIds = new Set<string>();
+  function findDescendants(id: string) {
+    descendantIds.add(id);
+    for (const c of categories) {
+      if (c.parentId === id) findDescendants(c.id);
+    }
+  }
+  findDescendants(currentId);
+
+  function getBreadcrumb(c: CategoryRow): string {
+    const parts: string[] = [c.name];
+    let curr = c;
+    while (curr.parentId && catMap.has(curr.parentId)) {
+      curr = catMap.get(curr.parentId)!;
+      parts.unshift(curr.name);
+    }
+    return parts.join(' > ');
+  }
+
+  const eligible = categories.filter((c) => !descendantIds.has(c.id));
+  eligible.sort((a, b) => getBreadcrumb(a).localeCompare(getBreadcrumb(b)));
+
+  return eligible.map((c) => {
+    let depth = 0;
+    let curr = c;
+    while (curr.parentId && catMap.has(curr.parentId)) {
+      depth++;
+      curr = catMap.get(curr.parentId)!;
+    }
+    const levelLabel = depth === 0 ? 'Make Level 2 (Under ' + c.name + ')' : depth === 1 ? 'Make Level 3 (Under ' + getBreadcrumb(c) + ')' : 'Under ' + getBreadcrumb(c);
+    return {
+      id: c.id,
+      label: `${levelLabel}`,
+      breadcrumb: getBreadcrumb(c),
+    };
+  });
+}
+
 const CategoryTree: React.FC = () => {
   const [categories, setCategories] = useState<CategoryRow[] | null>(null);
   const [history, setHistory] = useState<CategoryRow[][]>([]);
@@ -47,6 +90,7 @@ const CategoryTree: React.FC = () => {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [editingParentId, setEditingParentId] = useState<string | null>(null);
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dragOverId, setDragOverId] = useState<string | null>(null);
 
@@ -87,7 +131,44 @@ const CategoryTree: React.FC = () => {
     }
   }
 
-  // Safe sibling reordering only (cannot corrupt hierarchy/levels)
+  // Change category parent and level directly
+  async function handleChangeParent(id: string, newParentId: string | null) {
+    if (!categories) return;
+    const cat = categories.find((c) => c.id === id);
+    if (!cat || cat.parentId === newParentId) {
+      setEditingParentId(null);
+      return;
+    }
+
+    const updated = categories.map((c) => (c.id === id ? { ...c, parentId: newParentId } : c));
+    setCategories(updated);
+    pushHistory(updated);
+    setEditingParentId(null);
+
+    await saveField(id, { parentId: newParentId });
+    setSuccessMessage(`Level updated for "${cat.name}".`);
+    setTimeout(() => setSuccessMessage(null), 3000);
+  }
+
+  // Promote level (Move up one level: Level 3 -> Level 2, Level 2 -> Level 1)
+  async function promoteLevel(id: string) {
+    if (!categories) return;
+    const cat = categories.find((c) => c.id === id);
+    if (!cat || !cat.parentId) return; // Already Level 1
+
+    const parentCat = categories.find((c) => c.id === cat.parentId);
+    const newParentId = parentCat ? parentCat.parentId : null;
+
+    const updated = categories.map((c) => (c.id === id ? { ...c, parentId: newParentId } : c));
+    setCategories(updated);
+    pushHistory(updated);
+
+    await saveField(id, { parentId: newParentId });
+    setSuccessMessage(`Promoted "${cat.name}" up one level.`);
+    setTimeout(() => setSuccessMessage(null), 3000);
+  }
+
+  // Sibling drag and drop
   async function handleDrop(targetId: string) {
     if (!categories || !draggedId || draggedId === targetId) {
       setDraggedId(null);
@@ -104,15 +185,13 @@ const CategoryTree: React.FC = () => {
       return;
     }
 
-    // Safety: only allow reordering within the same parent level
     if (sourceCat.parentId !== targetCat.parentId) {
-      setSaveError('You can only drag to reorder categories within the same level/section.');
+      setSaveError('Drag to reorder within the same section. To change levels, use the "Change Level" button.');
       setDraggedId(null);
       setDragOverId(null);
       return;
     }
 
-    // Get all siblings in this parent group
     const siblings = categories
       .filter((c) => c.parentId === sourceCat.parentId && c.id !== sourceCat.id)
       .sort((a, b) => a.navOrder - b.navOrder || a.name.localeCompare(b.name));
@@ -120,10 +199,8 @@ const CategoryTree: React.FC = () => {
     const targetIndex = siblings.findIndex((c) => c.id === targetId);
     const insertIndex = targetIndex >= 0 ? targetIndex : siblings.length;
 
-    // Insert sourceCat at the target index
     siblings.splice(insertIndex, 0, sourceCat);
 
-    // Assign sequential navOrders (0, 10, 20, 30...) to prevent collisions
     const updatedCategories = categories.map((c) => {
       const idx = siblings.findIndex((s) => s.id === c.id);
       if (idx !== -1) {
@@ -137,7 +214,6 @@ const CategoryTree: React.FC = () => {
     setDraggedId(null);
     setDragOverId(null);
 
-    // Save the new order
     const newOrder = insertIndex * 10;
     await saveField(sourceCat.id, { navOrder: newOrder });
   }
@@ -153,7 +229,7 @@ const CategoryTree: React.FC = () => {
       .sort((a, b) => a.navOrder - b.navOrder || a.name.localeCompare(b.name));
 
     const index = siblings.findIndex((s) => s.id === id);
-    if (index <= 0) return; // Already at the top
+    if (index <= 0) return;
 
     const prevSibling = siblings[index - 1];
     const newOrder = Math.max(0, prevSibling.navOrder - 1);
@@ -176,7 +252,7 @@ const CategoryTree: React.FC = () => {
       .sort((a, b) => a.navOrder - b.navOrder || a.name.localeCompare(b.name));
 
     const index = siblings.findIndex((s) => s.id === id);
-    if (index < 0 || index >= siblings.length - 1) return; // Already at the bottom
+    if (index < 0 || index >= siblings.length - 1) return;
 
     const nextSibling = siblings[index + 1];
     const newOrder = nextSibling.navOrder + 1;
@@ -196,7 +272,6 @@ const CategoryTree: React.FC = () => {
     setHistoryIndex(prevIndex);
     setCategories(prevCats);
 
-    // Save orders from prev state
     for (const cat of prevCats) {
       const curr = categories?.find((c) => c.id === cat.id);
       if (curr && (curr.navOrder !== cat.navOrder || curr.parentId !== cat.parentId)) {
@@ -221,10 +296,9 @@ const CategoryTree: React.FC = () => {
     }
   }
 
-  // Reload / Reset from database
   function handleReset() {
     load();
-    setSuccessMessage('Category hierarchy reloaded and refreshed from database.');
+    setSuccessMessage('Category tree reloaded from database.');
     setTimeout(() => setSuccessMessage(null), 4000);
   }
 
@@ -267,18 +341,17 @@ const CategoryTree: React.FC = () => {
       <Box mb="lg" flex justifyContent="space-between" alignItems="flex-start">
         <Box>
           <H2 fontWeight="bold" mb="xs">
-            Interactive Category Navigation Tree
+            Interactive Category Level & Hierarchy Editor
           </H2>
           <Text color="grey60" mb="sm">
-            <strong>Drag and drop</strong> or use <strong>↑ / ↓</strong> to arrange categories.
-            Dragging is safely locked to the same level to preserve structure.
+            Easily turn any category into <strong>Level 1 (Top Navbar)</strong>, <strong>Level 2 (Column Header)</strong>, or <strong>Level 3 (Dropdown Item)</strong> using the <strong>Change Level</strong> button or <strong>Promote</strong> button.
           </Text>
           <Box flex style={{ gap: '12px', marginTop: '8px' }}>
             <Badge variant="primary" style={{ backgroundColor: '#1a2744', color: '#ffffff' }}>
               Level 1: Main Top Navbar
             </Badge>
             <Badge variant="info" style={{ backgroundColor: '#c5a059', color: '#ffffff' }}>
-              Level 2: Mega Menu Column
+              Level 2: Mega Menu Column Header
             </Badge>
             <Badge variant="default" style={{ backgroundColor: '#e2e8f0', color: '#334155' }}>
               Level 3: Dropdown Item
@@ -286,7 +359,6 @@ const CategoryTree: React.FC = () => {
           </Box>
         </Box>
 
-        {/* Toolbar: Undo, Redo, Reset */}
         <Box flex style={{ gap: '8px' }}>
           <Button
             size="sm"
@@ -314,6 +386,7 @@ const CategoryTree: React.FC = () => {
         {rows.map((row, index) => {
           const isDragging = draggedId === row.id;
           const isDragOver = dragOverId === row.id;
+          const isEditingParent = editingParentId === row.id;
 
           const levelBadge =
             row.depth === 0 ? (
@@ -324,10 +397,12 @@ const CategoryTree: React.FC = () => {
               <Badge style={{ backgroundColor: '#e2e8f0', color: '#334155', fontSize: '11px' }}>L3: Item</Badge>
             );
 
+          const parentOptions = isEditingParent ? buildParentOptions(categories, row.id) : [];
+
           return (
             <Box
               key={row.id}
-              draggable
+              draggable={!isEditingParent}
               onDragStart={(e) => {
                 setDraggedId(row.id);
                 e.dataTransfer.setData('text/plain', row.id);
@@ -344,141 +419,184 @@ const CategoryTree: React.FC = () => {
                 handleDrop(row.id);
               }}
               flex
-              alignItems="center"
-              justifyContent="space-between"
+              flexDirection="column"
               py="sm"
               px="md"
               style={{
-                gap: '12px',
                 paddingLeft: `${16 + row.depth * 28}px`,
-                backgroundColor: isDragging ? '#eff6ff' : isDragOver ? '#fef3c7' : index % 2 === 0 ? '#ffffff' : '#f8fafc',
+                backgroundColor: isDragging ? '#eff6ff' : isDragOver ? '#fef3c7' : isEditingParent ? '#f0f9ff' : index % 2 === 0 ? '#ffffff' : '#f8fafc',
                 borderBottom: '1px solid #f1f5f9',
                 borderTop: isDragOver ? '2px solid #c5a059' : 'none',
                 opacity: isDragging ? 0.5 : 1,
-                cursor: 'grab',
                 transition: 'background-color 0.15s ease',
               }}
             >
-              <Box flex alignItems="center" style={{ gap: '10px', flex: 1, minWidth: 0 }}>
-                {/* Drag Grip Handle */}
-                <span style={{ cursor: 'grab', color: '#94a3b8', fontSize: '16px', userSelect: 'none' }} title="Drag to reorder">
-                  ⋮⋮
-                </span>
+              <Box flex alignItems="center" justifyContent="space-between" style={{ gap: '12px' }}>
+                <Box flex alignItems="center" style={{ gap: '10px', flex: 1, minWidth: 0 }}>
+                  <span style={{ cursor: 'grab', color: '#94a3b8', fontSize: '16px', userSelect: 'none' }} title="Drag to reorder within level">
+                    ⋮⋮
+                  </span>
 
-                {levelBadge}
+                  {levelBadge}
 
-                <Text style={{ fontWeight: row.depth === 0 ? 'bold' : row.depth === 1 ? '600' : 'normal', color: '#1e293b' }}>
-                  {row.name}
-                </Text>
-              </Box>
+                  <Text style={{ fontWeight: row.depth === 0 ? 'bold' : row.depth === 1 ? '600' : 'normal', color: '#1e293b' }}>
+                    {row.name}
+                  </Text>
+                </Box>
 
-              <Box flex alignItems="center" style={{ gap: '16px' }}>
-                {/* Move Up / Move Down Quick Buttons */}
-                <Box flex style={{ gap: '4px' }}>
+                <Box flex alignItems="center" style={{ gap: '12px' }}>
+                  {/* Promote Level Button (Move up a level) */}
+                  {row.depth > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => promoteLevel(row.id)}
+                      disabled={savingId === row.id}
+                      style={{
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        border: '1px solid #c5a059',
+                        backgroundColor: '#fef9ee',
+                        color: '#92600c',
+                        cursor: 'pointer',
+                        fontSize: '11px',
+                        fontWeight: '600',
+                      }}
+                      title="Promote level (e.g. Item -> Column, or Column -> Top Navbar)"
+                    >
+                      ⮐ Promote
+                    </button>
+                  )}
+
+                  {/* Level / Parent Switcher Toggle */}
                   <button
                     type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      moveUp(row.id);
-                    }}
-                    disabled={savingId === row.id}
+                    onClick={() => setEditingParentId(isEditingParent ? null : row.id)}
                     style={{
                       padding: '2px 8px',
                       borderRadius: '4px',
                       border: '1px solid #cbd5e1',
-                      backgroundColor: '#ffffff',
+                      backgroundColor: isEditingParent ? '#e2e8f0' : '#ffffff',
+                      color: '#334155',
                       cursor: 'pointer',
-                      fontSize: '12px',
-                      fontWeight: 'bold',
+                      fontSize: '11px',
+                      fontWeight: '600',
                     }}
-                    title="Move up"
+                    title="Change where this category sits in the hierarchy"
                   >
-                    ↑
+                    {isEditingParent ? '✕ Close' : '⚡ Change Level'}
                   </button>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      moveDown(row.id);
-                    }}
-                    disabled={savingId === row.id}
-                    style={{
-                      padding: '2px 8px',
-                      borderRadius: '4px',
-                      border: '1px solid #cbd5e1',
-                      backgroundColor: '#ffffff',
-                      cursor: 'pointer',
-                      fontSize: '12px',
-                      fontWeight: 'bold',
-                    }}
-                    title="Move down"
-                  >
-                    ↓
-                  </button>
-                </Box>
 
-                {/* Show in Nav Checkbox */}
-                <Box flex alignItems="center" style={{ gap: '6px' }}>
-                  <CheckBox
-                    id={`nav-${row.id}`}
-                    checked={row.showInNav}
-                    disabled={savingId === row.id}
-                    onChange={() => {
-                      const updated = categories.map((c) => (c.id === row.id ? { ...c, showInNav: !row.showInNav } : c));
-                      setCategories(updated);
-                      pushHistory(updated);
-                      saveField(row.id, { showInNav: !row.showInNav });
-                    }}
-                  />
-                  <Label htmlFor={`nav-${row.id}`} style={{ margin: 0, fontSize: '12px' }}>
-                    Show in nav
-                  </Label>
-                </Box>
+                  {/* Move Up / Move Down Quick Buttons */}
+                  <Box flex style={{ gap: '4px' }}>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        moveUp(row.id);
+                      }}
+                      disabled={savingId === row.id}
+                      style={{
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        border: '1px solid #cbd5e1',
+                        backgroundColor: '#ffffff',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                      }}
+                      title="Move up"
+                    >
+                      ↑
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        moveDown(row.id);
+                      }}
+                      disabled={savingId === row.id}
+                      style={{
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        border: '1px solid #cbd5e1',
+                        backgroundColor: '#ffffff',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                      }}
+                      title="Move down"
+                    >
+                      ↓
+                    </button>
+                  </Box>
 
-                {/* Order Input */}
-                <Box flex alignItems="center" style={{ gap: '6px' }}>
-                  <Label htmlFor={`order-${row.id}`} style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>
-                    Order:
-                  </Label>
-                  <input
-                    id={`order-${row.id}`}
-                    type="number"
-                    defaultValue={row.navOrder}
-                    key={row.navOrder}
-                    disabled={savingId === row.id}
-                    style={{
-                      width: '52px',
-                      padding: '2px 6px',
-                      borderRadius: '4px',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '12px',
-                      textAlign: 'center',
-                    }}
-                    onBlur={(event) => {
-                      const value = Number(event.currentTarget.value);
-                      if (Number.isFinite(value) && value !== row.navOrder) {
-                        const updated = categories.map((c) => (c.id === row.id ? { ...c, navOrder: value } : c));
+                  {/* Show in Nav Checkbox */}
+                  <Box flex alignItems="center" style={{ gap: '6px' }}>
+                    <CheckBox
+                      id={`nav-${row.id}`}
+                      checked={row.showInNav}
+                      disabled={savingId === row.id}
+                      onChange={() => {
+                        const updated = categories.map((c) => (c.id === row.id ? { ...c, showInNav: !row.showInNav } : c));
                         setCategories(updated);
                         pushHistory(updated);
-                        saveField(row.id, { navOrder: value });
-                      }
-                    }}
-                  />
-                </Box>
+                        saveField(row.id, { showInNav: !row.showInNav });
+                      }}
+                    />
+                    <Label htmlFor={`nav-${row.id}`} style={{ margin: 0, fontSize: '12px' }}>
+                      Show in nav
+                    </Label>
+                  </Box>
 
-                {/* Edit Link */}
-                <a
-                  href={`/admin/resources/Category/records/${row.id}/edit`}
-                  style={{
-                    fontSize: '12px',
-                    color: '#2563eb',
-                    textDecoration: 'underline',
-                    padding: '2px 6px',
-                  }}
-                >
-                  Edit
-                </a>
+                  {/* Edit Resource Link */}
+                  <a
+                    href={`/admin/resources/Category/records/${row.id}/edit`}
+                    style={{
+                      fontSize: '12px',
+                      color: '#2563eb',
+                      textDecoration: 'underline',
+                      padding: '2px 4px',
+                    }}
+                  >
+                    Edit
+                  </a>
+                </Box>
               </Box>
+
+              {/* Inline Level / Parent Selection Panel */}
+              {isEditingParent && (
+                <Box mt="sm" p="sm" style={{ backgroundColor: '#ffffff', borderRadius: '6px', border: '1px solid #93c5fd' }}>
+                  <Text style={{ fontSize: '12px', fontWeight: 'bold', color: '#1e3a8a', marginBottom: '6px' }}>
+                    Choose new level / placement for "{row.name}":
+                  </Text>
+                  <Box flex alignItems="center" style={{ gap: '10px' }}>
+                    <select
+                      defaultValue={row.parentId ?? ''}
+                      onChange={(e) => {
+                        const val = e.target.value === '' ? null : e.target.value;
+                        handleChangeParent(row.id, val);
+                      }}
+                      style={{
+                        padding: '6px 10px',
+                        borderRadius: '4px',
+                        border: '1px solid #94a3b8',
+                        fontSize: '12px',
+                        minWidth: '320px',
+                      }}
+                    >
+                      <option value="">⭐ Make Level 1 (Main Top Navbar - No Parent)</option>
+                      {parentOptions.map((opt) => (
+                        <option key={opt.id} value={opt.id}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                    <Button size="sm" onClick={() => setEditingParentId(null)}>
+                      Cancel
+                    </Button>
+                  </Box>
+                </Box>
+              )}
             </Box>
           );
         })}
