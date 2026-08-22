@@ -40,8 +40,12 @@ function flattenTree(categories: CategoryRow[]): TreeNode[] {
 
 const CategoryTree: React.FC = () => {
   const [categories, setCategories] = useState<CategoryRow[] | null>(null);
+  const [history, setHistory] = useState<CategoryRow[][]>([]);
+  const [historyIndex, setHistoryIndex] = useState<number>(-1);
+
   const [loadError, setLoadError] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dragOverId, setDragOverId] = useState<string | null>(null);
@@ -49,11 +53,21 @@ const CategoryTree: React.FC = () => {
   function load() {
     api
       .getPage<CategoryRow[]>({ pageName: 'categoryTree' })
-      .then((response) => setCategories(response.data))
+      .then((response) => {
+        setCategories(response.data);
+        setHistory([response.data]);
+        setHistoryIndex(0);
+      })
       .catch(() => setLoadError('Could not load categories.'));
   }
 
   useEffect(load, []);
+
+  function pushHistory(newCats: CategoryRow[]) {
+    const updatedHistory = history.slice(0, historyIndex + 1);
+    setHistory([...updatedHistory, newCats]);
+    setHistoryIndex(updatedHistory.length);
+  }
 
   async function saveField(id: string, data: Partial<Pick<CategoryRow, 'showInNav' | 'navOrder' | 'parentId'>>) {
     setSavingId(id);
@@ -65,9 +79,6 @@ const CategoryTree: React.FC = () => {
         method: 'post',
         data,
       });
-      setCategories((current) =>
-        (current ?? []).map((c) => (c.id === id ? { ...c, ...data } : c)),
-      );
       setSaveError(null);
     } catch {
       setSaveError('Failed to save changes — please retry.');
@@ -76,7 +87,7 @@ const CategoryTree: React.FC = () => {
     }
   }
 
-  // Reorder siblings when dragging and dropping
+  // Safe sibling reordering only (cannot corrupt hierarchy/levels)
   async function handleDrop(targetId: string) {
     if (!categories || !draggedId || draggedId === targetId) {
       setDraggedId(null);
@@ -93,36 +104,42 @@ const CategoryTree: React.FC = () => {
       return;
     }
 
-    // Get all siblings in the target's parent group
+    // Safety: only allow reordering within the same parent level
+    if (sourceCat.parentId !== targetCat.parentId) {
+      setSaveError('You can only drag to reorder categories within the same level/section.');
+      setDraggedId(null);
+      setDragOverId(null);
+      return;
+    }
+
+    // Get all siblings in this parent group
     const siblings = categories
-      .filter((c) => c.parentId === targetCat.parentId && c.id !== sourceCat.id)
+      .filter((c) => c.parentId === sourceCat.parentId && c.id !== sourceCat.id)
       .sort((a, b) => a.navOrder - b.navOrder || a.name.localeCompare(b.name));
 
     const targetIndex = siblings.findIndex((c) => c.id === targetId);
     const insertIndex = targetIndex >= 0 ? targetIndex : siblings.length;
 
     // Insert sourceCat at the target index
-    siblings.splice(insertIndex, 0, { ...sourceCat, parentId: targetCat.parentId });
+    siblings.splice(insertIndex, 0, sourceCat);
 
     // Assign sequential navOrders (0, 10, 20, 30...) to prevent collisions
     const updatedCategories = categories.map((c) => {
       const idx = siblings.findIndex((s) => s.id === c.id);
       if (idx !== -1) {
-        return { ...c, parentId: targetCat.parentId, navOrder: idx * 10 };
+        return { ...c, navOrder: idx * 10 };
       }
       return c;
     });
 
     setCategories(updatedCategories);
+    pushHistory(updatedCategories);
     setDraggedId(null);
     setDragOverId(null);
 
-    // Persist new navOrder and parentId
+    // Save the new order
     const newOrder = insertIndex * 10;
-    await saveField(sourceCat.id, {
-      navOrder: newOrder,
-      parentId: targetCat.parentId,
-    });
+    await saveField(sourceCat.id, { navOrder: newOrder });
   }
 
   // Move up within sibling group
@@ -141,10 +158,11 @@ const CategoryTree: React.FC = () => {
     const prevSibling = siblings[index - 1];
     const newOrder = Math.max(0, prevSibling.navOrder - 1);
 
+    const updated = categories.map((c) => (c.id === id ? { ...c, navOrder: newOrder } : c));
+    setCategories(updated);
+    pushHistory(updated);
+
     await saveField(id, { navOrder: newOrder });
-    setCategories((current) =>
-      (current ?? []).map((c) => (c.id === id ? { ...c, navOrder: newOrder } : c)),
-    );
   }
 
   // Move down within sibling group
@@ -163,10 +181,51 @@ const CategoryTree: React.FC = () => {
     const nextSibling = siblings[index + 1];
     const newOrder = nextSibling.navOrder + 1;
 
+    const updated = categories.map((c) => (c.id === id ? { ...c, navOrder: newOrder } : c));
+    setCategories(updated);
+    pushHistory(updated);
+
     await saveField(id, { navOrder: newOrder });
-    setCategories((current) =>
-      (current ?? []).map((c) => (c.id === id ? { ...c, navOrder: newOrder } : c)),
-    );
+  }
+
+  // Undo
+  async function handleUndo() {
+    if (historyIndex <= 0) return;
+    const prevIndex = historyIndex - 1;
+    const prevCats = history[prevIndex];
+    setHistoryIndex(prevIndex);
+    setCategories(prevCats);
+
+    // Save orders from prev state
+    for (const cat of prevCats) {
+      const curr = categories?.find((c) => c.id === cat.id);
+      if (curr && (curr.navOrder !== cat.navOrder || curr.parentId !== cat.parentId)) {
+        await saveField(cat.id, { navOrder: cat.navOrder, parentId: cat.parentId });
+      }
+    }
+  }
+
+  // Redo
+  async function handleRedo() {
+    if (historyIndex >= history.length - 1) return;
+    const nextIndex = historyIndex + 1;
+    const nextCats = history[nextIndex];
+    setHistoryIndex(nextIndex);
+    setCategories(nextCats);
+
+    for (const cat of nextCats) {
+      const curr = categories?.find((c) => c.id === cat.id);
+      if (curr && (curr.navOrder !== cat.navOrder || curr.parentId !== cat.parentId)) {
+        await saveField(cat.id, { navOrder: cat.navOrder, parentId: cat.parentId });
+      }
+    }
+  }
+
+  // Reload / Reset from database
+  function handleReset() {
+    load();
+    setSuccessMessage('Category hierarchy reloaded and refreshed from database.');
+    setTimeout(() => setSuccessMessage(null), 4000);
   }
 
   if (loadError) {
@@ -197,24 +256,57 @@ const CategoryTree: React.FC = () => {
         </Box>
       )}
 
-      <Box mb="xl">
-        <H2 fontWeight="bold" mb="xs">
-          Interactive Category Navigation Tree
-        </H2>
-        <Text color="grey60" mb="sm">
-          <strong>Drag and drop</strong> rows or use the <strong>↑ / ↓ buttons</strong> to arrange categories.
-          The order and hierarchy set here controls the storefront navigation bar in real time.
-        </Text>
-        <Box flex style={{ gap: '12px', marginTop: '8px' }}>
-          <Badge variant="primary" style={{ backgroundColor: '#1a2744', color: '#ffffff' }}>
-            Level 1: Main Top Navbar
-          </Badge>
-          <Badge variant="info" style={{ backgroundColor: '#c5a059', color: '#ffffff' }}>
-            Level 2: Mega Menu Column
-          </Badge>
-          <Badge variant="default" style={{ backgroundColor: '#e2e8f0', color: '#334155' }}>
-            Level 3: Dropdown Item
-          </Badge>
+      {successMessage && (
+        <Box mb="lg">
+          <MessageBox message={successMessage} variant="success">
+            <Button onClick={() => setSuccessMessage(null)}>Dismiss</Button>
+          </MessageBox>
+        </Box>
+      )}
+
+      <Box mb="lg" flex justifyContent="space-between" alignItems="flex-start">
+        <Box>
+          <H2 fontWeight="bold" mb="xs">
+            Interactive Category Navigation Tree
+          </H2>
+          <Text color="grey60" mb="sm">
+            <strong>Drag and drop</strong> or use <strong>↑ / ↓</strong> to arrange categories.
+            Dragging is safely locked to the same level to preserve structure.
+          </Text>
+          <Box flex style={{ gap: '12px', marginTop: '8px' }}>
+            <Badge variant="primary" style={{ backgroundColor: '#1a2744', color: '#ffffff' }}>
+              Level 1: Main Top Navbar
+            </Badge>
+            <Badge variant="info" style={{ backgroundColor: '#c5a059', color: '#ffffff' }}>
+              Level 2: Mega Menu Column
+            </Badge>
+            <Badge variant="default" style={{ backgroundColor: '#e2e8f0', color: '#334155' }}>
+              Level 3: Dropdown Item
+            </Badge>
+          </Box>
+        </Box>
+
+        {/* Toolbar: Undo, Redo, Reset */}
+        <Box flex style={{ gap: '8px' }}>
+          <Button
+            size="sm"
+            onClick={handleUndo}
+            disabled={historyIndex <= 0}
+            style={{ opacity: historyIndex <= 0 ? 0.5 : 1 }}
+          >
+            ↩ Undo
+          </Button>
+          <Button
+            size="sm"
+            onClick={handleRedo}
+            disabled={historyIndex >= history.length - 1}
+            style={{ opacity: historyIndex >= history.length - 1 ? 0.5 : 1 }}
+          >
+            ↪ Redo
+          </Button>
+          <Button size="sm" variant="danger" onClick={handleReset}>
+            🔄 Refresh / Reset
+          </Button>
         </Box>
       </Box>
 
@@ -331,7 +423,12 @@ const CategoryTree: React.FC = () => {
                     id={`nav-${row.id}`}
                     checked={row.showInNav}
                     disabled={savingId === row.id}
-                    onChange={() => saveField(row.id, { showInNav: !row.showInNav })}
+                    onChange={() => {
+                      const updated = categories.map((c) => (c.id === row.id ? { ...c, showInNav: !row.showInNav } : c));
+                      setCategories(updated);
+                      pushHistory(updated);
+                      saveField(row.id, { showInNav: !row.showInNav });
+                    }}
                   />
                   <Label htmlFor={`nav-${row.id}`} style={{ margin: 0, fontSize: '12px' }}>
                     Show in nav
@@ -360,6 +457,9 @@ const CategoryTree: React.FC = () => {
                     onBlur={(event) => {
                       const value = Number(event.currentTarget.value);
                       if (Number.isFinite(value) && value !== row.navOrder) {
+                        const updated = categories.map((c) => (c.id === row.id ? { ...c, navOrder: value } : c));
+                        setCategories(updated);
+                        pushHistory(updated);
                         saveField(row.id, { navOrder: value });
                       }
                     }}
