@@ -16,14 +16,13 @@ function getItemDisplayName(item: QuoteCartItem) {
   return item.name;
 }
 
-// In standard PDF fonts (helvetica), the unicode '₵' symbol is not present in WinAnsi encoding.
-// Format as 'GHS ' (ISO standard) so prices render crisp and clean on all PDF viewers without corruption.
+// Use 'GH¢' with the standard Latin-1 cent/cedi symbol (supported in standard PDF Helvetica encoding)
 function formatPdfPrice(priceDescription: string | null | undefined): string | null {
   if (!priceDescription) return null;
   const trimmed = priceDescription.trim();
   if (!trimmed) return null;
 
-  const withoutSign = trimmed.replace(/^(GH₵|₵|GHS)/, "").trim();
+  const withoutSign = trimmed.replace(/^(GH₵|₵|GHS|GH¢|¢)/, "").trim();
   if (!/^\d[\d,]*(\.\d+)?$/.test(withoutSign)) return trimmed;
 
   const amount = Number(withoutSign.replace(/,/g, ""));
@@ -31,7 +30,7 @@ function formatPdfPrice(priceDescription: string | null | undefined): string | n
 }
 
 function formatPdfAmount(amount: number): string {
-  return `GHS ${amount.toLocaleString("en-US", {
+  return `GH¢ ${amount.toLocaleString("en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`;
