@@ -1,11 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { MapPin } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { getContactInfo } from "@/lib/api/client";
 
 export async function SiteFooter() {
-  const t = useTranslations("footer");
+  const [t, contactInfo] = await Promise.all([
+    getTranslations("footer"),
+    getContactInfo().catch(() => ({ address: null, mapEmbedUrl: null })),
+  ]);
 
   const FOOTER_COLUMNS = [
     {
@@ -50,7 +53,6 @@ export async function SiteFooter() {
 
   // Address + mini map are staff-editable (ContactInfo singleton in the
   // admin dashboard), the block hides when either is unset.
-  const contactInfo = await getContactInfo().catch(() => ({ address: null, mapEmbedUrl: null }));
   const showLocation = Boolean(contactInfo?.address || contactInfo?.mapEmbedUrl);
 
   return (

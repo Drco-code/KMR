@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { getBrands } from "@/lib/api/client";
 import { getSignatureCollections } from "@/lib/api/client";
 import { BrandStrip } from "@/components/brand-strip";
@@ -41,8 +41,10 @@ const SIGNATURE_SLOTS: Array<{
 ];
 
 export default async function Home() {
-  const t = useTranslations("home");
-  const tProduct = useTranslations("product");
+  const [t, tProduct] = await Promise.all([
+    getTranslations("home"),
+    getTranslations("product"),
+  ]);
 
   const [brands, signatureCollections] = await Promise.all([
     getBrands().catch(() => []),

@@ -1,10 +1,10 @@
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { WhatsAppIcon } from "@/components/icons/whatsapp-icon";
 
 // Floating WhatsApp bubble with a hover/focus label so visitors know what it
 // is. Pure CSS (group-hover / group-focus-visible), no client JS needed.
-export function WhatsAppFab() {
-  const t = useTranslations("whatsapp");
+export async function WhatsAppFab() {
+  const t = await getTranslations("whatsapp");
   const phone = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
   if (!phone) return null;
 

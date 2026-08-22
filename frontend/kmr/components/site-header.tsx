@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { HeaderCartButton } from "@/components/header-cart-button";
 import { MobileNav } from "@/components/mobile-nav";
 import { NavSearch } from "@/components/nav-search";
@@ -11,11 +11,8 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 import { getCategories, getPromoBanner } from "@/lib/api/client";
 
 export async function SiteHeader() {
-  const t = useTranslations("nav");
-
-  // The promo bar is admin-managed (PromoBanner resource in the dashboard):
-  // it only renders while a message is set and the banner is active.
-  const [categories, promo] = await Promise.all([
+  const [t, categories, promo] = await Promise.all([
+    getTranslations("nav"),
     getCategories().catch(() => []),
     getPromoBanner().catch(() => ({ message: null, link: null })),
   ]);
