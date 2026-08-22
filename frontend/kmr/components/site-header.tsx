@@ -17,12 +17,22 @@ export async function SiteHeader() {
     getPromoBanner().catch(() => ({ message: null, link: null })),
   ]);
 
-  const MEGA_MENU_ITEMS = [
-    { label: t("tools"), slug: "tools" },
-    { label: t("outdoorEquipment"), slug: "outdoor-equipment" },
-    { label: t("buildingMaterials"), slug: "building-materials" },
-    { label: t("homeEssentials"), slug: "home-essentials" },
-  ];
+  const KNOWN_LABELS: Record<string, string> = {
+    tools: t("tools"),
+    "outdoor-equipment": t("outdoorEquipment"),
+    "building-materials": t("buildingMaterials"),
+    "home-essentials": t("homeEssentials"),
+  };
+
+  // Dynamically build top-level nav items from the database (showInNav: true & no parentId),
+  // sorted by navOrder so drag-and-drop order in the admin immediately controls the navbar.
+  const rootNavCategories = categories
+    .filter((c) => c.showInNav && !c.parentId)
+    .sort((a, b) => a.navOrder - b.navOrder || a.name.localeCompare(b.name))
+    .map((c) => ({
+      label: KNOWN_LABELS[c.slug] || c.name,
+      slug: c.slug,
+    }));
 
   return (
     <header className="sticky top-0 z-40">
@@ -55,7 +65,7 @@ export async function SiteHeader() {
         </Link>
 
         <nav className="hidden items-center gap-4 xl:gap-6 2xl:flex">
-          {MEGA_MENU_ITEMS.map((item) => (
+          {rootNavCategories.map((item) => (
             <MegaMenu key={item.slug} label={item.label} slug={item.slug} categories={categories} />
           ))}
           <NavLink href="/catalog">{t("topSellers")}</NavLink>

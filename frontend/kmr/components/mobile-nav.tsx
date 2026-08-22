@@ -154,12 +154,20 @@ export function MobileNav({ categories }: { categories: Category[] }) {
   const t = useTranslations("nav");
 
 
-  const MEGA_MENU_ITEMS = [
-    { label: t("tools"), slug: "tools" },
-    { label: t("outdoorEquipment"), slug: "outdoor-equipment" },
-    { label: t("buildingMaterials"), slug: "building-materials" },
-    { label: t("homeEssentials"), slug: "home-essentials" },
-  ];
+  const KNOWN_LABELS: Record<string, string> = {
+    tools: t("tools"),
+    "outdoor-equipment": t("outdoorEquipment"),
+    "building-materials": t("buildingMaterials"),
+    "home-essentials": t("homeEssentials"),
+  };
+
+  const rootNavCategories = categories
+    .filter((c) => c.showInNav && !c.parentId)
+    .sort((a, b) => a.navOrder - b.navOrder || a.name.localeCompare(b.name))
+    .map((c) => ({
+      label: KNOWN_LABELS[c.slug] || c.name,
+      slug: c.slug,
+    }));
 
   return (
     <Sheet>
@@ -211,7 +219,7 @@ export function MobileNav({ categories }: { categories: Category[] }) {
             <span className="px-1 text-xs font-semibold tracking-[0.15em] text-ink-muted uppercase">
               {t("browseByCategory")}
             </span>
-            {MEGA_MENU_ITEMS.map((item) => (
+            {rootNavCategories.map((item) => (
               <CategoryAccordion
                 key={item.slug}
                 label={item.label}
