@@ -69,13 +69,9 @@ export default async function LocaleLayout({
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <NextIntlClientProvider messages={messages}>
-          <Suspense fallback={null}>
-            <SiteHeader />
-          </Suspense>
+          <SiteHeader />
           <main className="flex-1">{children}</main>
-          <Suspense fallback={null}>
-            <SiteFooter />
-          </Suspense>
+          <SiteFooter />
           <WhatsAppFab />
         </NextIntlClientProvider>
       </body>

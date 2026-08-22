@@ -17,12 +17,13 @@ export async function SiteHeader() {
     getPromoBanner().catch(() => ({ message: null, link: null })),
   ]);
 
-  // Build nav items dynamically from the API: any root-level category with
-  // showInNav=true becomes a top-level mega-menu entry. Sorted by navOrder
-  // so the admin controls the order from the Category Tree page.
-  const rootNavCategories = categories
-    .filter((c) => c.showInNav && !c.parentId)
-    .sort((a, b) => a.navOrder - b.navOrder || a.name.localeCompare(b.name));
+  const MEGA_MENU_ITEMS = [
+    { label: t("tools"), slug: "tools" },
+    { label: t("outdoorEquipment"), slug: "outdoor-equipment" },
+    { label: t("buildingMaterials"), slug: "building-materials" },
+    { label: t("homeEssentials"), slug: "home-essentials" },
+    { label: t("autoEssentials"), slug: "auto-essentials" },
+  ];
 
   return (
     <header className="sticky top-0 z-40">
@@ -43,7 +44,7 @@ export async function SiteHeader() {
         </div>
       ) : null}
       <div className="flex h-20 items-center justify-between border-b border-border bg-background px-6 md:px-20">
-        <Link href="/" className="flex items-center">
+        <Link href="/" className="flex items-center shrink-0">
           <Image
             src="/images/logo.png"
             alt="KMR City Ventures"
@@ -54,9 +55,9 @@ export async function SiteHeader() {
           />
         </Link>
 
-        <nav className="hidden items-center gap-3 2xl:flex">
-          {rootNavCategories.map((cat) => (
-            <MegaMenu key={cat.slug} label={cat.name} slug={cat.slug} categories={categories} />
+        <nav className="hidden items-center gap-4 xl:gap-6 2xl:flex">
+          {MEGA_MENU_ITEMS.map((item) => (
+            <MegaMenu key={item.slug} label={item.label} slug={item.slug} categories={categories} />
           ))}
           <NavLink href="/consultancy">{t("b2bSolutions")}</NavLink>
           <NavLink href="/catalog">{t("topSellers")}</NavLink>
