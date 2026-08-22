@@ -1,5 +1,5 @@
 import { jsPDF } from "jspdf";
-import { formatPrice, formatAmount, getItemSubtotal, calculateCartEstimatedTotal } from "@/lib/price";
+import { formatPrice, parsePrice, getItemSubtotal } from "@/lib/price";
 import type { QuoteCartItem } from "@/lib/store/quote-cart";
 
 export interface ReceiptCustomerInfo {
@@ -14,6 +14,27 @@ function getItemDisplayName(item: QuoteCartItem) {
     return item.name.split(" — ")[0];
   }
   return item.name;
+}
+
+// In standard PDF fonts (helvetica), the unicode '₵' symbol is not present in WinAnsi encoding.
+// Format as 'GHS ' (ISO standard) so prices render crisp and clean on all PDF viewers without corruption.
+function formatPdfPrice(priceDescription: string | null | undefined): string | null {
+  if (!priceDescription) return null;
+  const trimmed = priceDescription.trim();
+  if (!trimmed) return null;
+
+  const withoutSign = trimmed.replace(/^(GH₵|₵|GHS)/, "").trim();
+  if (!/^\d[\d,]*(\.\d+)?$/.test(withoutSign)) return trimmed;
+
+  const amount = Number(withoutSign.replace(/,/g, ""));
+  return formatPdfAmount(amount);
+}
+
+function formatPdfAmount(amount: number): string {
+  return `GHS ${amount.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
 }
 
 export function generateQuoteReceiptPDF(
@@ -120,6 +141,10 @@ export function generateQuoteReceiptPDF(
   doc.setFontSize(8.5);
   doc.setTextColor(40, 40, 40);
 
+  let totalAmount = 0;
+  let hasPricedItems = false;
+  let unpricedCount = 0;
+
   items.forEach((item, index) => {
     // Check if we need a new page
     if (y > pageHeight - 40) {
@@ -135,7 +160,14 @@ export function generateQuoteReceiptPDF(
 
     const displayName = getItemDisplayName(item);
     const subtotal = getItemSubtotal(item.priceDescription, item.quantity);
-    const unitPrice = formatPrice(item.priceDescription) || "Quote required";
+    const unitPrice = formatPdfPrice(item.priceDescription) || "Quote required";
+
+    if (subtotal !== null) {
+      totalAmount += subtotal;
+      hasPricedItems = true;
+    } else {
+      unpricedCount += 1;
+    }
 
     // Item name
     doc.setFont("helvetica", "bold");
@@ -165,7 +197,7 @@ export function generateQuoteReceiptPDF(
     // Subtotal
     doc.setFont("helvetica", "bold");
     if (subtotal !== null) {
-      doc.text(formatAmount(subtotal), margin + contentWidth - 4, y + 6, { align: "right" });
+      doc.text(formatPdfAmount(subtotal), margin + contentWidth - 4, y + 6, { align: "right" });
     } else {
       doc.setFont("helvetica", "normal");
       doc.text("On Request", margin + contentWidth - 4, y + 6, { align: "right" });
@@ -182,7 +214,6 @@ export function generateQuoteReceiptPDF(
   y += 8;
 
   // Totals Section
-  const { hasPricedItems, unpricedCount, formattedTotal } = calculateCartEstimatedTotal(items);
   const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
 
   doc.setFont("helvetica", "normal");
@@ -197,7 +228,7 @@ export function generateQuoteReceiptPDF(
     doc.text("ESTIMATED TOTAL:", margin + 105, y + 4);
 
     doc.setFontSize(12);
-    doc.text(formattedTotal, margin + contentWidth - 4, y + 4, { align: "right" });
+    doc.text(formatPdfAmount(totalAmount), margin + contentWidth - 4, y + 4, { align: "right" });
 
     if (unpricedCount > 0) {
       y += 6;
