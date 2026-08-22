@@ -153,21 +153,13 @@ function CategoryAccordion({
 export function MobileNav({ categories }: { categories: Category[] }) {
   const t = useTranslations("nav");
 
-
-  const KNOWN_LABELS: Record<string, string> = {
-    tools: t("tools"),
-    "outdoor-equipment": t("outdoorEquipment"),
-    "building-materials": t("buildingMaterials"),
-    "home-essentials": t("homeEssentials"),
-  };
-
-  const rootNavCategories = categories
-    .filter((c) => c.showInNav && !c.parentId)
-    .sort((a, b) => a.navOrder - b.navOrder || a.name.localeCompare(b.name))
-    .map((c) => ({
-      label: KNOWN_LABELS[c.slug] || c.name,
-      slug: c.slug,
-    }));
+  const MEGA_MENU_ITEMS = [
+    { label: t("tools"), slug: "tools" },
+    { label: t("outdoorEquipment"), slug: "outdoor-equipment" },
+    { label: t("buildingMaterials"), slug: "building-materials" },
+    { label: t("homeEssentials"), slug: "home-essentials" },
+    { label: t("autoEssentials"), slug: "auto-essentials" },
+  ];
 
   return (
     <Sheet>
@@ -219,7 +211,7 @@ export function MobileNav({ categories }: { categories: Category[] }) {
             <span className="px-1 text-xs font-semibold tracking-[0.15em] text-ink-muted uppercase">
               {t("browseByCategory")}
             </span>
-            {rootNavCategories.map((item) => (
+            {MEGA_MENU_ITEMS.map((item) => (
               <CategoryAccordion
                 key={item.slug}
                 label={item.label}
@@ -228,6 +220,17 @@ export function MobileNav({ categories }: { categories: Category[] }) {
               />
             ))}
           </div>
+
+          <SheetClose
+            render={
+              <Link
+                href="/consultancy"
+                className="py-3 text-sm font-semibold tracking-wide uppercase text-ink"
+              />
+            }
+          >
+            {t("b2bSolutions")}
+          </SheetClose>
 
           <SheetClose
             render={
