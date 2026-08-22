@@ -224,39 +224,6 @@ export function MobileNav({ categories }: { categories: Category[] }) {
           <SheetClose
             render={
               <Link
-                href="/consultancy"
-                className="py-3 text-sm font-semibold tracking-wide uppercase text-ink"
-              />
-            }
-          >
-            {t("b2bSolutions")}
-          </SheetClose>
-
-          <SheetClose
-            render={
-              <Link
-                href="/catalog"
-                className="py-3 text-sm font-semibold tracking-wide uppercase text-ink"
-              />
-            }
-          >
-            {t("topSellers")}
-          </SheetClose>
-
-          <SheetClose
-            render={
-              <Link
-                href="/consultancy"
-                className="border-t border-border py-3 pt-4 text-sm font-semibold tracking-wide uppercase text-ink"
-              />
-            }
-          >
-            {t("consultancy")}
-          </SheetClose>
-
-          <SheetClose
-            render={
-              <Link
                 href="/contact"
                 className="mt-2 flex items-center justify-center gap-2 rounded-full bg-black py-3 text-sm font-semibold tracking-wide text-white uppercase"
               />
