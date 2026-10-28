@@ -1,14 +1,19 @@
 import Image from "next/image";
 import Link from "next/link";
-import { MapPin } from "lucide-react";
+import { headers } from "next/headers";
+import { MapPin, Navigation } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { getContactInfo } from "@/lib/api/client";
+import { mapsUrl, PRIMARY_LOCATION, SHOP_LOCATIONS } from "@/lib/locations";
 
 export async function SiteFooter() {
-  const [t, contactInfo] = await Promise.all([
+  const [t, contactInfo, requestHeaders] = await Promise.all([
     getTranslations("footer"),
     getContactInfo().catch(() => ({ address: null, mapEmbedUrl: null })),
+    headers(),
   ]);
+  // Used to send a tap on a location to Apple Maps or Google Maps.
+  const userAgent = requestHeaders.get("user-agent");
 
   const FOOTER_COLUMNS = [
     {
@@ -51,18 +56,15 @@ export async function SiteFooter() {
     },
   ];
 
-  // Address + mini map are staff-editable (ContactInfo singleton in the
-  // admin dashboard), the block hides when either is unset.
-  const showLocation = Boolean(contactInfo?.address || contactInfo?.mapEmbedUrl);
+  // The shop addresses are hardcoded in lib/locations.ts; only the embedded
+  // mini map is staff-editable (ContactInfo singleton in the admin dashboard).
+  // With no embed, the map slot becomes a tappable "open in maps" link.
+  const mapEmbedUrl = contactInfo?.mapEmbedUrl ?? null;
 
   return (
     <footer className="bg-[#e2e2e2] px-6 py-16 md:px-20 md:py-24">
       <div className="mx-auto flex max-w-[1440px] flex-col gap-16">
-        <div
-          className={`grid grid-cols-1 gap-10 sm:grid-cols-2 md:grid-cols-4 ${
-            showLocation ? "lg:grid-cols-6" : "lg:grid-cols-4"
-          }`}
-        >
+        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
           <div className="flex flex-col gap-6">
             <Image
               src="/images/logo.png"
@@ -106,38 +108,64 @@ export async function SiteFooter() {
             </div>
           ))}
 
-          {showLocation ? (
-            // On mobile/tablet, spans full width (sm:col-span-2 md:col-span-4) with
-            // address and map in a balanced 2-column layout on tablet.
-            // On desktop (lg:grid-cols-6), spans 2 columns (lg:col-span-2) in a single row.
-            <div className="flex flex-col gap-4 sm:col-span-2 md:col-span-4 lg:col-span-2">
-              <div className="flex flex-col gap-4 md:grid md:grid-cols-2 md:items-start md:gap-8 lg:flex lg:flex-col lg:gap-4">
-                <div className="flex flex-col gap-3">
-                  <h5 className="flex items-center gap-2 text-xs font-semibold tracking-[0.15em] text-ink uppercase">
-                    <MapPin className="size-3.5 text-gold" />
-                    {t("visitUs")}
-                  </h5>
-                  {contactInfo.address ? (
-                    <p className="text-sm leading-relaxed text-ink/70">
-                      {contactInfo.address}
-                    </p>
-                  ) : null}
-                </div>
-                {contactInfo.mapEmbedUrl ? (
-                  // Admin-supplied iframe src (Google Maps embed or OpenStreetMap
-                  // embed). Muted grayscale by default; color on hover.
-                  <iframe
-                    src={contactInfo.mapEmbedUrl}
-                    title="KMR location map"
-                    loading="lazy"
-                    allowFullScreen
-                    referrerPolicy="no-referrer-when-downgrade"
-                    className="h-48 w-full rounded-sm border border-ink/10 grayscale transition-all duration-500 hover:grayscale-0 md:h-52 lg:h-56"
-                  />
-                ) : null}
+          {/* On mobile/tablet this spans full width (sm:col-span-2 md:col-span-4)
+              with locations and map side by side on tablet; on desktop
+              (lg:grid-cols-6) it takes the last 2 columns. */}
+          <div className="flex flex-col gap-4 sm:col-span-2 md:col-span-4 lg:col-span-2">
+            <div className="flex flex-col gap-4 md:grid md:grid-cols-2 md:items-start md:gap-8 lg:flex lg:flex-col lg:gap-4">
+              <div className="flex flex-col gap-3">
+                <h5 className="flex items-center gap-2 text-xs font-semibold tracking-[0.15em] text-ink uppercase">
+                  <MapPin className="size-3.5 text-gold" />
+                  {t("visitUs")}
+                </h5>
+                <ul className="flex flex-col gap-2">
+                  {SHOP_LOCATIONS.map((location) => (
+                    <li key={location.id}>
+                      <a
+                        href={mapsUrl(location.mapsQuery, userAgent)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group block text-sm leading-relaxed text-ink/70 transition-colors hover:text-gold"
+                      >
+                        <span className="block font-medium text-ink transition-colors group-hover:text-gold">
+                          {location.name}
+                        </span>
+                        {location.address}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
               </div>
+              {mapEmbedUrl ? (
+                // Admin-supplied iframe src (Google Maps embed or OpenStreetMap
+                // embed). Muted grayscale by default; color on hover.
+                <iframe
+                  src={mapEmbedUrl}
+                  title="KMR location map"
+                  loading="lazy"
+                  allowFullScreen
+                  referrerPolicy="no-referrer-when-downgrade"
+                  className="h-48 w-full rounded-sm border border-ink/10 grayscale transition-all duration-500 hover:grayscale-0 md:h-52 lg:h-56"
+                />
+              ) : (
+                // No embed configured — a tap opens the visitor's own map app
+                // (Apple Maps on iOS/macOS, Google Maps elsewhere).
+                <a
+                  href={mapsUrl(PRIMARY_LOCATION.mapsQuery, userAgent)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex h-48 w-full flex-col items-center justify-center gap-2 rounded-sm border border-ink/10 bg-white/60 text-ink transition-colors hover:border-gold/50 hover:text-gold md:h-52 lg:h-56"
+                >
+                  <MapPin className="size-6 text-gold" />
+                  <span className="text-sm font-medium">{PRIMARY_LOCATION.name}</span>
+                  <span className="flex items-center gap-1.5 text-xs tracking-[0.1em] uppercase">
+                    Open in Maps
+                    <Navigation className="size-3.5" />
+                  </span>
+                </a>
+              )}
             </div>
-          ) : null}
+          </div>
         </div>
 
         <div className="border-t border-ink/10 pt-8 text-center">

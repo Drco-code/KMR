@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
-import { Clock, Mail, MapPin, Phone } from "lucide-react";
+import { headers } from "next/headers";
+import { Clock, Mail, MapPin, Navigation, Phone } from "lucide-react";
 import { WhatsAppIcon } from "@/components/icons/whatsapp-icon";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { ContactForm } from "@/components/contact-form";
+import { mapsUrl, SHOP_LOCATIONS } from "@/lib/locations";
 
 export const metadata: Metadata = {
   title: "Contact | KMR",
@@ -10,9 +12,8 @@ export const metadata: Metadata = {
     "Get in touch with KMR City Ventures about products, projects, wholesale pricing, or consultancy.",
 };
 
-// Placeholder contact details: replace with the real phone, email and
-// showroom once they're confirmed. Cards render as-is, so swapping the
-// strings here is all that's needed.
+// Shop addresses live in lib/locations.ts (shared with the footer), so this
+// list only holds the generic contact details.
 const CONTACT_DETAILS = [
   {
     icon: Phone,
@@ -27,12 +28,6 @@ const CONTACT_DETAILS = [
     note: "We reply within 24 hours",
   },
   {
-    icon: MapPin,
-    title: "Showroom",
-    value: "123 Sample Street, Accra, Ghana",
-    note: "Visits by appointment",
-  },
-  {
     icon: Clock,
     title: "Hours",
     value: "Mon – Sat · 8:00am – 6:00pm",
@@ -40,8 +35,10 @@ const CONTACT_DETAILS = [
   },
 ];
 
-export default function ContactPage() {
+export default async function ContactPage() {
   const whatsappPhone = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
+  // Picks Apple Maps on Apple devices, Google Maps everywhere else.
+  const userAgent = (await headers()).get("user-agent");
 
   return (
     <div className="flex flex-col gap-16 px-6 py-16 md:px-20 md:py-24">
@@ -76,6 +73,42 @@ export default function ContactPage() {
               </div>
             </div>
           ))}
+
+          <div className="flex flex-col gap-4 rounded-sm border border-border bg-white p-6 transition-colors duration-300 hover:border-gold/50">
+            <div className="flex items-start gap-5">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-secondary text-gold">
+                <MapPin className="size-5" />
+              </span>
+              <div className="flex flex-col gap-1">
+                <span className="text-xs font-semibold tracking-[0.15em] text-ink-muted uppercase">
+                  Our Shops
+                </span>
+                <span className="text-sm text-ink-muted">
+                  Tap a shop to open it in your map app.
+                </span>
+              </div>
+            </div>
+            <ul className="flex flex-col gap-3">
+              {SHOP_LOCATIONS.map((location) => (
+                <li key={location.id}>
+                  <a
+                    href={mapsUrl(location.mapsQuery, userAgent)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex items-start justify-between gap-4 rounded-sm border border-border/60 px-4 py-3 transition-colors hover:border-gold/50 hover:bg-secondary/40"
+                  >
+                    <span className="flex flex-col gap-0.5">
+                      <span className="text-base font-medium text-ink transition-colors group-hover:text-gold">
+                        {location.name}
+                      </span>
+                      <span className="text-sm text-ink-muted">{location.address}</span>
+                    </span>
+                    <Navigation className="mt-1 size-4 shrink-0 text-gold" />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
 
           {whatsappPhone ? (
             <a
