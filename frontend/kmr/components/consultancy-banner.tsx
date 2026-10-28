@@ -8,7 +8,7 @@ export function ConsultancyBanner() {
 
   return (
     <div className="flex flex-col items-center gap-6 bg-secondary px-6 py-20 text-center md:px-20">
-      <h2 className="font-display text-3xl text-ink md:text-4xl">
+      <h2 className="text-3xl font-medium text-ink md:text-4xl">
         {t("heading")}
       </h2>
       <p className="max-w-lg text-ink-muted">
