@@ -12,12 +12,47 @@ import { routing } from "@/i18n/routing";
 // an API cache/dynamic-server decision into a build failure.
 export const dynamic = "force-dynamic";
 
+// Retries in lib/api/client.ts can use up to ~55s, so allow the route that much.
+export const maxDuration = 60;
+
 const STATIC_PATHS = ["/", "/catalog", "/consultancy", "/contact"];
 
 interface SitemapEntry {
   path: string;
   lastModified?: string;
   translatedLocales: readonly string[];
+}
+
+function apiHost(): string {
+  try {
+    return new URL(API_URL as string).host;
+  } catch {
+    return "(KMR_API_URL is not a valid URL)";
+  }
+}
+
+// Temporary diagnostics: shows which host was called, how long the request
+// took and how many items came back, so an empty sitemap is never silent.
+async function fetchCatalog<T>(
+  label: string,
+  endpoint: string,
+  request: () => Promise<T[]>
+): Promise<T[]> {
+  const startedAt = Date.now();
+  try {
+    const value = await request();
+    console.info(
+      `[sitemap] ${label}: ${value.length} item(s) from ${apiHost()}${endpoint} in ${Date.now() - startedAt}ms`
+    );
+    return value;
+  } catch (error) {
+    console.error(
+      `[sitemap] ${label}: request to ${apiHost()}${endpoint} failed after ${
+        Date.now() - startedAt
+      }ms. ${error instanceof Error ? error.message : String(error)}`
+    );
+    throw error;
+  }
 }
 
 function requireCatalogData<T>(label: string, value: T[], url: string): T[] {
@@ -31,9 +66,11 @@ function requireCatalogData<T>(label: string, value: T[], url: string): T[] {
 
 function validPath(path: string): string | null {
   const encoded = encodePath(path);
-  return encoded === "/" || encoded.split("/").every((segment) => segment.length > 0)
-    ? encoded
-    : null;
+  if (encoded === "/") return encoded;
+  // Every catalog path starts with "/", so drop that leading empty segment
+  // before checking the remaining ones.
+  const segments = encoded.split("/").slice(1);
+  return segments.length > 0 && segments.every((segment) => segment.length > 0) ? encoded : null;
 }
 
 function languageLinks(entry: SitemapEntry): Record<string, string> {
@@ -70,9 +107,9 @@ export async function GET(): Promise<Response> {
   ];
   try {
     catalogData = await Promise.all([
-      getCategories(),
-      getProducts(),
-      getSignatureCollections(),
+      fetchCatalog("categories", "/category-module", getCategories),
+      fetchCatalog("products", "/product-module", getProducts),
+      fetchCatalog("collections", "/signature-collection-module", getSignatureCollections),
     ]);
   } catch (error) {
     const message = `Sitemap generation aborted: catalog API request failed. ${
@@ -101,7 +138,6 @@ export async function GET(): Promise<Response> {
   const total = Object.values(languageCounts).reduce((sum, count) => sum + count, 0);
   console.info("Sitemap URL counts by type", counts);
   console.info("Sitemap URL counts by language", { ...languageCounts, total });
-
   const entries: SitemapEntry[] = [
     ...STATIC_PATHS.map((path) => ({
       path,
@@ -139,7 +175,10 @@ export async function GET(): Promise<Response> {
 
   return new Response(xml, {
     headers: {
-      "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+      // One hour of edge caching, then revalidate. No stale-while-revalidate so
+      // a broken catalog surfaces within the hour instead of serving a stale
+      // sitemap for a day.
+      "Cache-Control": "public, s-maxage=3600, must-revalidate",
       "Content-Type": "application/xml; charset=utf-8",
       "X-Sitemap-Url-Count": String(entries.length),
       "X-Sitemap-Canonical-Host": SITE_URL,

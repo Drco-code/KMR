@@ -20,19 +20,73 @@ if (!API_URL) {
   );
 }
 
-async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_URL}${path}`, {
-    ...init,
-    headers: { "Content-Type": "application/json", ...init?.headers },
-  });
+// A sleeping or cold-starting backend needs more than a single fast request, so
+// GETs are retried. The budget covers the three attempts plus backoff and stays
+// under the 60s function limit the routes set with `maxDuration`.
+const API_REQUEST_ATTEMPTS = 3;
+const API_REQUEST_TIMEOUT_MS = 30_000;
+const API_REQUEST_BUDGET_MS = 55_000;
 
-  if (!res.ok) {
-    throw new Error(
-      `API request failed: ${init?.method ?? "GET"} ${new URL(path, API_URL).toString()} (${res.status})`
-    );
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function requestTarget(path: string): string {
+  try {
+    return `${new URL(API_URL as string).host}${path}`;
+  } catch {
+    return path;
+  }
+}
+
+async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+  const method = init?.method ?? "GET";
+  const target = requestTarget(path);
+  const attempts = method === "GET" ? API_REQUEST_ATTEMPTS : 1;
+  const deadline = Date.now() + API_REQUEST_BUDGET_MS;
+  let lastError: Error | undefined;
+
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    const remaining = deadline - Date.now();
+    if (remaining <= 0) break;
+
+    const startedAt = Date.now();
+    let res: Response | undefined;
+    try {
+      res = await fetch(`${API_URL}${path}`, {
+        ...init,
+        signal: AbortSignal.timeout(Math.min(API_REQUEST_TIMEOUT_MS, remaining)),
+        headers: { "Content-Type": "application/json", ...init?.headers },
+      });
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      console.error(
+        `[api] ${method} ${target} errored after ${Date.now() - startedAt}ms (attempt ${attempt}/${attempts}): ${lastError.message}`
+      );
+    }
+
+    if (res) {
+      const elapsed = Date.now() - startedAt;
+      if (res.ok) {
+        console.info(
+          `[api] ${method} ${target} -> ${res.status} in ${elapsed}ms (attempt ${attempt}/${attempts})`
+        );
+        return (await res.json()) as T;
+      }
+
+      lastError = new Error(
+        `API request failed: ${method} ${new URL(path, API_URL).toString()} (${res.status})`
+      );
+      console.error(
+        `[api] ${method} ${target} -> ${res.status} in ${elapsed}ms (attempt ${attempt}/${attempts})`
+      );
+
+      // Retry only conditions that can clear on their own; a 4xx will not.
+      if (res.status < 500 && res.status !== 429) throw lastError;
+    }
+
+    if (attempt < attempts) await sleep(1_000 * attempt);
   }
 
-  return res.json() as Promise<T>;
+  throw lastError ?? new Error(`API request failed: ${method} ${target} (no attempt completed)`);
 }
 
 export async function getCategories(): Promise<Category[]> {
