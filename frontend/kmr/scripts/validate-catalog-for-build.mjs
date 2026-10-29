@@ -1,8 +1,16 @@
-const apiOrigin = process.env.KMR_API_URL?.trim().replace(/\/+$/, "");
+const configuredApiUrl = process.env.KMR_API_URL?.trim();
+const legacyApiUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
+const apiOrigin = (configuredApiUrl || legacyApiUrl)?.replace(/\/+$/, "");
 
 if (!apiOrigin) {
   throw new Error(
     "KMR_API_URL is required for the production build. Set it to the server-side NestJS API origin."
+  );
+}
+
+if (!configuredApiUrl && legacyApiUrl) {
+  console.warn(
+    "KMR_API_URL is not set; falling back to NEXT_PUBLIC_API_URL. Rename the variable to KMR_API_URL in the deployment environment."
   );
 }
 

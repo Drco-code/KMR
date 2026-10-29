@@ -13,7 +13,7 @@ local `.env.local` — copy `.env.local.example`).
 | `SITE_URL` | `https://www.kmr-shop-online.com` | Yes |
 | `ALLOW_INDEXING` | `true` | Yes |
 | `GOOGLE_SITE_VERIFICATION` | the token from Search Console | No |
-| `KMR_API_URL` | the server-side NestJS API origin, for example `https://api.example.com` | Yes |
+| `KMR_API_URL` | the server-side NestJS API origin, for example `https://api.example.com` | Yes (`NEXT_PUBLIC_API_URL` is read as a legacy fallback) |
 | `NEXT_PUBLIC_WHATSAPP_NUMBER` | `233555786654` (digits, country code, no `+`) | Yes |
 
 ### `SITE_URL`
@@ -54,6 +54,11 @@ This is the **one server-side API URL variable** used by product pages,
 category pages, the sitemap and production build validation. Set it to the
 publicly reachable NestJS API origin, without a trailing slash. Do not use
 `http://localhost:3005` in Vercel.
+
+Deployments that still carry the older name `NEXT_PUBLIC_API_URL` keep working:
+it is read only when `KMR_API_URL` is unset, and the build prints a warning
+asking you to rename it. Set `KMR_API_URL` so the canonical name is the one in
+use.
 
 The build runs a catalog validation before Next.js starts. It requests the
 categories, products and signature collections endpoints, prints the sitemap counts by type and language, and fails the build if the API is unreachable, returns a

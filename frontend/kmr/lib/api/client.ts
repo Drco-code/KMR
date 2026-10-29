@@ -9,11 +9,14 @@ import type {
 } from "./types";
 import { categorySlug, productSlug } from "@/lib/slug";
 
-export const API_URL = process.env.KMR_API_URL?.trim().replace(/\/+$/, "");
+const rawApiUrl =
+  process.env.KMR_API_URL?.trim() || process.env.NEXT_PUBLIC_API_URL?.trim();
+
+export const API_URL = rawApiUrl?.replace(/\/+$/, "");
 
 if (!API_URL) {
   throw new Error(
-    "KMR_API_URL is required. Set it to the server-side NestJS API origin before building or serving the storefront."
+    "KMR_API_URL is required. Set it to the server-side NestJS API origin before building or serving the storefront. NEXT_PUBLIC_API_URL is only read as a legacy fallback."
   );
 }
 
