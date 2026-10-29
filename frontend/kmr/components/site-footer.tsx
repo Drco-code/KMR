@@ -6,6 +6,7 @@ import { getTranslations } from "next-intl/server";
 import { getCategories, getContactInfo } from "@/lib/api/client";
 import { mapsUrl, PRIMARY_LOCATION, SHOP_LOCATIONS } from "@/lib/locations";
 import { EMAIL, phoneDisplay, telHref } from "@/lib/business";
+import { categoryPath } from "@/lib/slug";
 
 export async function SiteFooter() {
   const [t, contactInfo, requestHeaders, categories] = await Promise.all([
@@ -27,7 +28,7 @@ export async function SiteFooter() {
       { slug: "paint-finishing", label: t("specialtyFinishes") },
     ] as const
   ).map((link) => ({
-    href: hasCategory(link.slug) ? `/catalog/${link.slug}` : "/catalog",
+    href: hasCategory(link.slug) ? categoryPath(link.slug) : "/catalog",
     label: link.label,
   }));
   // Used to send a tap on a location to Apple Maps or Google Maps.

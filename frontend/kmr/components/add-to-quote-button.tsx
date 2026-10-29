@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useQuoteCart } from "@/lib/store/quote-cart";
 import { getValidImages } from "@/lib/image";
 import type { Product } from "@/lib/api/types";
+import { productPath } from "@/lib/slug";
 
 export function AddToQuoteButton({ product }: { product: Product }) {
   const addItem = useQuoteCart((state) => state.addItem);
@@ -18,7 +19,7 @@ export function AddToQuoteButton({ product }: { product: Product }) {
       productId: product.id,
       name: product.name,
       slug: product.slug,
-      href: `/product/${product.slug}`,
+      href: productPath(product.slug),
       priceDescription: product.priceDescription,
       coverImage: getValidImages(product.images)[0] ?? null,
     });

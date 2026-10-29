@@ -9,6 +9,7 @@ import { gsap } from "@/lib/gsap";
 import { cn } from "@/lib/utils";
 import { buildMegaMenuTree, findRootCategoryBySlug } from "@/lib/category-tree";
 import type { Category } from "@/lib/api/types";
+import { categoryPath } from "@/lib/slug";
 
 export function MegaMenu({
   label,
@@ -43,7 +44,7 @@ export function MegaMenu({
   }
 
   const root = findRootCategoryBySlug(categories, slug);
-  const isActive = root ? pathname.startsWith(`/catalog/${root.slug}`) : false;
+  const isActive = root ? pathname.startsWith(categoryPath(root.slug)) : false;
   const columns = root ? buildMegaMenuTree(categories, root.id) : [];
 
   // Skip the animation on the very first mount (panel starts hidden via
@@ -116,7 +117,7 @@ export function MegaMenu({
               {columns.map(({ category, items }) => (
                 <div key={category.id} className="flex flex-col gap-3">
                   <Link
-                    href={`/catalog/${category.slug}`}
+                    href={categoryPath(category.slug)}
                     onClick={() => setOpen(false)}
                     className="border-b border-border pb-2 text-sm font-semibold tracking-[0.05em] text-ink uppercase hover:text-gold"
                   >
@@ -126,7 +127,7 @@ export function MegaMenu({
                     {items.map((item) => (
                       <Link
                         key={item.id}
-                        href={`/catalog/${item.slug}`}
+                        href={categoryPath(item.slug)}
                         onClick={() => setOpen(false)}
                         className="text-sm text-ink hover:text-gold"
                       >

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import {
   getCategories,
@@ -13,6 +13,7 @@ import { getCategoryBreadcrumbs } from "@/lib/category-tree";
 import { categoryDescription } from "@/lib/category-copy";
 import { breadcrumbSchema, collectionPageSchema } from "@/lib/schema";
 import { pageMetadata, plainText } from "@/lib/seo";
+import { categoryPath } from "@/lib/slug";
 
 export async function generateMetadata({
   params,
@@ -22,14 +23,14 @@ export async function generateMetadata({
   searchParams: Promise<CatalogSearchParams>;
 }): Promise<Metadata> {
   const [{ locale, categorySlug }, query] = await Promise.all([params, searchParams]);
-  const category = await getCategoryBySlug(decodeURIComponent(categorySlug)).catch(() => null);
+  const category = await getCategoryBySlug(categorySlug).catch(() => null);
   if (!category) return {};
 
   const description = plainText(categoryDescription(category.slug, category.name), 155);
 
   return pageMetadata({
     locale,
-    path: `/catalog/${category.slug}`,
+    path: categoryPath(category.slug),
     title: `${category.name} in Ghana`,
     description,
     noindex: Boolean(query.q || query.category || query.sort || query.page),
@@ -47,9 +48,11 @@ export default async function CategoryPage({
     params,
     searchParams,
   ]);
-  const decodedSlug = decodeURIComponent(categorySlug);
-  const category = await getCategoryBySlug(decodedSlug);
+  const category = await getCategoryBySlug(categorySlug);
   if (!category) notFound();
+  if (decodeURIComponent(categorySlug) !== category.slug) {
+    permanentRedirect(categoryPath(category.slug));
+  }
 
   const [products, categories] = await Promise.all([
     getProducts(),
@@ -70,7 +73,7 @@ export default async function CategoryPage({
     { name: tNav("allProducts"), path: "/catalog" },
     ...trail.map((item) => ({
       name: item.name,
-      path: `/catalog/${item.slug}`,
+      path: categoryPath(item.slug),
     })),
   ];
 
@@ -82,7 +85,7 @@ export default async function CategoryPage({
       <JsonLd
         data={collectionPageSchema({
           locale,
-          path: `/catalog/${category.slug}`,
+          path: categoryPath(category.slug),
           name: category.name,
           description: intro,
           products: visible,

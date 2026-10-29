@@ -8,6 +8,7 @@ import { formatPrice } from "@/lib/price";
 import { RevealImage } from "@/components/reveal-image";
 import { Button } from "@/components/ui/button";
 import type { Product } from "@/lib/api/types";
+import { productPath } from "@/lib/slug";
 
 export function ProductCard({
   product,
@@ -24,7 +25,7 @@ export function ProductCard({
     <div className="group flex w-full max-w-[240px] sm:max-w-[300px] flex-col overflow-hidden rounded-md border border-gray-200 bg-white transition-all duration-300 hover:shadow-xl">
       {/* Image Section - White background with padding */}
       <Link
-        href={`/product/${product.slug}`}
+        href={productPath(product.slug)}
         className="relative block aspect-square w-full bg-gray-50 p-6 sm:p-8"
       >
         {coverImage ? (
@@ -53,7 +54,7 @@ export function ProductCard({
         {/* Product Name - Full, not truncated. h2 (not h3) so the heading
             order under a page's h1 goes h1 → h2 without skipping a level. */}
         <h2 className="text-sm font-medium leading-snug text-ink">
-          <Link href={`/product/${product.slug}`} className="hover:text-gold transition-colors">
+          <Link href={productPath(product.slug)} className="hover:text-gold transition-colors">
             {product.name}
           </Link>
         </h2>
@@ -79,7 +80,7 @@ export function ProductCard({
               productId: product.id,
               name: product.name,
               slug: product.slug,
-              href: `/product/${product.slug}`,
+              href: productPath(product.slug),
               priceDescription: product.priceDescription,
               coverImage,
             })

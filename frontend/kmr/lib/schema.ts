@@ -12,6 +12,7 @@ import {
 import { absoluteUrl, localizedPath, SITE_NAME, SITE_URL } from "@/lib/seo";
 import { parsePrice } from "@/lib/price";
 import { getValidImages } from "@/lib/image";
+import { productPath } from "@/lib/slug";
 
 // ---------------------------------------------------------------------------
 // JSON-LD builders.
@@ -170,7 +171,7 @@ export function collectionPageSchema({
           "@type": "ListItem",
           position: index + 1,
           name: product.name,
-          url: absoluteUrl(localizedPath(locale, `/product/${product.slug}`)),
+          url: absoluteUrl(localizedPath(locale, productPath(product.slug))),
         })),
       },
     ],
@@ -186,7 +187,7 @@ export function productSchema({
   product: Product;
   description: string;
 }) {
-  const url = absoluteUrl(localizedPath(locale, `/product/${product.slug}`));
+  const url = absoluteUrl(localizedPath(locale, productPath(product.slug)));
   const images = getValidImages(product.images).map(toImageUrl);
   const price = parsePrice(product.priceDescription);
 

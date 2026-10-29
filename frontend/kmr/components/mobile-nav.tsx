@@ -19,6 +19,7 @@ import { gsap } from "@/lib/gsap";
 import { buildMegaMenuTree, findRootCategoryBySlug } from "@/lib/category-tree";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import type { Category } from "@/lib/api/types";
+import { categoryPath } from "@/lib/slug";
 
 // One top-level nav category, rendered as a floating card with an animated
 // expand/collapse. Height/opacity animate via a CSS grid-rows trick (smooth
@@ -121,7 +122,7 @@ function CategoryAccordion({
                 <SheetClose
                   render={
                     <Link
-                      href={`/catalog/${category.slug}`}
+                      href={categoryPath(category.slug)}
                       className="pt-1 text-xs font-semibold tracking-[0.15em] text-gold uppercase transition-colors hover:text-ink"
                     />
                   }
@@ -133,7 +134,7 @@ function CategoryAccordion({
                     key={child.id}
                     render={
                       <Link
-                        href={`/catalog/${child.slug}`}
+                        href={categoryPath(child.slug)}
                         className="py-1.5 pl-2 text-sm text-ink-muted transition-colors hover:text-gold"
                       />
                     }

@@ -6,6 +6,7 @@ import { Minus, Plus, X } from "lucide-react";
 import { useQuoteCart, type QuoteCartItem } from "@/lib/store/quote-cart";
 import { isValidImageSrc } from "@/lib/image";
 import { formatPrice, formatAmount, getItemSubtotal } from "@/lib/price";
+import { productPath } from "@/lib/slug";
 
 export function QuoteCartLine({ item }: { item: QuoteCartItem }) {
   const setQuantity = useQuoteCart((state) => state.setQuantity);
@@ -28,7 +29,7 @@ export function QuoteCartLine({ item }: { item: QuoteCartItem }) {
 
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         <Link
-          href={item.href ?? `/product/${item.slug}`}
+          href={item.href ?? productPath(item.slug)}
           className="truncate font-display text-base md:text-lg text-ink hover:text-gold transition-colors"
         >
           {displayName}

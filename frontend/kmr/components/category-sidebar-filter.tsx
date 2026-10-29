@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import type { Category } from "@/lib/api/types";
+import { categoryPath } from "@/lib/slug";
 
 const VISIBLE_LIMIT = 5;
 
@@ -61,7 +62,7 @@ export function CategorySidebarFilter({
                   className="size-4 accent-ink"
                 />
                 <Link
-                  href={`/catalog/${category.slug}`}
+                  href={categoryPath(category.slug)}
                   className="text-sm text-ink transition-colors hover:text-gold"
                 >
                   {category.name}

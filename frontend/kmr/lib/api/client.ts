@@ -7,6 +7,7 @@ import type {
   QuoteRequestPayload,
   SignatureCollection,
 } from "./types";
+import { categorySlug, productSlug } from "@/lib/slug";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -24,17 +25,32 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export async function getCategories(): Promise<Category[]> {
-  return apiFetch<Category[]>("/category-module", { cache: "no-store" });
+  const categories = await apiFetch<Category[]>("/category-module", { cache: "no-store" });
+  return categories.map((category) => ({
+    ...category,
+    slug: categorySlug(category.slug || category.name),
+  }));
 }
 
 export async function getCategoryBySlug(slug: string): Promise<Category | null> {
   const categories = await getCategories();
-  return categories.find((category) => category.slug === slug) ?? null;
+  const requestedSlug = categorySlug(decodeURIComponent(slug));
+  return categories.find((category) => category.slug === requestedSlug) ?? null;
 }
 
 export async function getProducts(): Promise<Product[]> {
   const products = await apiFetch<Product[]>("/product-module", { cache: "no-store" });
-  return products.filter((product) => product.isActive);
+  return products
+    .filter((product) => product.isActive)
+    .map((product) => ({
+      ...product,
+      slug: productSlug(product.slug || product.name),
+      categories: product.categories.map((category) => ({
+        ...category,
+        slug: categorySlug(category.slug || category.name),
+      })),
+    }))
+    .filter((product) => product.slug.length > 0);
 }
 
 export async function getProductsByCategorySlug(categorySlug: string): Promise<Product[]> {
@@ -45,8 +61,8 @@ export async function getProductsByCategorySlug(categorySlug: string): Promise<P
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {
   const products = await getProducts();
-  const decodedSlug = decodeURIComponent(slug);
-  return products.find((product) => product.slug === decodedSlug) ?? null;
+  const requestedSlug = productSlug(decodeURIComponent(slug));
+  return products.find((product) => product.slug === requestedSlug) ?? null;
 }
 
 export async function getBrands(): Promise<Brand[]> {

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import sanitizeHtml from "sanitize-html";
 import { getProductBySlug, getProducts } from "@/lib/api/client";
@@ -15,6 +15,7 @@ import { formatPrice } from "@/lib/price";
 import { TextReveal } from "@/components/text-reveal";
 import { breadcrumbSchema, productSchema } from "@/lib/schema";
 import { pageMetadata, plainText } from "@/lib/seo";
+import { categoryPath, productPath } from "@/lib/slug";
 
 // Product.description is written by staff through AdminJS's rich text
 // editor (see backend admin-module.service.ts) and stored as raw HTML.
@@ -53,7 +54,7 @@ export async function generateMetadata({
 
   return pageMetadata({
     locale,
-    path: `/product/${product.slug}`,
+    path: productPath(product.slug),
     title: product.name,
     description,
   });
@@ -67,6 +68,9 @@ export default async function ProductPage({
   const { locale, slug } = await params;
   const product = await getProductBySlug(slug);
   if (!product) notFound();
+  if (decodeURIComponent(slug) !== product.slug) {
+    permanentRedirect(productPath(product.slug));
+  }
 
   const primaryCategory = product.categories.find((c) => c.isPrimary);
 
@@ -91,9 +95,9 @@ export default async function ProductPage({
     { name: tNav("home"), path: "/" },
     { name: tNav("allProducts"), path: "/catalog" },
     ...(primaryCategory
-      ? [{ name: primaryCategory.name, path: `/catalog/${primaryCategory.slug}` }]
+      ? [{ name: primaryCategory.name, path: categoryPath(primaryCategory.slug) }]
       : []),
-    { name: product.name, path: `/product/${product.slug}` },
+    { name: product.name, path: productPath(product.slug) },
   ];
 
   return (
@@ -136,7 +140,7 @@ export default async function ProductPage({
           <h2 className="font-display text-2xl text-ink md:text-3xl">
             More from{" "}
             <Link
-              href={`/catalog/${primaryCategory.slug}`}
+              href={categoryPath(primaryCategory.slug)}
               className="transition-colors hover:text-gold"
             >
               {primaryCategory.name}

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { getCategories } from "@/lib/api/client";
 import { buildCategoryGroups } from "@/lib/category-tree";
+import { categoryPath } from "@/lib/slug";
 
 // Rendered inside the locale layout (header, footer, fonts) for any 404 below
 // the [locale] segment. Real links back into the catalog so a dead end still
@@ -53,7 +54,7 @@ export default async function NotFound() {
             {groups.map(({ category }) => (
               <li key={category.id}>
                 <Link
-                  href={`/catalog/${category.slug}`}
+                  href={categoryPath(category.slug)}
                   className="text-sm text-ink transition-colors hover:text-gold"
                 >
                   {category.name}

@@ -21,7 +21,7 @@ local `.env.local` — copy `.env.local.example`).
 The single canonical origin, used for:
 
 - `<link rel="canonical">` on every page
-- hreflang alternates (`en`, `ar`, `zh`, `tr` + `x-default`)
+- hreflang alternates for locale versions that contain translated content
 - `/sitemap.xml` and the `Sitemap:` line in `/robots.txt`
 - Open Graph / Twitter URLs and images
 - every absolute URL in the JSON-LD (Organization, WebSite, HardwareStore,
@@ -81,7 +81,7 @@ and to `true` only for Production.
 | `lib/category-copy.ts` | The intro copy used on category pages and as their meta description |
 | `components/json-ld.tsx` | Escaped `<script type="application/ld+json">` renderer |
 | `app/robots.ts` | `/robots.txt` |
-| `app/sitemap.ts` | `/sitemap.xml` (all locales, hreflang alternates, revalidated hourly) |
+| `app/sitemap.xml/route.ts` | `/sitemap.xml` (XML-escaped URLs, safe slugs, hreflang alternates, revalidated hourly) |
 | `app/[locale]/not-found.tsx` | The site-branded 404 page |
 | `app/not-found.tsx` | Fallback 404 for URLs outside the locale segment |
 

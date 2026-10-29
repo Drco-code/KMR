@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import sanitizeHtml from "sanitize-html";
 import { getProductBySlug } from "@/lib/api/client";
 import { AddToQuoteButton } from "@/components/add-to-quote-button";
@@ -8,6 +8,7 @@ import { ProductImageCarousel } from "@/components/product-image-carousel";
 import { getValidImages } from "@/lib/image";
 import { formatPrice } from "@/lib/price";
 import { TextReveal } from "@/components/text-reveal";
+import { categoryPath, productPath } from "@/lib/slug";
 
 // Product.description is written by staff through AdminJS's rich text
 // editor (see backend admin-module.service.ts) and stored as raw HTML.
@@ -35,6 +36,9 @@ export default async function ProductPage({
   const { slug } = await params;
   const product = await getProductBySlug(slug);
   if (!product) notFound();
+  if (decodeURIComponent(slug) !== product.slug) {
+    permanentRedirect(productPath(product.slug));
+  }
 
   const primaryCategory = product.categories.find((c) => c.isPrimary);
 
@@ -42,7 +46,7 @@ export default async function ProductPage({
     <div className="flex flex-col gap-4 px-6 py-16 md:px-20 md:py-24">
       {primaryCategory && (
         <Link
-          href={`/catalog/${primaryCategory.slug}`}
+          href={categoryPath(primaryCategory.slug)}
           className="text-xs font-medium tracking-[0.15em] text-gold uppercase"
         >
           ← {primaryCategory.name}

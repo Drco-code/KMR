@@ -14,7 +14,12 @@ export class ProductModuleService {
   ) {}
 
   private async buildUniqueSlug(baseSlug: string) {
-    let slug = slugify(baseSlug);
+    const normalizedBaseSlug = slugify(baseSlug);
+    if (!normalizedBaseSlug) {
+      throw new BadRequestException('Product name or slug must contain letters or numbers');
+    }
+
+    let slug = normalizedBaseSlug;
     let counter = 1;
 
     while (true) {
@@ -25,7 +30,7 @@ export class ProductModuleService {
         return slug;
       }
 
-      slug = `${slugify(baseSlug)}-${counter++}`;
+      slug = `${normalizedBaseSlug}-${counter++}`;
     }
   }
 

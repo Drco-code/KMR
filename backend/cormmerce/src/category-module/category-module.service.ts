@@ -1,22 +1,20 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaModuleService } from '../prisma-module/prisma-module.service';
 import { CreateCategoryModuleDto } from './dto/create-category-module.dto';
 import { UpdateCategoryModuleDto } from './dto/update-category-module.dto';
+import { slugify } from '../product-module/slug';
 
 @Injectable()
 export class CategoryModuleService {
   constructor(private readonly prisma: PrismaModuleService) {}
 
-  private slugify(value: string) {
-    return value
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
-  }
-
   private async buildUniqueSlug(baseSlug: string) {
-    let slug = this.slugify(baseSlug);
+    const normalizedBaseSlug = slugify(baseSlug);
+    if (!normalizedBaseSlug) {
+      throw new BadRequestException('Category name or slug must contain letters or numbers');
+    }
+
+    let slug = normalizedBaseSlug;
     let counter = 1;
 
     while (true) {
@@ -27,7 +25,7 @@ export class CategoryModuleService {
         return slug;
       }
 
-      slug = `${this.slugify(baseSlug)}-${counter++}`;
+      slug = `${normalizedBaseSlug}-${counter++}`;
     }
   }
 
