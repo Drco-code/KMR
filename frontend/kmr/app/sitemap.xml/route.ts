@@ -1,4 +1,9 @@
-import { getCategories, getProducts, getSignatureCollections } from "@/lib/api/client";
+import {
+  API_URL,
+  getCategories,
+  getProducts,
+  getSignatureCollections,
+} from "@/lib/api/client";
 import { absoluteUrl, localizedPath, SITE_URL } from "@/lib/seo";
 import { escapeXml, encodePath, categorySlug, productSlug, slugify } from "@/lib/slug";
 import { routing } from "@/i18n/routing";
@@ -78,17 +83,24 @@ export async function GET(): Promise<Response> {
   }
 
   const [categories, products, collections] = catalogData;
-  requireCatalogData("categories", categories, "category-module");
-  requireCatalogData("products", products, "product-module");
+  requireCatalogData("categories", categories, `${API_URL}/category-module`);
+  requireCatalogData("products", products, `${API_URL}/product-module`);
 
   const counts = {
     static: STATIC_PATHS.length,
     categories: categories.length,
     products: products.length,
-    collections: collections.length,
+    collections: collections.filter((collection) => collection.isActive).length,
   };
-  const total = Object.values(counts).reduce((sum, count) => sum + count, 0);
-  console.info("Sitemap URL counts", { ...counts, total });
+  const languageCounts = {
+    en: counts.static + counts.categories + counts.products + counts.collections,
+    ar: counts.static,
+    zh: counts.static,
+    tr: counts.static,
+  };
+  const total = Object.values(languageCounts).reduce((sum, count) => sum + count, 0);
+  console.info("Sitemap URL counts by type", counts);
+  console.info("Sitemap URL counts by language", { ...languageCounts, total });
 
   const entries: SitemapEntry[] = [
     ...STATIC_PATHS.map((path) => ({

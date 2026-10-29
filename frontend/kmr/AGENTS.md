@@ -46,7 +46,7 @@ npm run lint
 - English uses `localePrefix: "as-needed"`, so `/` is English while other locales use a locale segment.
 - The root layout is intentionally minimal. The real document shell is in `app/[locale]/layout.tsx`.
 - Arabic is right to left. Keep the `dir` calculation and locale validation in the locale layout.
-- The backend URL comes from `NEXT_PUBLIC_API_URL`; WhatsApp links use `NEXT_PUBLIC_WHATSAPP_NUMBER`.
+- The server-side backend URL comes from `KMR_API_URL`; WhatsApp links use `NEXT_PUBLIC_WHATSAPP_NUMBER`.
 - The storefront filters inactive products and brands on the client API wrapper, while the API also omits staff only fields.
 
 _Drafted by /audit from the repo, worth a quick human pass. Edit freely: once a line stops matching this draft, later runs treat it as curated and will flag rather than overwrite._

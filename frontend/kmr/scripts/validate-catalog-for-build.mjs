@@ -1,8 +1,8 @@
-const apiOrigin = process.env.NEXT_PUBLIC_API_URL?.trim().replace(/\/+$/, "");
+const apiOrigin = process.env.KMR_API_URL?.trim().replace(/\/+$/, "");
 
 if (!apiOrigin) {
   throw new Error(
-    "NEXT_PUBLIC_API_URL is required for the production build. Set it to the public NestJS API origin."
+    "KMR_API_URL is required for the production build. Set it to the server-side NestJS API origin."
   );
 }
 
@@ -17,7 +17,7 @@ async function fetchCollection(label, url) {
   try {
     response = await fetch(url);
   } catch (error) {
-    throw new Error(
+      throw new Error(
       `Catalog validation failed: ${label} request to ${url} could not be completed. ${
         error instanceof Error ? error.message : String(error)
       }`,
@@ -48,9 +48,19 @@ const counts = {
   products: products.filter((product) => product.isActive !== false).length,
   collections: collections.filter((collection) => collection.isActive !== false).length,
 };
-const total = Object.values(counts).reduce((sum, count) => sum + count, 0);
+const languageCounts = {
+  en: counts.static + counts.categories + counts.products + counts.collections,
+  ar: counts.static,
+  zh: counts.static,
+  tr: counts.static,
+};
+const total = Object.values(languageCounts).reduce((sum, count) => sum + count, 0);
 
-console.info("Catalog validation passed. Sitemap URL counts:", { ...counts, total });
+console.info("Catalog validation passed. Sitemap URL counts by type:", counts);
+console.info("Catalog validation passed. Sitemap URL counts by language:", {
+  ...languageCounts,
+  total,
+});
 
 if (counts.categories === 0 || counts.products === 0) {
   throw new Error(
