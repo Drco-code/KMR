@@ -13,7 +13,7 @@ local `.env.local` — copy `.env.local.example`).
 | `SITE_URL` | `https://www.kmr-shop-online.com` | Yes |
 | `ALLOW_INDEXING` | `true` | Yes |
 | `GOOGLE_SITE_VERIFICATION` | the token from Search Console | No |
-| `NEXT_PUBLIC_API_URL` | the NestJS API origin | Yes |
+| `NEXT_PUBLIC_API_URL` | the public NestJS API origin, for example `https://api.example.com` | Yes |
 | `NEXT_PUBLIC_WHATSAPP_NUMBER` | `233555786654` (digits, country code, no `+`) | Yes |
 
 ### `SITE_URL`
@@ -47,6 +47,20 @@ Only the exact string `true` makes the site indexable.
 **Set it to `false` for Preview and Development environments in Vercel** so
 `*.vercel.app` previews can never be indexed as duplicates of the live site,
 and to `true` only for Production.
+
+### `NEXT_PUBLIC_API_URL`
+
+This is the **one API URL variable** used by the storefront, sitemap and
+production build validation. Set it to the publicly reachable NestJS API
+origin, without a trailing slash. Do not use `http://localhost:3005` in
+Vercel.
+
+The build runs a catalog validation before Next.js starts. It requests the
+categories, products and signature collections endpoints, prints the sitemap
+counts by type, and fails the build if the API is unreachable, returns a
+non-array response, or returns zero categories or zero active products. The
+runtime sitemap route applies the same failure behavior, so an API outage
+cannot silently produce a sitemap containing only the four static pages.
 
 ## Going live checklist
 

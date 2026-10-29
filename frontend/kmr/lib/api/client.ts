@@ -9,7 +9,13 @@ import type {
 } from "./types";
 import { categorySlug, productSlug } from "@/lib/slug";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL?.trim().replace(/\/+$/, "");
+
+if (!API_URL) {
+  throw new Error(
+    "NEXT_PUBLIC_API_URL is required. Set it to the public NestJS API origin before building or serving the storefront."
+  );
+}
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, {

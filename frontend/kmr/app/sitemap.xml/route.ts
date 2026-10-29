@@ -13,6 +13,15 @@ interface SitemapEntry {
   translatedLocales: readonly string[];
 }
 
+function requireCatalogData<T>(label: string, value: T[], url: string): T[] {
+  if (value.length === 0) {
+    const message = `Sitemap generation aborted: ${label} API response from ${url} was empty.`;
+    console.error(message);
+    throw new Error(message);
+  }
+  return value;
+}
+
 function validPath(path: string): string | null {
   const encoded = encodePath(path);
   return encoded === "/" || encoded.split("/").every((segment) => segment.length > 0)
@@ -47,11 +56,37 @@ function renderUrl(entry: SitemapEntry): string {
 }
 
 export async function GET(): Promise<Response> {
-  const [categories, products, collections] = await Promise.all([
-    getCategories().catch(() => []),
-    getProducts().catch(() => []),
-    getSignatureCollections().catch(() => []),
-  ]);
+  let catalogData: [
+    Awaited<ReturnType<typeof getCategories>>,
+    Awaited<ReturnType<typeof getProducts>>,
+    Awaited<ReturnType<typeof getSignatureCollections>>,
+  ];
+  try {
+    catalogData = await Promise.all([
+      getCategories(),
+      getProducts(),
+      getSignatureCollections(),
+    ]);
+  } catch (error) {
+    const message = `Sitemap generation aborted: catalog API request failed. ${
+      error instanceof Error ? error.message : String(error)
+    }`;
+    console.error(message);
+    throw new Error(message, { cause: error });
+  }
+
+  const [categories, products, collections] = catalogData;
+  requireCatalogData("categories", categories, "category-module");
+  requireCatalogData("products", products, "product-module");
+
+  const counts = {
+    static: STATIC_PATHS.length,
+    categories: categories.length,
+    products: products.length,
+    collections: collections.length,
+  };
+  const total = Object.values(counts).reduce((sum, count) => sum + count, 0);
+  console.info("Sitemap URL counts", { ...counts, total });
 
   const entries: SitemapEntry[] = [
     ...STATIC_PATHS.map((path) => ({
