@@ -1,11 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import type { Category } from "@/lib/api/types";
 
 const VISIBLE_LIMIT = 5;
 
+// The checkbox filters the listing in place; the category name next to it is
+// a real link to that category's own page (/catalog/<slug>), so crawlers — and
+// visitors who want to share or bookmark a category — always have a plain
+// anchor to follow instead of a JS-only filter.
 export function CategorySidebarFilter({
   categories,
   categoryCounts,
@@ -29,6 +34,7 @@ export function CategorySidebarFilter({
       <button
         type="button"
         onClick={() => setExpanded((e) => !e)}
+        aria-expanded={expanded}
         className="flex items-center justify-between text-xs font-semibold tracking-[0.15em] text-ink uppercase"
       >
         Category
@@ -42,7 +48,7 @@ export function CategorySidebarFilter({
       {expanded && (
         <div className="flex flex-col gap-3">
           {visibleCategories.map((category) => (
-            <label
+            <div
               key={category.id}
               className="flex cursor-pointer items-center justify-between gap-2 text-sm text-ink"
             >
@@ -51,14 +57,20 @@ export function CategorySidebarFilter({
                   type="checkbox"
                   checked={selectedSlugs.includes(category.slug)}
                   onChange={() => onToggle(category.slug)}
+                  aria-label={category.name}
                   className="size-4 accent-ink"
                 />
-                {category.name}
+                <Link
+                  href={`/catalog/${category.slug}`}
+                  className="text-sm text-ink transition-colors hover:text-gold"
+                >
+                  {category.name}
+                </Link>
               </span>
               <span className="text-ink-muted">
                 ({categoryCounts.get(category.slug) ?? 0})
               </span>
-            </label>
+            </div>
           ))}
 
           {categories.length > VISIBLE_LIMIT && (

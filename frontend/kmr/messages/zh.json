@@ -30,7 +30,7 @@
     "consultancy": "咨询服务",
     "contact": "联系我们",
     "visitUs": "拜访我们",
-    "copyright": "© {year} KMR 建筑涂料。保留所有权利。"
+    "copyright": "© {year} KMR City Ventures。保留所有权利。"
   },
   "product": {
     "addToCart": "加入购物车",
@@ -114,5 +114,26 @@
     "zh": "中文",
     "tr": "Türkçe",
     "selectLanguage": "选择语言"
+  },
+  "seo": {
+    "homeTitle": "KMR City Ventures | 加纳工具与建筑材料",
+    "homeDescription": "KMR City Ventures 在阿克拉和库马西的门店供应工具、户外设备、建筑材料、油漆和家居必需品。欢迎询价。",
+    "catalogTitle": "五金、工具与油漆产品目录",
+    "catalogDescription": "浏览 KMR City Ventures 在加纳供应的电动工具、手动工具、木材、油漆和家居必需品，所有商品均可按需报价。",
+    "consultancyTitle": "调色与项目咨询服务",
+    "consultancyDescription": "KMR City Ventures 工作室在加纳提供调色、专业涂装施工和项目材料规格服务，适用于住宅和商业项目。",
+    "contactTitle": "联系我们 — 阿克拉与库马西门店",
+    "contactDescription": "通过电话、WhatsApp 或电子邮件咨询产品、项目或批发价格。门店位于阿克拉 Kojo Thompson Road、Spintex 和库马西。",
+    "quoteTitle": "报价清单",
+    "quoteDescription": "查看已加入报价清单的商品，并通过 WhatsApp 将清单发送给我们的销售团队，获取价格与配送信息。",
+    "productDescription": "来自加纳 KMR City Ventures 的 {name}。查看产品详情并询价，了解价格与配送。",
+    "categoryDescription": "浏览加纳 KMR City Ventures 的 {name}，可咨询价格、批发价以及配送到阿克拉、库马西或加纳各地的服务。",
+    "collectionDescription": "{name} 属于 KMR 油漆系列，提供多种包装规格和色调。欢迎向加纳 KMR City Ventures 索取色卡和报价。",
+    "homeH1": "加纳的工具、建筑材料、户外设备与家居必需品"
+  },
+  "notFound": {
+    "title": "页面不存在",
+    "body": "您要查找的页面不存在或已被移动。请浏览产品目录，或直接进入下方任一分类。",
+    "backHome": "返回首页"
   }
 }

@@ -64,6 +64,28 @@ export function buildMegaMenuTree(categories: Category[], rootId: string): MegaM
   }));
 }
 
+// The full parent chain for one category, root first, ending with the
+// category itself. Used for visible breadcrumbs and BreadcrumbList JSON-LD.
+export function getCategoryBreadcrumbs(
+  categories: Category[],
+  category: Category
+): Category[] {
+  const byId = new Map(categories.map((c) => [c.id, c]));
+  const trail: Category[] = [];
+  const seen = new Set<string>();
+  let current: Category | undefined = category;
+
+  // Walks up the parent chain (the tree can be nested several levels deep),
+  // guarding against a cyclical parentId left in the data.
+  while (current && !seen.has(current.id)) {
+    seen.add(current.id);
+    trail.unshift(current);
+    current = current.parentId ? byId.get(current.parentId) : undefined;
+  }
+
+  return trail;
+}
+
 // Finds a top-level category by its slug (used to look up the root id for
 // each nav item's mega menu). The root itself must have showInNav: true, 
 // if staff hide a nav item's root category, the whole nav item disappears

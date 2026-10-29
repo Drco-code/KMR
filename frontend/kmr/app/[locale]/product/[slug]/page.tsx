@@ -1,13 +1,20 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import sanitizeHtml from "sanitize-html";
-import { getProductBySlug } from "@/lib/api/client";
+import { getProductBySlug, getProducts } from "@/lib/api/client";
 import { AddToQuoteButton } from "@/components/add-to-quote-button";
 import { ProductDescription } from "@/components/product-description";
 import { ProductImageCarousel } from "@/components/product-image-carousel";
+import { ProductCard } from "@/components/product-card";
+import { Breadcrumbs } from "@/components/breadcrumbs";
+import { JsonLd } from "@/components/json-ld";
 import { getValidImages } from "@/lib/image";
 import { formatPrice } from "@/lib/price";
 import { TextReveal } from "@/components/text-reveal";
+import { breadcrumbSchema, productSchema } from "@/lib/schema";
+import { pageMetadata, plainText } from "@/lib/seo";
 
 // Product.description is written by staff through AdminJS's rich text
 // editor (see backend admin-module.service.ts) and stored as raw HTML.
@@ -18,7 +25,7 @@ function sanitizeDescription(html: string): string {
   return sanitizeHtml(html, {
     allowedTags: [
       "p", "br", "strong", "em", "u", "s", "a",
-      "ul", "ol", "li", "blockquote", "h1", "h2", "h3", "code", "pre",
+      "ul", "ol", "li", "blockquote", "h2", "h3", "code", "pre",
     ],
     allowedAttributes: {
       a: ["href", "target", "rel"],
@@ -27,27 +34,79 @@ function sanitizeDescription(html: string): string {
   });
 }
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>;
+}): Promise<Metadata> {
+  const { locale, slug } = await params;
+  const product = await getProductBySlug(slug).catch(() => null);
+  if (!product) {
+    return { robots: { index: false, follow: true } };
+  }
+
+  const t = await getTranslations({ locale, namespace: "seo" });
+  // Prefer the staff-written description; fall back to a factual template so
+  // the snippet is never empty or duplicated across the catalog.
+  const description =
+    plainText(product.description, 155) || t("productDescription", { name: product.name });
+
+  return pageMetadata({
+    locale,
+    path: `/product/${product.slug}`,
+    title: product.name,
+    description,
+  });
+}
+
 export default async function ProductPage({
   params,
 }: {
   params: Promise<{ locale: string; slug: string }>;
 }) {
-  const { slug } = await params;
+  const { locale, slug } = await params;
   const product = await getProductBySlug(slug);
   if (!product) notFound();
 
   const primaryCategory = product.categories.find((c) => c.isPrimary);
 
+  const [tNav, tSeo] = await Promise.all([
+    getTranslations({ locale, namespace: "nav" }),
+    getTranslations({ locale, namespace: "seo" }),
+  ]);
+
+  // Same-category products give visitors (and crawlers) a path from one
+  // product to the next instead of dead-ending here.
+  const related = primaryCategory
+    ? (await getProducts().catch(() => []))
+        .filter(
+          (other) =>
+            other.id !== product.id &&
+            other.categories.some((c) => c.id === primaryCategory.id)
+        )
+        .slice(0, 4)
+    : [];
+
+  const crumbs = [
+    { name: tNav("home"), path: "/" },
+    { name: tNav("allProducts"), path: "/catalog" },
+    ...(primaryCategory
+      ? [{ name: primaryCategory.name, path: `/catalog/${primaryCategory.slug}` }]
+      : []),
+    { name: product.name, path: `/product/${product.slug}` },
+  ];
+
   return (
     <div className="flex flex-col gap-4 px-6 py-16 md:px-20 md:py-24">
-      {primaryCategory && (
-        <Link
-          href={`/catalog/${primaryCategory.slug}`}
-          className="text-xs font-medium tracking-[0.15em] text-gold uppercase"
-        >
-          ← {primaryCategory.name}
-        </Link>
-      )}
+      <JsonLd data={breadcrumbSchema(locale, crumbs)} />
+      <JsonLd
+        data={productSchema({
+          locale,
+          product,
+          description: plainText(product.description, 500) || tSeo("productDescription", { name: product.name }),
+        })}
+      />
+      <Breadcrumbs items={crumbs} />
 
       <div className="grid grid-cols-1 gap-12 pt-8 md:grid-cols-2">
           <ProductImageCarousel
@@ -71,6 +130,25 @@ export default async function ProductPage({
           )}
         </div>
       </div>
+
+      {related.length > 0 && primaryCategory && (
+        <section className="mt-16 flex flex-col gap-6 border-t border-border pt-12">
+          <h2 className="font-display text-2xl text-ink md:text-3xl">
+            More from{" "}
+            <Link
+              href={`/catalog/${primaryCategory.slug}`}
+              className="transition-colors hover:text-gold"
+            >
+              {primaryCategory.name}
+            </Link>
+          </h2>
+          <div className="grid grid-cols-2 justify-items-center gap-4 md:grid-cols-4">
+            {related.map((item) => (
+              <ProductCard key={item.id} product={item} />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

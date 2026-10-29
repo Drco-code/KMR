@@ -1,18 +1,22 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useRef } from "react";
 import Image from "next/image";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "@/lib/gsap";
 
+// Alt text describes what each photo actually shows, since these are the
+// first (LCP) images on the busiest page of the site.
 const SLIDES = [
   {
     desktop: "/images/optimized/hero-slide-1-desktop.webp",
     mobile: "/images/optimized/hero-mobile-1-mobile.webp",
+    alt: "KMR paint buckets, spray tins, ladders and a cordless drill on a paint-splattered studio backdrop",
   },
   {
     desktop: "/images/optimized/hero-slide-2-desktop.webp",
     mobile: "/images/optimized/hero-mobile-2-mobile.webp",
+    alt: "A decorator in overalls holding a paint roller beside KMR paint buckets, ladders and brushes against a colourful paint splash",
   },
 ];
 
@@ -21,7 +25,6 @@ const TRANSITION_DURATION = 1.2; // crossfade duration
 
 export function HeroBackground() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
 
   useGSAP(() => {
     const container = containerRef.current;
@@ -47,7 +50,6 @@ export function HeroBackground() {
         const tl = gsap.timeline({
           onComplete: () => {
             currentIdx = nextIdx;
-            setCurrentIndex(nextIdx);
           },
         });
 
@@ -109,7 +111,7 @@ export function HeroBackground() {
             />
             <Image
               src={slide.desktop}
-              alt="KMR Architectural Paint & Hardware"
+              alt={slide.alt}
               fill
               priority={index === 0}
               className="object-cover object-top"

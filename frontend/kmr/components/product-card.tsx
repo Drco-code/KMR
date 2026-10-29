@@ -50,12 +50,13 @@ export function ProductCard({
           </span>
         )}
 
-        {/* Product Name - Full, not truncated */}
-        <h3 className="text-sm font-medium leading-snug text-ink">
+        {/* Product Name - Full, not truncated. h2 (not h3) so the heading
+            order under a page's h1 goes h1 → h2 without skipping a level. */}
+        <h2 className="text-sm font-medium leading-snug text-ink">
           <Link href={`/product/${product.slug}`} className="hover:text-gold transition-colors">
             {product.name}
           </Link>
-        </h3>
+        </h2>
 
         {/* Price */}
         {formatPrice(product.priceDescription) && (

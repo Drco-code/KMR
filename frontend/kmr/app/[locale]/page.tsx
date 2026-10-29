@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
@@ -6,7 +7,27 @@ import { getSignatureCollections } from "@/lib/api/client";
 import { BrandStrip } from "@/components/brand-strip";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { HeroBackground } from "@/components/hero-background";
+import { JsonLd } from "@/components/json-ld";
+import { homeSchema } from "@/lib/schema";
+import { pageMetadata } from "@/lib/seo";
 import type { SignatureCollectionType } from "@/lib/api/types";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "seo" });
+
+  return pageMetadata({
+    locale,
+    path: "/",
+    title: t("homeTitle"),
+    description: t("homeDescription"),
+    absoluteTitle: true,
+  });
+}
 
 const SIGNATURE_SLOTS: Array<{
   type: SignatureCollectionType;
@@ -40,10 +61,16 @@ const SIGNATURE_SLOTS: Array<{
   },
 ];
 
-export default async function Home() {
-  const [t, tProduct] = await Promise.all([
+export default async function Home({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const [t, tProduct, tSeo] = await Promise.all([
     getTranslations("home"),
     getTranslations("product"),
+    getTranslations("seo"),
   ]);
 
   const [brands, signatureCollections] = await Promise.all([
@@ -55,7 +82,11 @@ export default async function Home() {
 
   return (
     <div className="flex flex-col">
-      {/* Image-only hero, copy and CTAs will be added back once the direction is confirmed */}
+      <JsonLd data={homeSchema(locale)} />
+      {/* The hero is image-only by design, so the page heading for search
+          engines and screen readers lives here as a visually hidden h1
+          instead of adding new visible copy. */}
+      <h1 className="sr-only">{tSeo("homeH1")}</h1>
       <section className="relative min-h-[50vh] overflow-hidden bg-ink md:min-h-[calc(100vh-120px)]">
         <HeroBackground />
       </section>

@@ -30,7 +30,7 @@
     "consultancy": "Danışmanlık",
     "contact": "Bize Ulaşın",
     "visitUs": "Bizi Ziyaret Edin",
-    "copyright": "© {year} KMR Mimari Kaplamalar. Tüm hakları saklıdır."
+    "copyright": "© {year} KMR City Ventures. Tüm hakları saklıdır."
   },
   "product": {
     "addToCart": "Sepete Ekle",
@@ -114,5 +114,26 @@
     "zh": "中文",
     "tr": "Türkçe",
     "selectLanguage": "Dil Seçin"
+  },
+  "seo": {
+    "homeTitle": "KMR City Ventures | Gana'da Aletler ve Yapı Malzemeleri",
+    "homeDescription": "KMR City Ventures, Accra ve Kumasi'deki mağazalarından alet, dış mekan ekipmanı, yapı malzemesi, boya ve ev ürünleri sunar. Fiyat teklifi alın.",
+    "catalogTitle": "Hırdavat, Alet ve Boya Kataloğu",
+    "catalogDescription": "KMR City Ventures'ın Gana'daki elektrikli el aletleri, el aletleri, kereste, boya ve ev ürünleri kataloğuna göz atın. Tüm fiyatlar talep üzerine verilir.",
+    "consultancyTitle": "Renk Eşleştirme ve Proje Danışmanlığı",
+    "consultancyDescription": "KMR City Ventures stüdyosundan Gana'da konut ve ticari projeler için renk eşleştirme, profesyonel boya uygulaması ve proje şartnamesi hizmeti.",
+    "contactTitle": "Bize Ulaşın — Accra ve Kumasi Mağazaları",
+    "contactDescription": "Ürünler, projeler veya toptan fiyatlar için KMR City Ventures'a telefon, WhatsApp veya e-posta ile ulaşın. Accra ve Kumasi'deki mağazalar.",
+    "quoteTitle": "Teklif Sepetiniz",
+    "quoteDescription": "Teklif sepetinize eklediğiniz ürünleri gözden geçirin ve listeyi fiyat ve teslimat için WhatsApp üzerinden satış ekibimize gönderin.",
+    "productDescription": "Gana'daki KMR City Ventures'tan {name}. Ayrıntıları inceleyin, fiyat ve teslimat için teklif isteyin.",
+    "categoryDescription": "Gana'daki KMR City Ventures'ta {name} ürünlerine göz atın. Fiyat, toptan oranlar ve Accra, Kumasi veya Gana'nın her yerine teslimat için teklif isteyin.",
+    "collectionDescription": "KMR boya koleksiyonlarından {name}, farklı ambalaj boyutları ve renk tonlarıyla sunulur. Gana'daki KMR City Ventures'tan renk kartelası ve teklif isteyin.",
+    "homeH1": "Gana'da aletler, yapı malzemeleri, dış mekan ekipmanları ve ev ürünleri"
+  },
+  "notFound": {
+    "title": "Sayfa bulunamadı",
+    "body": "Aradığınız sayfa mevcut değil veya taşınmış. Kataloğa göz atın ya da aşağıdaki bölümlerden birine gidin.",
+    "backHome": "Ana sayfaya dön"
   }
 }

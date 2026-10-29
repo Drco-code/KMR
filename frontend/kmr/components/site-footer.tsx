@@ -1,17 +1,35 @@
 import Image from "next/image";
 import Link from "next/link";
 import { headers } from "next/headers";
-import { MapPin, Navigation } from "lucide-react";
+import { MapPin, Navigation, Mail, Phone } from "lucide-react";
 import { getTranslations } from "next-intl/server";
-import { getContactInfo } from "@/lib/api/client";
+import { getCategories, getContactInfo } from "@/lib/api/client";
 import { mapsUrl, PRIMARY_LOCATION, SHOP_LOCATIONS } from "@/lib/locations";
+import { EMAIL, phoneDisplay, telHref } from "@/lib/business";
 
 export async function SiteFooter() {
-  const [t, contactInfo, requestHeaders] = await Promise.all([
+  const [t, contactInfo, requestHeaders, categories] = await Promise.all([
     getTranslations("footer"),
     getContactInfo().catch(() => ({ address: null, mapEmbedUrl: null })),
     headers(),
+    getCategories().catch(() => []),
   ]);
+
+  const phone = phoneDisplay();
+  const phoneLink = telHref();
+  // Deep links to the paint categories when they exist in the catalog,
+  // otherwise the catalog itself, so the footer can never point at a 404.
+  const hasCategory = (slug: string) => categories.some((category) => category.slug === slug);
+  const shopCategoryLinks = (
+    [
+      { slug: "interior-paint", label: t("interiorEnamels") },
+      { slug: "exterior-paint", label: t("exteriorCoatings") },
+      { slug: "paint-finishing", label: t("specialtyFinishes") },
+    ] as const
+  ).map((link) => ({
+    href: hasCategory(link.slug) ? `/catalog/${link.slug}` : "/catalog",
+    label: link.label,
+  }));
   // Used to send a tap on a location to Apple Maps or Google Maps.
   const userAgent = requestHeaders.get("user-agent");
 
@@ -20,9 +38,7 @@ export async function SiteFooter() {
       heading: t("shop"),
       links: [
         { href: "/catalog", label: t("fullCatalog") },
-        { href: "/catalog", label: t("interiorEnamels") },
-        { href: "/catalog", label: t("exteriorCoatings") },
-        { href: "/catalog", label: t("specialtyFinishes") },
+        ...shopCategoryLinks,
       ],
     },
     {
@@ -135,6 +151,27 @@ export async function SiteFooter() {
                     </li>
                   ))}
                 </ul>
+
+                {/* Clickable phone and email, kept in sync with the contact
+                    page and the LocalBusiness schema via lib/business.ts. */}
+                <div className="flex flex-col gap-2 pt-1">
+                  {phone && phoneLink ? (
+                    <a
+                      href={phoneLink}
+                      className="flex items-center gap-2 text-sm text-ink/70 transition-colors hover:text-gold"
+                    >
+                      <Phone className="size-3.5 shrink-0 text-gold" />
+                      {phone}
+                    </a>
+                  ) : null}
+                  <a
+                    href={`mailto:${EMAIL}`}
+                    className="flex items-center gap-2 text-sm text-ink/70 transition-colors hover:text-gold"
+                  >
+                    <Mail className="size-3.5 shrink-0 text-gold" />
+                    {EMAIL}
+                  </a>
+                </div>
               </div>
               {mapEmbedUrl ? (
                 // Admin-supplied iframe src (Google Maps embed or OpenStreetMap

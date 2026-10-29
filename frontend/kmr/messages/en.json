@@ -30,7 +30,7 @@
     "consultancy": "Consultancy",
     "contact": "Contact Us",
     "visitUs": "Visit Us",
-    "copyright": "© {year} KMR Architectural Coatings. All rights reserved."
+    "copyright": "© {year} KMR City Ventures. All rights reserved."
   },
   "product": {
     "addToCart": "Add to cart",
@@ -114,5 +114,26 @@
     "zh": "Chinese",
     "tr": "Turkish",
     "selectLanguage": "Select Language"
+  },
+  "seo": {
+    "homeTitle": "KMR City Ventures | Tools & Building Materials in Ghana",
+    "homeDescription": "KMR City Ventures supplies tools, outdoor equipment, building materials, paint and home essentials from shops in Accra and Kumasi. Request a quote.",
+    "catalogTitle": "Hardware, Tools & Paint Catalog",
+    "catalogDescription": "Browse power tools, hand tools, timber, paint and home essentials from KMR City Ventures in Ghana. Every item is quoted in cedis on request.",
+    "consultancyTitle": "Paint Colour Matching & Project Consultancy",
+    "consultancyDescription": "Colour matching, professional paint application and project specification from the KMR City Ventures studio in Ghana, for homes and commercial builds.",
+    "contactTitle": "Contact Us — Accra & Kumasi Shops",
+    "contactDescription": "Call, WhatsApp or email KMR City Ventures about products, projects or wholesale pricing. Shops on Kojo Thompson Road, Spintex and in Kumasi, Ghana.",
+    "quoteTitle": "Your Quote Cart",
+    "quoteDescription": "Review the items you added to your KMR quote cart and send the list to our sales team on WhatsApp for pricing and delivery.",
+    "productDescription": "{name} from KMR City Ventures in Ghana. See the details and request a quote for pricing and delivery.",
+    "categoryDescription": "Browse {name} at KMR City Ventures in Ghana. Request a quote for pricing, bulk rates and delivery to Accra, Kumasi or anywhere in Ghana.",
+    "collectionDescription": "{name} from the KMR paint collections, available in several container sizes and shades. Request a colour card and a quote from KMR City Ventures in Ghana.",
+    "homeH1": "Tools, building materials, outdoor equipment and home essentials in Ghana"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "body": "The page you were looking for doesn't exist or has moved. Browse the catalog, or jump straight to one of the sections below.",
+    "backHome": "Back to home"
   }
 }

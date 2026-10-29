@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
+import { Breadcrumbs } from "@/components/breadcrumbs";
+import { JsonLd } from "@/components/json-ld";
+import { breadcrumbSchema } from "@/lib/schema";
+import { pageMetadata } from "@/lib/seo";
 
 const SERVICES = [
   {
@@ -21,20 +27,52 @@ const SERVICES = [
   },
 ];
 
-export default function ConsultancyPage() {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "seo" });
+
+  return pageMetadata({
+    locale,
+    path: "/consultancy",
+    title: t("consultancyTitle"),
+    description: t("consultancyDescription"),
+  });
+}
+
+export default async function ConsultancyPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const tNav = await getTranslations({ locale, namespace: "nav" });
+
+  const crumbs = [
+    { name: tNav("home"), path: "/" },
+    { name: "Consultancy", path: "/consultancy" },
+  ];
+
   return (
     <div className="flex flex-col gap-20 px-6 py-16 md:px-20 md:py-24">
-      <div className="flex flex-col items-center gap-4 text-center">
-        <span className="text-xs font-medium tracking-[0.2em] text-gold uppercase">
-          KMR Studio
-        </span>
-        <h1 className="font-display text-4xl text-ink md:text-5xl">
-          Consultancy Services
-        </h1>
-        <p className="max-w-xl text-lg text-ink-muted md:text-justify md:hyphens-auto">
-          Beyond the collection, our in-house colorists and application
-          specialists help you bring architectural-grade finishes to life.
-        </p>
+      <JsonLd data={breadcrumbSchema(locale, crumbs)} />
+      <div className="flex flex-col gap-6">
+        <Breadcrumbs items={crumbs} />
+        <div className="flex flex-col items-center gap-4 text-center">
+          <span className="text-xs font-medium tracking-[0.2em] text-gold uppercase">
+            KMR Studio
+          </span>
+          <h1 className="font-display text-4xl text-ink md:text-5xl">
+            Consultancy Services
+          </h1>
+          <p className="max-w-xl text-lg text-ink-muted md:text-justify md:hyphens-auto">
+            Beyond the collection, our in-house colorists and application
+            specialists help you bring architectural-grade finishes to life.
+          </p>
+        </div>
       </div>
 
       <div className="flex flex-col gap-8">
