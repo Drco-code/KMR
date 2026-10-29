@@ -3,7 +3,9 @@ import { absoluteUrl, localizedPath, SITE_URL } from "@/lib/seo";
 import { escapeXml, encodePath, categorySlug, productSlug, slugify } from "@/lib/slug";
 import { routing } from "@/i18n/routing";
 
-export const revalidate = 3600;
+// The catalog API is fetched at request time. Static prerendering would turn
+// an API cache/dynamic-server decision into a build failure.
+export const dynamic = "force-dynamic";
 
 const STATIC_PATHS = ["/", "/catalog", "/consultancy", "/contact"];
 

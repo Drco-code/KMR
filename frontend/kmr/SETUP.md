@@ -62,6 +62,11 @@ non-array response, or returns zero categories or zero active products. The
 runtime sitemap route applies the same failure behavior, so an API outage
 cannot silently produce a sitemap containing only the four static pages.
 
+In Vercel, set the **Build Command** to `npm run build` (not `next build`) so
+this validation runs before the Next.js build. The sitemap route itself is
+dynamic and fetches the catalog at request time; it must not be statically
+prerendered.
+
 ## Going live checklist
 
 1. In Vercel, set `SITE_URL=https://www.kmr-shop-online.com` for **Production,
